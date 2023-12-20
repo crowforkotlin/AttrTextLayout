@@ -10,6 +10,8 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.Typeface
 import android.text.TextPaint
 import android.view.ViewTreeObserver
@@ -414,6 +416,11 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * @author crowforkotlin
      */
     init {
+        /*
+        * 这里一定要设置xfermode（在源图像中显示目标图像，目标图像仅在源图像上显示）
+        * 否则使用Canvas绘制的动画例如子View实现的 就会导致clipRect的时候文字出现边角出现缺失
+        * */
+        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
         mTextPaint.color = mFontColor
         mTextPaint.textSize = mFontSize
         mTextPaint.typeface = if (mFontMonoSpace) Typeface.MONOSPACE else Typeface.DEFAULT
