@@ -7,7 +7,7 @@ interface IBaseAttrTextExt {
 
     var mAnimationTop: Boolean
     var mAnimationLeft: Boolean
-    var mAnimationMode: Int
+    var mAnimationMode: Short
 
     /**
      * ● 获取文本高度：ascent绝对值 + descent
