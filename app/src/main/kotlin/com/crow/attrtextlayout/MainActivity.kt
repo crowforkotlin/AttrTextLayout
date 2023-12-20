@@ -68,7 +68,7 @@ class MainActivity : AppCompatActivity() {
         layout.mGravity = BaseAttrTextLayout.GRAVITY_CENTER
         layout.mUpdateStrategy = BaseAttrTextLayout.STRATEGY_TEXT_UPDATE_LAZY
         layout.mAnimationStrategy = BaseAttrTextLayout.STRATEGY_ANIMATION_UPDATE_RESTART
-        layout.mScrollSpeed = 15
+        layout.mScrollSpeed = 10
         layout.mText = mContent
         return layout
     }
