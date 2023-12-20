@@ -17,7 +17,7 @@ import com.crow.attrtextlayout.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private val mBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-    private val mContent = "好吧我觉得有BUG-确定吗？？？？我觉得是肯定的！！qweiqx"
+    private val mContent = "好吧我觉i得有BUG-确定吗？？？？我觉得是肯定的！！qweiqx"
 //    val mContent = "CROW/n自己/n自己/n写的一/n个静态/n文本组/n件，包含了静态文本/n布局 静态文/n本视图，手动计算文本位置 进行对应的绘制！代码量共计1300行左右，十分的简单！算是自定义View中的入门基础了！！/n！/n"
 //    val mContent = "好吧我觉得有BUG-确定吗？？？？我觉得是肯定的！！qweiqx@%!xTIQNAQWENXOQWEM#&IA我阿斯顿维拉4i9992188nnaduqwuzxucqwbdq!@$@#@snajaiw"
 //    val mContent = "好吧我觉得有BUG-确定吗？？？？我觉得是肯定的！！qweiqx@%!xTIQNAQWENXOQWEM#&IA"
@@ -53,7 +53,7 @@ class MainActivity : AppCompatActivity() {
         layout.mMultipleLineEnable = true
         layout.mResidenceTime = 3000
         layout.mFontSize = 14f
-        layout.mAnimationMode = BaseAttrTextLayout.ANIMATION_CONTINUATION_ERASE_Y
+        layout.mAnimationMode = BaseAttrTextLayout.ANIMATION_ERASE_Y
         layout.mAnimationLeft = true
         layout.mAnimationTop = false
         layout.mFontMonoSpace = true

@@ -723,8 +723,8 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
             val textWidth = mTextPaint.measureText(char.toString(), 0, 1)
             textStringWidth += textWidth
 
-            // 字符串宽度 < 测量宽度
-            if (textStringWidth <= measuredWidth) {
+            // 字符串宽度 < 测量宽度 假设宽度是 128  那么范围在 0 - 127 故用小于号而不是小于等于
+            if (textStringWidth < measuredWidth) {
                 when(char) {
                     NEWLINE_CHAR_FLAG_SLASH -> {
                         if (originText.getOrNull(index + 1) == NEWLINE_CHAR_FLAG_N) {
