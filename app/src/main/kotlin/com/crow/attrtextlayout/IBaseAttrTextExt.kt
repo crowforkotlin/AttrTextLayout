@@ -5,6 +5,10 @@ import kotlin.math.abs
 
 interface IBaseAttrTextExt {
 
+    var mAnimationTop: Boolean
+    var mAnimationLeft: Boolean
+    var mAnimationMode: Int
+
     /**
      * ● 获取文本高度：ascent绝对值 + descent
      *

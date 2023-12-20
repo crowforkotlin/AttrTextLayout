@@ -3,17 +3,10 @@
 package com.crow.attrtextlayout
 
 import android.content.Context
-import android.graphics.BlendMode
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.FontMetrics
-import android.graphics.Path
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
-import android.graphics.RectF
-import android.graphics.Xfermode
 import android.text.TextPaint
 import android.view.View
 import kotlin.math.abs
@@ -105,14 +98,6 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
     var mAnimationTimeFraction = 0f
 
     /**
-     * ● 动画模式
-     *
-     * ● 2023-12-19 18:57:03 周二 下午
-     * @author crowforkotlin
-     */
-    var mAnimationMode = 0
-
-    /**
      * ● 动画启动时间
      *
      * ● 2023-12-19 17:36:37 周二 下午
@@ -121,12 +106,29 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
     var mAnimationStartTime = 0L
 
     /**
+     * ● 当前视图是否是显示在最前面的？
+     *
+     * ● 2023-12-19 19:00:24 周二 下午
+     * @author crowforkotlin
+     */
+    var mIsCurrentView: Boolean = false
+
+    /**
+     * ● 动画模式
+     *
+     * ● 2023-12-19 18:57:03 周二 下午
+     * @author crowforkotlin
+     */
+    override var mAnimationMode = 0
+
+
+    /**
      * ● 动画X方向
      *
      * ● 2023-11-02 14:53:24 周四 下午
      * @author crowforkotlin
      */
-    var mAnimationLeft: Boolean = false
+    override var mAnimationLeft: Boolean = false
 
     /**
      * ● 动画Y方向
@@ -134,15 +136,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-11-02 14:53:45 周四 下午
      * @author crowforkotlin
      */
-    var mAnimationTop: Boolean = false
-
-    /**
-     * ● 当前视图是否是显示在最前面的？
-     *
-     * ● 2023-12-19 19:00:24 周二 下午
-     * @author crowforkotlin
-     */
-    var mIsCurrentView: Boolean = false
+    override var mAnimationTop: Boolean = false
 
     /**
      * ● 设置硬件加速渲染
@@ -166,28 +160,39 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         super.onDraw(canvas)
         if (mAnimationStartTime > 0) {
             when(mAnimationMode) {
-
                 BaseAttrTextLayout.ANIMATION_CONTINUATION_ERASE_Y -> {
 
                     // Layout高度浮点
                     val heightFloat = height.toFloat()
 
                     // 剪切当前区域
-                    if (!mIsCurrentView) {
-                        if (mAnimationTop) canvas.clipRect(0f, 0f, width.toFloat(), heightFloat - heightFloat * mAnimationTimeFraction)
-                        else canvas.clipRect(0f, heightFloat * mAnimationTimeFraction , width.toFloat(), heightFloat)
-                    } else {
-                        if (mAnimationTop) canvas.clipRect(0f, heightFloat - heightFloat * mAnimationTimeFraction, width.toFloat(), heightFloat)
-                        else canvas.clipRect(0f, 0f, width.toFloat(), heightFloat * mAnimationTimeFraction)
-                    }
+                    drawView(
+                        onCurrent = {
+                            if (mAnimationTop) canvas.clipRect(0f, heightFloat - heightFloat * mAnimationTimeFraction, width.toFloat(), heightFloat)
+                            else canvas.clipRect(0f, 0f, width.toFloat(), heightFloat * mAnimationTimeFraction)
+                        },
+                        onNext =  {
+                            if (mAnimationTop) canvas.clipRect(0f, 0f, width.toFloat(), heightFloat - heightFloat * mAnimationTimeFraction)
+                            else canvas.clipRect(0f, heightFloat * mAnimationTimeFraction , width.toFloat(), heightFloat)
+                        }
+                    )
                 }
                 BaseAttrTextLayout.ANIMATION_CONTINUATION_ERASE_X -> {
                     // Layout宽度浮点
                     val widthFloat = width.toFloat()
 
-                    // 剪切当前区域
-                    if (mAnimationLeft) canvas.clipRect(widthFloat - widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
-                    else canvas.clipRect(0f, 0f, widthFloat * mAnimationTimeFraction, height.toFloat())
+                    drawView(
+                        onCurrent = {
+                            // 剪切当前区域
+                            if (mAnimationLeft) canvas.clipRect(widthFloat - widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
+                            else canvas.clipRect(0f, 0f, widthFloat * mAnimationTimeFraction, height.toFloat())
+                        },
+                        onNext = {
+                            // 剪切当前区域
+                            if (mAnimationLeft) canvas.clipRect(widthFloat - widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
+                            else canvas.clipRect(widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
+                        }
+                    )
                 }
             }
         }
@@ -241,6 +246,8 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
             }
         }
     }
+
+    private inline fun drawView(onCurrent: () -> Unit, onNext: () -> Unit) { if (mIsCurrentView) onCurrent() else onNext() }
 
     /**
      * ● 绘制顶部文本
