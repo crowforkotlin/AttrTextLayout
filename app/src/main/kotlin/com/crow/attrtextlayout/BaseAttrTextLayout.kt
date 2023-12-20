@@ -1156,7 +1156,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
             val viewNextB = getNextView(mCurrentViewPos)
             val valueAnimator = ValueAnimator.ofFloat(0f, 1f)
             valueAnimator.addUpdateListener {
-                mAnimationTimeFraction
+                mAnimationTimeFraction = it.animatedFraction
                 viewCurrentA.mAnimationTimeFraction = mAnimationTimeFraction
                 viewNextB.mAnimationTimeFraction = mAnimationTimeFraction
                 viewCurrentA.invalidate()
