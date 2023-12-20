@@ -539,7 +539,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
             FLAG_SCROLL_SPEED -> {
                 // 根据 mScrollSpeed 动态调整 mAnimationDuration
                 val baseDuration = 16 - mScrollSpeed
-                mAnimationDuration = if (baseDuration == 1) {
+                mAnimationDuration = if (baseDuration <= 1) {
                     1000L
                 } else {
                     1000L + (500 * baseDuration)
