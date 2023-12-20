@@ -7,6 +7,8 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.FontMetrics
+import android.graphics.Path
+import android.graphics.RectF
 import android.text.TextPaint
 import android.view.View
 import kotlin.math.abs
@@ -137,7 +139,6 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      */
     var mIsCurrentView: Boolean = false
 
-
     /**
      * ● 设置硬件加速渲染
      *
@@ -157,8 +158,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * @author crowforkotlin
      */
     override fun onDraw(canvas: Canvas) {
-
-        super.onDraw(canvas)
+        mTextPaint.color = Color.GRAY
         if (mAnimationStartTime > 0) {
             when(mAnimationMode) {
 
@@ -167,19 +167,16 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                     // Layout高度浮点
                     val heightFloat = height.toFloat()
 
+                    // 剪切当前区域
                     if (!mIsCurrentView) {
-                       if (mAnimationTop) {
-                           canvas.clipRect(0f, heightFloat * mAnimationTimeFraction, width.toFloat(), heightFloat)
-                       } else {
-                           canvas.clipRect(0f, 0f, width.toFloat(), heightFloat - heightFloat * mAnimationTimeFraction)
-                       }
+                        if (mAnimationTop) canvas.clipRect(0f, 0f, width.toFloat(), heightFloat - heightFloat * mAnimationTimeFraction)
+                        else canvas.clipRect(0f, heightFloat * mAnimationTimeFraction, width.toFloat(), heightFloat)
                     } else {
-                        // 剪切当前区域
                         if (mAnimationTop) canvas.clipRect(0f, heightFloat - heightFloat * mAnimationTimeFraction, width.toFloat(), heightFloat)
                         else canvas.clipRect(0f, 0f, width.toFloat(), heightFloat * mAnimationTimeFraction)
                     }
                 }
-                BaseAttrTextLayout.ANIMATION_CONTINUATION_ERASE_X -> {
+               BaseAttrTextLayout.ANIMATION_CONTINUATION_ERASE_X -> {
                     // Layout宽度浮点
                     val widthFloat = width.toFloat()
 
@@ -189,6 +186,8 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                 }
             }
         }
+        mTextPaint.color = Color.RED
+        super.onDraw(canvas)
 
         // 文本列表长度
         val textListSize = mList.size
