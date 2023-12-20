@@ -92,6 +92,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         const val ANIMATION_ERASE_X: Short = 307
         const val ANIMATION_CONTINUATION_ERASE_Y: Short = 308
         const val ANIMATION_CONTINUATION_ERASE_X: Short = 309
+        const val ANIMATION_CROSS_EXTENSION: Short = 310
 
         /**
          * ● 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
@@ -649,6 +650,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                     ANIMATION_ERASE_X -> launchEraseAnimation(isDelay= delay)
                     ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousEraseAnimation(isDelay= delay)
                     ANIMATION_CONTINUATION_ERASE_X -> launchContinuousEraseAnimation(isDelay= delay)
+                    ANIMATION_CROSS_EXTENSION -> launchCrossExtension(isDelay)
                 }
                 delay = true
             }
@@ -1150,6 +1152,60 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * @author crowforkotlin
      */
     private suspend fun launchContinuousEraseAnimation(isDelay: Boolean) {
+        if(isDelay) delay(mResidenceTime)
+        return suspendCancellableCoroutine { continuation ->
+            mViewAnimatorSet?.cancel()
+            mViewAnimatorSet = AnimatorSet()
+            val viewCurrentA = mCacheViews[mCurrentViewPos]
+            val viewNextB = getNextView(mCurrentViewPos)
+            val valueAnimator = ValueAnimator.ofFloat(0f, 1f)
+            valueAnimator.addUpdateListener {
+                mAnimationTimeFraction = it.animatedFraction
+                viewCurrentA.mAnimationTimeFraction = mAnimationTimeFraction
+                viewNextB.mAnimationTimeFraction = mAnimationTimeFraction
+                viewCurrentA.invalidate()
+                viewNextB.invalidate()
+            }
+            valueAnimator.duration = mCurrentDuration
+            mViewAnimatorSet?.let { animatorSet ->
+                animatorSet.duration = mCurrentDuration
+                animatorSet.interpolator = LinearInterpolator()
+                animatorSet.play(valueAnimator)
+                animatorSet.addListener(object : Animator.AnimatorListener {
+                    override fun onAnimationStart(animation: Animator) {
+                        mAnimationStartTime = System.currentTimeMillis()
+                        mCurrentDuration = mAnimationDuration
+                        viewCurrentA.mAnimationStartTime = mAnimationStartTime
+                        viewNextB.mAnimationStartTime = mAnimationStartTime
+                        viewCurrentA.mIsCurrentView = false
+                        viewNextB.mIsCurrentView = true
+                        updateViewPosition()
+                        updateTextListPosition()
+                    }
+                    override fun onAnimationEnd(animation: Animator) {
+                        if (!continuation.isCompleted) continuation.resume(Unit)
+                    }
+                    override fun onAnimationCancel(animation: Animator) {
+                        if (mAnimationStrategy == STRATEGY_ANIMATION_UPDATE_DEFAULT) {
+                            mCurrentDuration = animatorSet.duration - animatorSet.currentPlayTime
+                        }
+                    }
+                    override fun onAnimationRepeat(animation: Animator) {
+
+                    }
+                })
+                animatorSet.start()
+            }
+        }
+    }
+
+    /**
+     * ● 十字行扩展动画
+     *
+     * ● 2023-12-19 17:37:40 周二 下午
+     * @author crowforkotlin
+     */
+    private suspend fun launchCrossExtension(isDelay: Boolean) {
         if(isDelay) delay(mResidenceTime)
         return suspendCancellableCoroutine { continuation ->
             mViewAnimatorSet?.cancel()
