@@ -194,20 +194,27 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                     )
                 }
                 BaseAttrTextLayout.ANIMATION_CROSS_EXTENSION -> {
-                    val rectLeft: Float = 0f
-                    val rectRight: Float = 0f + width
-                    val rectTop: Float = height / 2 * mAnimationTimeFraction + 0f
-                    val rectBottom: Float = height - height / 2 * mAnimationTimeFraction + 0f
-                    val rectLeft1: Float = width / 2 * mAnimationTimeFraction + 0f
-                    val rectRight1: Float = width - width / 2 * mAnimationTimeFraction + 0f
-                    val rectTop1: Float = 0f
-                    val rectBottom1: Float = height + 0f
-                    canvas.clipRect(rectLeft, rectTop, rectRight, rectBottom)
-                    canvas.clipRect(
-                        rectLeft1,
-                        rectTop1,
-                        rectRight1,
-                        rectBottom1,
+                    drawView(
+                        onCurrent = {
+
+                        },
+                        onNext = {
+                            val rectLeft = 0f
+                            val rectRight: Float = width.toFloat()
+                            val rectTop: Float = height / 2 * mAnimationTimeFraction
+                            val rectBottom: Float = height - height / 2 * mAnimationTimeFraction
+                            val rectLeft1: Float = width / 2 * mAnimationTimeFraction
+                            val rectRight1: Float = width - width / 2 * mAnimationTimeFraction
+                            val rectTop1: Float = 0f
+                            val rectBottom1: Float = height.toFloat()
+                            canvas.clipRect(rectLeft, rectTop, rectRight, rectBottom)
+                            canvas.clipRect(
+                                rectLeft1,
+                                rectTop1,
+                                rectRight1,
+                                rectBottom1,
+                            )
+                        }
                     )
                 }
             }
