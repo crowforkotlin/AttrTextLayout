@@ -53,6 +53,9 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         internal const val ENABLE_AUTO_UPDATE = false
         private const val NEWLINE_CHAR_FLAG_SLASH = '/'
         private const val NEWLINE_CHAR_FLAG_N = 'n'
+        private const val MAX_SCROLL_SPEED: Short = 16
+        private const val MIN_ANIMATION_DURATION = 1000L
+        private const val ANIMATION_DURATION_FIXED_INCREMEN = 500
 
         /**
          * ● 缓存VIEW个数 勿动改了后会出问题
@@ -261,7 +264,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-10-31 13:59:53 周二 下午
      * @author crowforkotlin
      */
-    var mScrollSpeed: Int by Delegates.observable(1) { _, _, _ -> onVariableChanged(FLAG_SCROLL_SPEED) }
+    var mScrollSpeed: Short by Delegates.observable(1) { _, _, _ -> onVariableChanged(FLAG_SCROLL_SPEED) }
 
     /**
      * ● 文本内容 -- 设置后会触发重新绘制
@@ -538,12 +541,8 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
             }
             FLAG_SCROLL_SPEED -> {
                 // 根据 mScrollSpeed 动态调整 mAnimationDuration
-                val baseDuration = 16 - mScrollSpeed
-                mAnimationDuration = if (baseDuration <= 1) {
-                    1000L
-                } else {
-                    1000L + (500 * baseDuration)
-                }
+                val baseDuration = MAX_SCROLL_SPEED - mScrollSpeed
+                mAnimationDuration = if (baseDuration <= 1) MIN_ANIMATION_DURATION else MIN_ANIMATION_DURATION + (ANIMATION_DURATION_FIXED_INCREMEN * baseDuration)
                 mCurrentDuration = mAnimationDuration
             }
             FLAG_BACKGROUND_COLOR -> {
