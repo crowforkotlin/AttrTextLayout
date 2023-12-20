@@ -25,7 +25,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
 
     companion object {
 
-        private const val FLAG_REFRESH = 0x01
+        private const val FLAG_REFRESH: Byte = 0x01
 
     }
 
@@ -68,8 +68,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-10-31 14:06:16 周二 下午
      * @author crowforkotlin
      */
-    var mListPosition : Int by Delegates.observable(0) { _, oldPosition, newPosition -> onVariableChanged(
-        FLAG_REFRESH, oldPosition, newPosition, skipSameCheck = true) }
+    var mListPosition : Int by Delegates.observable(0) { _, oldPosition, newPosition -> onVariableChanged(FLAG_REFRESH, oldPosition, newPosition, skipSameCheck = true) }
 
     /**
      * ● 视图对齐方式 -- 上中下
@@ -77,8 +76,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-10-31 15:24:43 周二 下午
      * @author crowforkotlin
      */
-    var mGravity: Int by Delegates.observable(BaseAttrTextLayout.GRAVITY_TOP_START) { _, oldSize, newSize -> onVariableChanged(
-        FLAG_REFRESH, oldSize, newSize) }
+    var mGravity: Byte by Delegates.observable(BaseAttrTextLayout.GRAVITY_TOP_START) { _, oldSize, newSize -> onVariableChanged(FLAG_REFRESH, oldSize, newSize) }
 
     /**
      * ● 是否开启换行
@@ -86,8 +84,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-10-31 17:31:20 周二 下午
      * @author crowforkotlin
      */
-    var mMultiLineEnable: Boolean by Delegates.observable(false) { _, oldValue, newValue -> onVariableChanged(
-        FLAG_REFRESH, oldValue, newValue) }
+    var mMultiLineEnable: Boolean by Delegates.observable(false) { _, oldValue, newValue -> onVariableChanged(FLAG_REFRESH, oldValue, newValue) }
 
     /**
      * ● 动画时间比率
@@ -119,7 +116,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-12-19 18:57:03 周二 下午
      * @author crowforkotlin
      */
-    override var mAnimationMode = 0
+    override var mAnimationMode: Short = 0
 
 
     /**
@@ -409,7 +406,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-10-31 14:14:18 周二 下午
      * @author crowforkotlin
      */
-    private fun<T : Any> onVariableChanged(flag: Int, oldValue: T?, newValue: T?, skipSameCheck: Boolean = false) {
+    private fun<T : Any> onVariableChanged(flag: Byte, oldValue: T?, newValue: T?, skipSameCheck: Boolean = false) {
         if (oldValue == newValue && !skipSameCheck) return
         when(flag) {
             FLAG_REFRESH -> { if (mList.isNotEmpty()) invalidate() }

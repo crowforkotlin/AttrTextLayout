@@ -61,34 +61,34 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
          * @author crowforkotlin
          */
         private const val REQUIRED_CACHE_SIZE = 2
-        private const val MAX_STRING_LENGTH = 2 shl 9
+        private const val MAX_STRING_LENGTH = 1 shl 9
 
-        private const val FLAG_TEXT = 0x00
-        private const val FLAG_CHILD_REFRESH = 0x03
-        private const val FLAG_LAYOUT_REFRESH = 0x04
-        private const val FLAG_SCROLL_SPEED = 0x05
-        private const val FLAG_BACKGROUND_COLOR = 0x06
+        const val GRAVITY_TOP_START: Byte = 1
+        const val GRAVITY_TOP_CENTER: Byte = 2
+        const val GRAVITY_TOP_END: Byte = 3
+        const val GRAVITY_CENTER_START:Byte = 4
+        const val GRAVITY_CENTER: Byte = 5
+        const val GRAVITY_CENTER_END: Byte = 6
+        const val GRAVITY_BOTTOM_START: Byte = 7
+        const val GRAVITY_BOTTOM_CENTER: Byte = 8
+        const val GRAVITY_BOTTOM_END: Byte = 9
 
-        const val ANIMATION_DEFAULT = 2000
-        const val ANIMATION_MOVE_X = 2001
-        const val ANIMATION_MOVE_Y = 2002
-        const val ANIMATION_FADE = 2003
-        const val ANIMATION_FADE_SYNC = 2004
-        const val ANIMATION_CENTER = 2005
-        const val ANIMATION_ERASE_Y = 2006
-        const val ANIMATION_ERASE_X = 2007
-        const val ANIMATION_CONTINUATION_ERASE_Y = 2008
-        const val ANIMATION_CONTINUATION_ERASE_X = 2009
+        private const val FLAG_TEXT: Byte = 10
+        private const val FLAG_CHILD_REFRESH: Byte = 11
+        private const val FLAG_LAYOUT_REFRESH: Byte = 12
+        private const val FLAG_SCROLL_SPEED: Byte = 13
+        private const val FLAG_BACKGROUND_COLOR: Byte = 14
 
-        const val GRAVITY_TOP_START = 1000
-        const val GRAVITY_TOP_CENTER = 1001
-        const val GRAVITY_TOP_END = 1002
-        const val GRAVITY_CENTER_START = 1003
-        const val GRAVITY_CENTER = 1004
-        const val GRAVITY_CENTER_END = 1005
-        const val GRAVITY_BOTTOM_START = 1006
-        const val GRAVITY_BOTTOM_CENTER = 1007
-        const val GRAVITY_BOTTOM_END = 1008
+        const val ANIMATION_DEFAULT: Short = 300
+        const val ANIMATION_MOVE_X: Short = 301
+        const val ANIMATION_MOVE_Y: Short = 302
+        const val ANIMATION_FADE: Short = 303
+        const val ANIMATION_FADE_SYNC: Short = 304
+        const val ANIMATION_CENTER: Short = 305
+        const val ANIMATION_ERASE_Y: Short = 306
+        const val ANIMATION_ERASE_X: Short = 307
+        const val ANIMATION_CONTINUATION_ERASE_Y: Short = 308
+        const val ANIMATION_CONTINUATION_ERASE_X: Short = 309
 
         /**
          * ● 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
@@ -96,7 +96,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
          * ● 2023-10-31 14:09:24 周二 下午
          * @author crowforkotlin
          */
-        const val STRATEGY_TEXT_UPDATE_DEFAULT = 0x00 shl 16
+        const val STRATEGY_TEXT_UPDATE_DEFAULT: Short = 600
 
         /**
          * ● 懒加载更新策略：当文本发生改变时 并不会触发绘制视图的需求 只有下次动画到来 或者 切换到下一个文本才会重新绘制视图
@@ -105,7 +105,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
          * ● 2023-10-31 14:09:59 周二 下午
          * @author crowforkotlin
          */
-        const val STRATEGY_TEXT_UPDATE_LAZY = 0x01 shl 16
+        const val STRATEGY_TEXT_UPDATE_LAZY: Short = 601
 
         /**
          * ● 重新加载更新策略：当重新绘制的时候是否重新执行动画
@@ -113,7 +113,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
          * ● 2023-11-06 16:02:52 周一 下午
          * @author crowforkotlin
          */
-        const val STRATEGY_ANIMATION_UPDATE_RESTART = 0x02 shl 16
+        const val STRATEGY_ANIMATION_UPDATE_RESTART: Short = 602
 
         /**
          * ● 默认更新策略：当重新绘制的时候是否继续执行已停止的动画
@@ -121,7 +121,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
          * ● 2023-11-06 16:04:22 周一 下午
          * @author crowforkotlin
          */
-        const val STRATEGY_ANIMATION_UPDATE_DEFAULT = 0x03 shl 16
+        const val STRATEGY_ANIMATION_UPDATE_DEFAULT: Short = 603
     }
 
     /**
@@ -140,7 +140,6 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      */
     private var mAnimationStartTime = 0L
 
-
     /**
      * ● 是否完成布局
      *
@@ -155,7 +154,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-12-04 11:01:30 周一 上午
      * @author crowforkotlin
      */
-    private var mTask: MutableList<Int>? = null
+    private var mTask: MutableList<Byte>? = null
 
     /**
      * ● 文本画笔
@@ -204,7 +203,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-11-02 17:16:40 周四 下午
      * @author crowforkotlin
      */
-    private var mLastAnimation = -1
+    private var mLastAnimation: Short = -1
 
     /**
      * ● 当前持续时间
@@ -308,7 +307,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-10-31 15:24:43 周二 下午
      * @author crowforkotlin
      */
-    var mGravity: Int = GRAVITY_TOP_START
+    var mGravity: Byte = GRAVITY_TOP_START
 
     /**
      * ● 字体颜色
@@ -332,7 +331,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-10-31 14:07:36 周二 下午
      * @author crowforkotlin
      */
-    var mUpdateStrategy : Int = STRATEGY_TEXT_UPDATE_DEFAULT
+    var mUpdateStrategy : Short = STRATEGY_TEXT_UPDATE_DEFAULT
 
     /**
      * ● 动画策略 详细可查看定义声明
@@ -340,7 +339,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-11-06 19:29:33 周一 下午
      * @author crowforkotlin
      */
-    var mAnimationStrategy : Int = STRATEGY_ANIMATION_UPDATE_DEFAULT
+    var mAnimationStrategy : Short = STRATEGY_ANIMATION_UPDATE_DEFAULT
 
     /**
      * ● 是否启用单行动画（当文本 刚好当前页面显示完 根据该值决定是否启用动画）
@@ -388,7 +387,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-10-31 18:06:32 周二 下午
      * @author crowforkotlin
      */
-    override var mAnimationMode = ANIMATION_DEFAULT
+    override var mAnimationMode: Short = ANIMATION_DEFAULT
 
     /**
      * ● 动画X方向
@@ -504,7 +503,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-10-31 14:14:18 周二 下午
      * @author crowforkotlin
      */
-    private fun onVariableChanged(flag: Int) {
+    private fun onVariableChanged(flag: Byte) {
 
         // 根据FLAG 执行对于Logic
         when(flag) {
@@ -1284,7 +1283,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-12-04 11:02:32 周一 上午
      * @author crowforkotlin
      */
-    private fun addTask(flag: Int) {
+    private fun addTask(flag: Byte) {
        if (mTask == null) mTask = mutableListOf(flag) else mTask?.add(flag)
     }
 
