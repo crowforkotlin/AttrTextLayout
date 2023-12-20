@@ -140,6 +140,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      */
     private var mAnimationStartTime = 0L
 
+
     /**
      * ● 是否完成布局
      *
@@ -261,9 +262,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-10-31 13:59:53 周二 下午
      * @author crowforkotlin
      */
-    var mScrollSpeed: Int by Delegates.observable(1) { _, _, _ -> onVariableChanged(
-        FLAG_SCROLL_SPEED
-    ) }
+    var mScrollSpeed: Int by Delegates.observable(1) { _, _, _ -> onVariableChanged(FLAG_SCROLL_SPEED) }
 
     /**
      * ● 文本内容 -- 设置后会触发重新绘制
@@ -285,9 +284,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-11-09 09:47:58 周四 上午
      * @author crowforkotlin
      */
-    var mBackgroundColor: Int by Delegates.observable(Color.BLACK) { _, _, _ -> onVariableChanged(
-        FLAG_BACKGROUND_COLOR
-    ) }
+    var mBackgroundColor: Int by Delegates.observable(Color.BLACK) { _, _, _ -> onVariableChanged(FLAG_BACKGROUND_COLOR) }
 
     /**
      * ● 是否开启换行
@@ -330,14 +327,6 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
     var mEnableAntiAlias: Boolean = false
 
     /**
-     * ● 动画模式（一般是默认）
-     *
-     * ● 2023-10-31 18:06:32 周二 下午
-     * @author crowforkotlin
-     */
-    var mAnimationMode = ANIMATION_DEFAULT
-
-    /**
      * ● 更新策略 详细可看定义声明
      *
      * ● 2023-10-31 14:07:36 周二 下午
@@ -370,22 +359,6 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
     var mResidenceTime: Long = 5000
 
     /**
-     * ● 动画X方向
-     *
-     * ● 2023-11-02 14:53:24 周四 下午
-     * @author crowforkotlin
-     */
-    var mAnimationLeft: Boolean = false
-
-    /**
-     * ● 动画Y方向
-     *
-     * ● 2023-11-02 14:53:45 周四 下午
-     * @author crowforkotlin
-     */
-    var mAnimationTop: Boolean = false
-
-    /**
      * ● 字体粗体
      *
      * ● 2023-11-10 14:34:58 周五 下午
@@ -408,6 +381,30 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * @author crowforkotlin
      */
     var mFontMonoSpace: Boolean = false
+
+    /**
+     * ● 动画模式（一般是默认）
+     *
+     * ● 2023-10-31 18:06:32 周二 下午
+     * @author crowforkotlin
+     */
+    override var mAnimationMode = ANIMATION_DEFAULT
+
+    /**
+     * ● 动画X方向
+     *
+     * ● 2023-11-02 14:53:24 周四 下午
+     * @author crowforkotlin
+     */
+    override var mAnimationLeft: Boolean = false
+
+    /**
+     * ● 动画Y方向
+     *
+     * ● 2023-11-02 14:53:45 周四 下午
+     * @author crowforkotlin
+     */
+    override var mAnimationTop: Boolean = false
 
     /**
      * ● 初始化画笔
