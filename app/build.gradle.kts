@@ -6,7 +6,9 @@ plugins {
 android {
     namespace = "com.crow.attrtextlayout"
     compileSdk = 34
-
+    buildFeatures {
+        viewBinding = true
+    }
     defaultConfig {
         applicationId = "com.crow.attrtextlayout"
         minSdk = 24
