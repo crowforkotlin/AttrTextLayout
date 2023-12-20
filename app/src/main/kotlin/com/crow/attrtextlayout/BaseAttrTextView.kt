@@ -7,12 +7,14 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.FontMetrics
+import android.graphics.Region
 import android.text.TextPaint
 import android.view.View
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.properties.Delegates
+
 
 /**
  * ● 属性文本组件
@@ -189,6 +191,23 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                             if (mAnimationLeft) canvas.clipRect(widthFloat - widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
                             else canvas.clipRect(widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
                         }
+                    )
+                }
+                BaseAttrTextLayout.ANIMATION_CROSS_EXTENSION -> {
+                    val rectLeft: Float = 0f
+                    val rectRight: Float = 0f + width
+                    val rectTop: Float = height / 2 * mAnimationTimeFraction + 0f
+                    val rectBottom: Float = height - height / 2 * mAnimationTimeFraction + 0f
+                    val rectLeft1: Float = width / 2 * mAnimationTimeFraction + 0f
+                    val rectRight1: Float = width - width / 2 * mAnimationTimeFraction + 0f
+                    val rectTop1: Float = 0f
+                    val rectBottom1: Float = height + 0f
+                    canvas.clipRect(rectLeft, rectTop, rectRight, rectBottom)
+                    canvas.clipRect(
+                        rectLeft1,
+                        rectTop1,
+                        rectRight1,
+                        rectBottom1,
                     )
                 }
             }
