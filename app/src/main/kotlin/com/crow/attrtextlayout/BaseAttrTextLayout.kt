@@ -495,6 +495,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         return BaseAttrTextView(context).also { view ->
             view.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             view.mTextPaint = mTextPaint
+            view.mTextColor = mTextPaint.color
             view.mMultiLineEnable = mMultipleLineEnable
             view.mGravity = mGravity
             addView(view)
