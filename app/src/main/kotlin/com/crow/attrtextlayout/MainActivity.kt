@@ -4,10 +4,6 @@ package com.crow.attrtextlayout
 
 import android.graphics.Color
 import android.os.Bundle
-import android.text.TextUtils
-import android.util.TypedValue
-import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
@@ -61,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         layout.mMultipleLineEnable = true
         layout.mResidenceTime = 1000
         layout.mFontSize = textSizeInPx
-        layout.mAnimationMode = BaseAttrTextLayout.ANIMATION_CROSS_EXTENSION
+        layout.mAnimationMode = BaseAttrTextLayout.ANIMATION_CONTINUATION_CROSS_EXTENSION
         layout.mAnimationLeft = true
         layout.mAnimationTop = false
         layout.mFontMonoSpace = true

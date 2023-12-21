@@ -150,8 +150,6 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
-    var mTextColor: Int = Color.RED
-
     /**
      * ● 绘制文本
      *
@@ -160,7 +158,6 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      */
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        mTextPaint.color = mTextColor
         if (mAnimationStartTime > 0) {
             when(mAnimationMode) {
                 BaseAttrTextLayout.ANIMATION_CONTINUATION_ERASE_Y -> {
@@ -197,18 +194,18 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                         }
                     )
                 }
-                BaseAttrTextLayout.ANIMATION_CROSS_EXTENSION -> {
+                BaseAttrTextLayout.ANIMATION_CONTINUATION_CROSS_EXTENSION -> {
                     drawView(
                         onCurrent = {
                             val rectXRate = (width shr 1) * mAnimationTimeFraction
                             val rectYRate = (height shr 1) * mAnimationTimeFraction
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                    canvas.clipOutRect(0f,  rectYRate, width.toFloat(), height - rectYRate) // 上下
-                                    canvas.clipOutRect(rectXRate, 0f, width - rectXRate, height.toFloat())  // 左右
-                                } else {
-                                    canvas.clipRect(0f,  rectYRate, width.toFloat(), height - rectYRate, Region.Op.DIFFERENCE) // 上下
-                                    canvas.clipRect(rectXRate, 0f, width - rectXRate, height.toFloat(), Region.Op.DIFFERENCE)  // 左右
-                                }
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                canvas.clipOutRect(0f,  rectYRate, width.toFloat(), height - rectYRate) // 上下
+                                canvas.clipOutRect(rectXRate, 0f, width - rectXRate, height.toFloat())  // 左右
+                            } else {
+                                canvas.clipRect(0f,  rectYRate, width.toFloat(), height - rectYRate, Region.Op.DIFFERENCE) // 上下
+                                canvas.clipRect(rectXRate, 0f, width - rectXRate, height.toFloat(), Region.Op.DIFFERENCE)  // 左右
+                            }
                         },
                         onNext = {
                             val rectXRate = (width shr 1) * mAnimationTimeFraction
