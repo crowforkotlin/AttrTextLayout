@@ -254,6 +254,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                 }
             }
         }
+
         // 文本列表长度
         val textListSize = mList.size
 
