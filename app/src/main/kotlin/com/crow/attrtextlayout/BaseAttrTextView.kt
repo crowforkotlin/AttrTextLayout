@@ -7,6 +7,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.FontMetrics
+import android.graphics.Path
 import android.graphics.Region
 import android.os.Build
 import android.text.TextPaint
@@ -14,6 +15,7 @@ import android.view.View
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.min
+import kotlin.math.sqrt
 import kotlin.properties.Delegates
 
 
@@ -55,6 +57,14 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * @author crowforkotlin
      */
     private var mTextY : Float = 0f
+
+    /**
+     * ● Path -- 用于绘制动画
+     *
+     * ● 2023-12-21 19:15:44 周四 下午
+     * @author crowforkotlin
+     */
+    private val mPath = Path()
 
     /**
      * ● 文本列表 -- 存储屏幕上可显示的字符串集合 实现原理是 动态计算字符串宽度和 视图View做判断
@@ -149,7 +159,6 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         // 设置View使用硬件加速渲染绘制， 不然Animation移动View会造成绘制的内容抖动
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
-
     /**
      * ● 绘制文本
      *
@@ -215,9 +224,36 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                         }
                     )
                 }
+                BaseAttrTextLayout.ANIMATION_CONTINUATION_OVAL -> {
+                    drawView(
+                        onCurrent = {
+                            val diagonal = sqrt(width.toFloat() * width + height * height)
+                            val widthHalf = width / 2f
+                            val heightHalf = height / 2f
+                            mPath.reset()
+                            mPath.addArc(widthHalf - diagonal, heightHalf - diagonal, width + diagonal - widthHalf, height + diagonal -heightHalf,270f,360 * mAnimationTimeFraction)
+                            mPath.lineTo(widthHalf,heightHalf)
+                            mPath.close()
+                            canvas.clipPath(mPath);
+                        },
+                        onNext = {
+                            val diagonal = sqrt(width.toFloat() * width + height * height)
+                            val widthHalf = width / 2f
+                            val heightHalf = height / 2f
+                            mPath.reset()
+                            mPath.addArc(widthHalf - diagonal, heightHalf - diagonal, width + diagonal - widthHalf, height + diagonal -heightHalf,270f,360 * mAnimationTimeFraction)
+                            mPath.lineTo(widthHalf,heightHalf)
+                            mPath.close()
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                canvas.clipOutPath(mPath)
+                            } else {
+                                canvas.clipPath(mPath, Region.Op.DIFFERENCE)
+                            }
+                        }
+                    )
+                }
             }
         }
-
         // 文本列表长度
         val textListSize = mList.size
 

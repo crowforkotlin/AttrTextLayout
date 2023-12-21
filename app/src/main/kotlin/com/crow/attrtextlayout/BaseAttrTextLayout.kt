@@ -10,6 +10,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Region
@@ -26,6 +27,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlin.math.sqrt
 import kotlin.properties.Delegates
 
 /**
@@ -96,6 +98,8 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         const val ANIMATION_CONTINUATION_ERASE_X: Short = 309
         const val ANIMATION_CROSS_EXTENSION: Short = 310
         const val ANIMATION_CONTINUATION_CROSS_EXTENSION: Short = 311
+        const val ANIMATION_OVAL: Short = 312
+        const val ANIMATION_CONTINUATION_OVAL: Short = 312
 
         /**
          * ● 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
@@ -130,6 +134,14 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
          */
         const val STRATEGY_ANIMATION_UPDATE_DEFAULT: Short = 603
     }
+
+    /**
+     * ● Path -- 用于绘制动画
+     *
+     * ● 2023-12-21 19:15:44 周四 下午
+     * @author crowforkotlin
+     */
+    private val mPath = Path()
 
     /**
      * ● 动画时间比率
@@ -242,9 +254,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-11-01 10:12:30 周三 上午
      * @author crowforkotlin
      */
-    private var mCurrentViewPos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged(
-        FLAG_LAYOUT_REFRESH
-    ) }
+    private var mCurrentViewPos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged(FLAG_LAYOUT_REFRESH) }
 
     /**
      * ● 文本列表位置 -- 设置后会触发重新绘制
@@ -477,6 +487,16 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                         canvas.clipRect(rectXRate, 0f, width - rectXRate, height.toFloat(), Region.Op.DIFFERENCE)  // 左右
                     }
                 }
+                ANIMATION_OVAL -> {
+                    val diagonal = sqrt(width.toFloat() * width + height * height)
+                    val widthHalf = width / 2f
+                    val heightHalf = height / 2f
+                    mPath.reset()
+                    mPath.addArc(widthHalf - diagonal, heightHalf - diagonal, width + diagonal - widthHalf, height + diagonal -heightHalf,270f,360 * mAnimationTimeFraction)
+                    mPath.lineTo(widthHalf,heightHalf)
+                    mPath.close()
+                    canvas.clipPath(mPath);
+                }
             }
         }
         super.dispatchDraw(canvas)
@@ -662,10 +682,12 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                     ANIMATION_CENTER -> launchCenterAnimation(isDelay = delay)
                     ANIMATION_ERASE_Y -> launchDrawAnimation(isDelay= delay)
                     ANIMATION_ERASE_X -> launchDrawAnimation(isDelay= delay)
+                    ANIMATION_OVAL -> launchDrawAnimation(isDelay = delay)
+                    ANIMATION_CONTINUATION_OVAL -> launchContinuousDrawAnimation(isDelay= delay)
                     ANIMATION_CROSS_EXTENSION -> launchDrawAnimation(isDelay = delay)
-                    ANIMATION_CONTINUATION_CROSS_EXTENSION -> launchContinuousAnimation(isDelay = delay)
-                    ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousAnimation(isDelay= delay)
-                    ANIMATION_CONTINUATION_ERASE_X -> launchContinuousAnimation(isDelay= delay)
+                    ANIMATION_CONTINUATION_CROSS_EXTENSION -> launchContinuousDrawAnimation(isDelay = delay)
+                    ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousDrawAnimation(isDelay= delay)
+                    ANIMATION_CONTINUATION_ERASE_X -> launchContinuousDrawAnimation(isDelay= delay)
                 }
                 delay = true
             }
@@ -1166,7 +1188,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-12-19 17:37:40 周二 下午
      * @author crowforkotlin
      */
-    private suspend fun launchContinuousAnimation(isDelay: Boolean) {
+    private suspend fun launchContinuousDrawAnimation(isDelay: Boolean) {
         if(isDelay) delay(mResidenceTime)
         return suspendCancellableCoroutine { continuation ->
             mViewAnimatorSet?.cancel()
