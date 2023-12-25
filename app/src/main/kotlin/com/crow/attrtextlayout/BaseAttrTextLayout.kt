@@ -10,6 +10,7 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
+import android.database.Observable
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -20,6 +21,7 @@ import android.graphics.Region
 import android.graphics.Typeface
 import android.os.Build
 import android.text.TextPaint
+import android.util.Log
 import android.view.ViewTreeObserver
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
@@ -81,6 +83,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         private const val FLAG_LAYOUT_REFRESH: Byte = 12
         private const val FLAG_SCROLL_SPEED: Byte = 13
         private const val FLAG_BACKGROUND_COLOR: Byte = 14
+        private const val FLAG_FONT_SIZE: Byte = 15
 
         const val ANIMATION_DEFAULT: Short = 300
         const val ANIMATION_MOVE_X: Short = 301
@@ -314,7 +317,13 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-10-31 14:03:04 周二 下午
      * @author crowforkotlin
      */
-    var mFontSize: Float = 12f
+    var mFontSize: Float by Delegates.observable(12f) { _, _, _ ->
+        if (!mLayoutComplete) {
+            addTask(FLAG_FONT_SIZE)
+        } else {
+            onVariableChanged(FLAG_FONT_SIZE)
+        }
+    }
 
     /**
      * ● 视图对齐方式 -- 上中下 IntRange(from = 1000, to = 1008)
@@ -475,7 +484,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      */
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        debug("onDetachedFromWindow"::log)
+        "onDetachedFromWindow".debugLog()
         cancelAnimationJob()
         cancelAnimator()
         mCacheViews.clear()
@@ -545,6 +554,21 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
             }
             FLAG_BACKGROUND_COLOR -> {
                 setBackgroundColor(mBackgroundColor)
+            }
+            FLAG_FONT_SIZE -> {
+                val paintFontsize = mTextPaint.textSize
+                mTextPaint.textSize = mFontSize
+                val textHeight = getTextHeight(mTextPaint.fontMetrics)
+                val textWidth = mTextPaint.measureText("O")
+                "textsize is error auto applyOption! textSize is $mFontSize \t textWidth is $textWidth \t textHeight is $textHeight \t width is $width \t height is $height".debugLog()
+                if (textWidth > width || textHeight > height) {
+                    "textsize is error auto applyOption! textSize is $mFontSize \t textWidth is $textWidth \t textHeight is $textHeight \t width is $width \t height is $height".debugLog()
+                    mFontSize = 12f
+                    mTextPaint.textSize = mFontSize
+                    applyOption()
+                } else {
+                    mTextPaint.textSize = paintFontsize
+                }
             }
         }
     }
@@ -625,7 +649,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         if (viewNextB.translationY != 0f) viewNextB.translationY = 0f
         viewCurrentA.mAnimationMode = mAnimationMode
         viewNextB.mAnimationMode = mAnimationMode
-        mAnimationJob = mViewScope.launch(CoroutineExceptionHandler { _, throwable -> throwable.stackTraceToString().log() }) {
+        mAnimationJob = mViewScope.launch(CoroutineExceptionHandler { _, throwable -> throwable.stackTraceToString().debugLog(level = Log.ERROR) }) {
             while(true) {
                 if (isListSizeFitPage() && !mEnableSingleTextAnimation) return@launch run {
                     if (viewNextB.visibility == VISIBLE) viewNextB.visibility = INVISIBLE
@@ -802,6 +826,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                 }
             }
         }
+        "getTextLists : $textList".debugLog()
         return textList
     }
 
@@ -829,7 +854,8 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         if (mList.isEmpty()) return
         when(mMultipleLineEnable) {
             true -> {
-                val textMaxLine = (measuredHeight / getTextHeight(mTextPaint.fontMetrics)).toInt()
+                val textHeightWithMargin = getTextHeight(mTextPaint.fontMetrics) + mMarginRow
+                val textMaxLine = if(textHeightWithMargin > height) 1 else  (height / textHeightWithMargin).toInt()
                 if (textMaxLine <= 0) return
                 val textListSize = mList.size
                 var textTotalCount: Int = textListSize / textMaxLine
@@ -1274,6 +1300,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         view.mAnimationTop = mAnimationTop
         view.mAnimationLeft = mAnimationLeft
         view.mAnimationMode = mAnimationMode
+        view.mMarginRow = mMarginRow
         view.mAnimationStartTime = 0
         view.mTextPaint = mTextPaint
     }

@@ -32,7 +32,6 @@ import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_START
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.properties.Delegates
-import kotlin.system.measureTimeMillis
 
 
 /**
@@ -46,10 +45,29 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
 
     companion object {
 
+        /**
+         * ● 刷新标志位
+         *
+         * ● 2023-12-25 17:32:12 周一 下午
+         * @author crowforkotlin
+         */
         private const val FLAG_REFRESH: Byte = 0x01
-        private const val ROW_VALID: Int = 3
-        private const val ROW_DEVIATION: Float = 0.5f
 
+        /**
+         * ● 文本有效行默认为小于3，1奇、2偶 为3则 另外手动处理，直接给文本高度设置0 详情见 drawCenterText 函数
+         *
+         * ● 2023-12-25 17:29:59 周一 下午
+         * @author crowforkotlin
+         */
+        private const val TEXT_HEIGHT_VALID_ROW: Int = 3
+
+        /**
+         * ● 用于解决文本Y轴的精准度 减少由浮点数带来的微小误差，在像素级视图中 效果十分明显
+         *
+         * ● 2023-12-25 17:27:58 周一 下午
+         * @author crowforkotlin
+         */
+        private const val ROW_DEVIATION: Float = 0.5f
     }
 
     /**
@@ -167,7 +185,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
     override var mAnimationTop: Boolean = false
 
     /**
-     * ● 每一行的行间距
+     * ● 文本的行间距
      *
      * ● 2023-12-25 15:17:16 周一 下午
      * @author crowforkotlin
@@ -218,7 +236,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
             }
             GRAVITY_TOP_CENTER -> {
                 mTextY = abs(mTextPaint.fontMetrics.ascent)
-                drawTopText(canvas, text, textListSize) { mTextX = (width shr 1) - it / 2 }
+                drawTopText(canvas, text, textListSize) { mTextX = (width shr 1) - it / 2f }
             }
             GRAVITY_TOP_END -> {
                 mTextY = abs(mTextPaint.fontMetrics.ascent)
@@ -228,7 +246,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                 drawCenterText(canvas, text, textListSize) { mTextX = 0f }
             }
             GRAVITY_CENTER -> {
-                drawCenterText(canvas, text, textListSize) { mTextX = (width shr 1) - it / 2 }
+                drawCenterText(canvas, text, textListSize) { mTextX = (width shr 1) - it / 2f }
             }
             GRAVITY_CENTER_END -> {
                 drawCenterText(canvas, text, textListSize) { mTextX = width - it }
@@ -239,7 +257,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
             }
             GRAVITY_BOTTOM_CENTER -> {
                 mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
-                drawBottomText(canvas, text, textListSize) { mTextX =  (width shr 1) - it /  2 }
+                drawBottomText(canvas, text, textListSize) { mTextX =  (width shr 1) - it /  2f }
             }
             GRAVITY_BOTTOM_END -> {
                 mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
@@ -333,18 +351,21 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      */
     private inline fun drawTopText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onIniTextX: (Float) -> Unit) {
         if (mMultiLineEnable && textListSize > 1) {
+            val heightHalf = height shr 1
             val textHeight = getTextHeight(mTextPaint.fontMetrics)
-            val maxLine = (measuredHeight / textHeight).toInt()
+            val marginRow = if (mMarginRow >= heightHalf) heightHalf.toFloat() else mMarginRow
+            val textHeightWithMargin = textHeight + marginRow
+            val maxLine =  if (height < textHeightWithMargin) 1 else (measuredHeight / (textHeightWithMargin)).toInt()
             var listStartPos = mListPosition * maxLine
+            val textYIncremenet = textHeight + marginRow
             repeat(maxLine) {
                 if (listStartPos < mList.size) {
                     val currentText = mList[listStartPos]
                     onIniTextX(currentText.second)
                     canvas.drawText(currentText.first)
-                }
-                else return@repeat
-                listStartPos ++
-                mTextY += textHeight
+                    listStartPos ++
+                    mTextY += textYIncremenet
+                } else return
             }
         } else {
             onIniTextX(text.second)
@@ -366,28 +387,28 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         var marginRow = mMarginRow
         var halfMarginRow = marginRow / 2f
         if (mMultiLineEnable && textListSize > 1) {
-            val maxRow = min((height / (textHeight + marginRow)).toInt(), textListSize)
+            val textHeightWithMargin = textHeight + marginRow
+            val maxRow = if (height < textHeightWithMargin) 1 else min((height / (textHeightWithMargin)).toInt(), textListSize)
             var listStartPos = (mListPosition * maxRow).let { if (it >= textListSize) it - maxRow else it }
             val validRow = if (listStartPos + maxRow <= textListSize) maxRow else textListSize - listStartPos
             val halfCount = validRow shr 1
-            if (maxRow == 1) {
+            if (maxRow == 1 || validRow == 1) {
                 marginRow = 0f
                 halfMarginRow = 0f
             }
-            // 考虑到 偶数、奇数 行居中的效果 分别 进行对于的处理
-            mTextY = if (validRow % 2 == 0) {
-                (screenHeightHalf - (textHeight * if(validRow < ROW_VALID) 0 else halfCount - 1)) - baseLineOffsetY + ROW_DEVIATION - halfMarginRow
+            mTextY = if (validRow % 2 == 0) { // 考虑到 偶数、奇数 行居中的效果
+                (screenHeightHalf - (textHeight * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount - 1)) - baseLineOffsetY + ROW_DEVIATION - halfMarginRow
             } else {
-                (screenHeightHalf - (textHeight * if(validRow < ROW_VALID) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION - halfMarginRow
+                (screenHeightHalf - (textHeight * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION - halfMarginRow
             }
-
-            for (count in 0 until validRow) {
+            val textYIncrement = textHeight + marginRow + halfMarginRow
+            repeat(validRow) {
                 if (listStartPos < textListSize) {
                     val currentText = mList[listStartPos]
                     onInitializaTextX(currentText.second)
                     canvas.drawText(currentText.first)
                     listStartPos ++
-                    mTextY += textHeight + marginRow
+                    mTextY += textYIncrement
                 } else return
             }
         } else {
@@ -405,21 +426,24 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      */
     private inline fun drawBottomText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onIniTextX: (Float) -> Unit) {
         if (mMultiLineEnable && textListSize > 1) {
+            val heightHalf = height shr 1
+            val marginRow = if (mMarginRow >= heightHalf) heightHalf.toFloat() else mMarginRow
             val textHeight = getTextHeight(mTextPaint.fontMetrics)
-            val maxLine = (measuredHeight / textHeight).toInt()
+            val textHeightWithMargin = textHeight + marginRow
+            val maxLine =  if (height < textHeightWithMargin) 1 else (measuredHeight / textHeightWithMargin).toInt()
             val listSize = mList.size
             val startPos = (mListPosition + 1) * maxLine
             val endPos = mListPosition * maxLine
             var pos = if (listSize >= startPos) startPos - 1 else listSize - 1
+            val textYIncrement = textHeight + marginRow
             repeat(maxLine) {
                 if (pos >= endPos) {
                     val currentText = mList[pos]
                     onIniTextX(currentText.second)
                     canvas.drawText(currentText.first)
-                }
-                else return@repeat
-                pos --
-                mTextY -= textHeight
+                    pos --
+                    mTextY -= textYIncrement
+                } else return
             }
         } else {
             onIniTextX(text.second)
