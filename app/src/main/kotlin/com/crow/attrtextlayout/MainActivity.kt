@@ -2,21 +2,18 @@
 
 package com.crow.attrtextlayout
 
-import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.crow.attr.text.BaseAttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

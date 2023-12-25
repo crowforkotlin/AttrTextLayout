@@ -1,23 +1,22 @@
+import org.jetbrains.kotlin.gradle.plugin.extraProperties
+
 plugins {
-    alias(app.plugins.android.application)
+    alias(app.plugins.android.library)
     alias(app.plugins.android.kotlin)
-    `maven-publish`
+    id("maven-publish")
 }
 
 android {
-    namespace = "com.crow.attrtextlayout"
+    namespace = "com.crow.attr.text"
     compileSdk = 34
-    buildFeatures {
-        viewBinding = true
-    }
+
     defaultConfig {
-        applicationId = "com.crow.attrtextlayout"
         minSdk = 21
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -37,7 +36,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":crow-attr-text"))
+
     implementation(app.androidx.core.ktx)
     implementation(app.androidx.appcompat)
     implementation(app.androidx.material)

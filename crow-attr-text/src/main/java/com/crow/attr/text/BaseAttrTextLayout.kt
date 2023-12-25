@@ -2,7 +2,7 @@
     "DEPRECATION"
 )
 
-package com.crow.attrtextlayout
+package com.crow.attr.text
 
 import android.animation.Animator
 import android.animation.AnimatorSet
@@ -10,16 +10,13 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
-import android.database.Observable
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Region
 import android.graphics.Typeface
-import android.os.Build
 import android.text.TextPaint
 import android.util.Log
 import android.view.ViewTreeObserver
@@ -32,7 +29,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
-import kotlin.math.sqrt
 import kotlin.properties.Delegates
 
 /**
