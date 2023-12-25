@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         layout.mAnimationTop = true
         layout.mFontMonoSpace = true
         layout.mUpdateStrategy = BaseAttrTextLayout.STRATEGY_TEXT_UPDATE_DEFAULT
-        layout.mAnimationStrategy = BaseAttrTextLayout.STRATEGY_ANIMATION_UPDATE_RESTART
+        layout.mAnimationStrategy = BaseAttrTextLayout.STRATEGY_ANIMATION_UPDATE_DEFAULT
         layout.mScrollSpeed = 5
         layout.mMarginRow = 10f
         lifecycleScope.launch {
