@@ -1,6 +1,6 @@
 @file:Suppress("SpellCheckingInspection", "unused", "DEPRECATION")
 
-package com.crow.attrtextlayout
+package com.crow.attr.text
 
 import android.graphics.Canvas
 import android.graphics.Color
@@ -9,6 +9,7 @@ import android.graphics.Path
 import android.graphics.Region
 import android.os.Build
 import android.util.Log
+import androidx.annotation.ChecksSdkIntAtLeast
 import kotlin.math.sqrt
 
 interface IBaseAttrTextExt {
@@ -284,6 +285,7 @@ inline fun withPath(path:Path, pathOperations: Path.() -> Unit) {
     path.close()
 }
 
+@ChecksSdkIntAtLeast(api = Build.VERSION_CODES.O, lambda = 0)
 inline fun withApiO(leastO: () -> Unit, lessO: () -> Unit) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) leastO() else lessO()
 }

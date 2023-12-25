@@ -2,7 +2,7 @@
     "DEPRECATION"
 )
 
-package com.crow.attrtextlayout
+package com.crow.attr.text
 
 import android.content.Context
 import android.graphics.Canvas
@@ -15,20 +15,20 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Region
 import android.text.TextPaint
 import android.view.View
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_X
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_Y
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_END
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_START
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_CENTER
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_CENTER_END
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_CENTER_START
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_CENTER
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_END
-import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_START
+import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
+import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_X
+import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_Y
+import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
+import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
+import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
+import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_END
+import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_START
+import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_CENTER
+import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_CENTER_END
+import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_CENTER_START
+import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_TOP_CENTER
+import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_TOP_END
+import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_TOP_START
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.properties.Delegates

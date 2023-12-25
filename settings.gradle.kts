@@ -3,6 +3,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+        mavenLocal()
         maven { setUrl("https://jitpack.io") }
     }
 }
@@ -11,13 +12,13 @@ pluginManagement {
 dependencyResolutionManagement {
 
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-
     versionCatalogs {
         create("compose") { from(files("gradle/compose.versions.toml")) }
         create("app") { from(files("gradle/app.versions.toml") )}
     }
-
     repositories {
+
+        mavenLocal()
         google()
         mavenCentral()
         gradlePluginPortal()
@@ -29,4 +30,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "AttrTextLayout"
 include(":app")
- 
+include(":crow-attr-text")

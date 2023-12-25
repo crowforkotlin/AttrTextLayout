@@ -2,6 +2,7 @@
 android-gradle-plugin = "8.3.0-alpha17"
 kotlin = "1.9.10"
 ksp = "1.9.10-1.0.13"
+maven-publish = "1.0"
 
 androidx-core = "1.12.0"
 androidx-core-animation = "1.0.0-rc01"
@@ -258,3 +259,4 @@ android-application = { id = "com.android.application", version.ref = "android-g
 android-library = { id = "com.android.library", version.ref = "android-gradle-plugin" }
 android-kotlin = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 android-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+maven-publish = { id = "maven-publish" }
