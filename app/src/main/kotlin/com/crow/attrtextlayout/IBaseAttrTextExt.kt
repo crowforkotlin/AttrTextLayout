@@ -8,6 +8,7 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Region
 import android.os.Build
+import android.util.Log
 import kotlin.math.sqrt
 
 interface IBaseAttrTextExt {
@@ -244,6 +245,16 @@ interface IBaseAttrTextExt {
                 }
             }
         )
+    }
+
+    /**
+     * ● 调试模式打印
+     *
+     * ● 2023-12-25 16:39:20 周一 下午
+     * @author crowforkotlin
+     */
+    fun Any?.debugLog(tag: String = "IBaseAttrTextExt-Crow",level: Int = Log.DEBUG) {
+        debug { Log.println(level, tag, this.toString()) }
     }
 }
 
