@@ -1,4 +1,6 @@
-@file:Suppress("MemberVisibilityCanBePrivate", "KotlinConstantConditions", "unused", "SpellCheckingInspection")
+@file:Suppress("MemberVisibilityCanBePrivate", "KotlinConstantConditions", "unused", "SpellCheckingInspection",
+    "DEPRECATION"
+)
 
 package com.crow.attrtextlayout
 
@@ -8,14 +10,28 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.FontMetrics
 import android.graphics.Path
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
 import android.graphics.Region
-import android.os.Build
 import android.text.TextPaint
 import android.view.View
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_X
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_Y
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_END
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_START
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_CENTER
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_CENTER_END
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_CENTER_START
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_CENTER
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_END
+import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_START
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.min
-import kotlin.math.sqrt
 import kotlin.properties.Delegates
 
 
@@ -31,6 +47,8 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
     companion object {
 
         private const val FLAG_REFRESH: Byte = 0x01
+        private const val ROW_VALID: Int = 3
+        private const val ROW_DEVIATION: Float = 0.5f
 
     }
 
@@ -64,7 +82,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-12-21 19:15:44 周四 下午
      * @author crowforkotlin
      */
-    private val mPath = Path()
+    var mPath = Path()
 
     /**
      * ● 文本列表 -- 存储屏幕上可显示的字符串集合 实现原理是 动态计算字符串宽度和 视图View做判断
@@ -89,7 +107,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-10-31 15:24:43 周二 下午
      * @author crowforkotlin
      */
-    var mGravity: Byte by Delegates.observable(BaseAttrTextLayout.GRAVITY_TOP_START) { _, oldSize, newSize -> onVariableChanged(FLAG_REFRESH, oldSize, newSize) }
+    var mGravity: Byte by Delegates.observable(GRAVITY_TOP_START) { _, oldSize, newSize -> onVariableChanged(FLAG_REFRESH, oldSize, newSize) }
 
     /**
      * ● 是否开启换行
@@ -159,6 +177,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         // 设置View使用硬件加速渲染绘制， 不然Animation移动View会造成绘制的内容抖动
         setLayerType(LAYER_TYPE_HARDWARE, null)
     }
+
     /**
      * ● 绘制文本
      *
@@ -167,93 +186,9 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      */
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        if (mAnimationStartTime > 0) {
-            when(mAnimationMode) {
-                BaseAttrTextLayout.ANIMATION_CONTINUATION_ERASE_Y -> {
 
-                    // Layout高度浮点
-                    val heightFloat = height.toFloat()
-
-                    // 剪切当前区域
-                    drawView(
-                        onCurrent = {
-                            if (mAnimationTop) canvas.clipRect(0f, heightFloat - heightFloat * mAnimationTimeFraction, width.toFloat(), heightFloat)
-                            else canvas.clipRect(0f, 0f, width.toFloat(), heightFloat * mAnimationTimeFraction)
-                        },
-                        onNext =  {
-                            if (mAnimationTop) canvas.clipRect(0f, 0f, width.toFloat(), heightFloat - heightFloat * mAnimationTimeFraction)
-                            else canvas.clipRect(0f, heightFloat * mAnimationTimeFraction , width.toFloat(), heightFloat)
-                        }
-                    )
-                }
-                BaseAttrTextLayout.ANIMATION_CONTINUATION_ERASE_X -> {
-                    // Layout宽度浮点
-                    val widthFloat = width.toFloat()
-
-                    drawView(
-                        onCurrent = {
-                            // 剪切当前区域
-                            if (mAnimationLeft) canvas.clipRect(widthFloat - widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
-                            else canvas.clipRect(0f, 0f, widthFloat * mAnimationTimeFraction, height.toFloat())
-                        },
-                        onNext = {
-                            // 剪切当前区域
-                            if (mAnimationLeft) canvas.clipRect(widthFloat - widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
-                            else canvas.clipRect(widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
-                        }
-                    )
-                }
-                BaseAttrTextLayout.ANIMATION_CONTINUATION_CROSS_EXTENSION -> {
-                    drawView(
-                        onCurrent = {
-                            val rectXRate = (width shr 1) * mAnimationTimeFraction
-                            val rectYRate = (height shr 1) * mAnimationTimeFraction
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                canvas.clipOutRect(0f,  rectYRate, width.toFloat(), height - rectYRate) // 上下
-                                canvas.clipOutRect(rectXRate, 0f, width - rectXRate, height.toFloat())  // 左右
-                            } else {
-                                canvas.clipRect(0f,  rectYRate, width.toFloat(), height - rectYRate, Region.Op.DIFFERENCE) // 上下
-                                canvas.clipRect(rectXRate, 0f, width - rectXRate, height.toFloat(), Region.Op.DIFFERENCE)  // 左右
-                            }
-                        },
-                        onNext = {
-                            val rectXRate = (width shr 1) * mAnimationTimeFraction
-                            val rectYRate = (height shr 1) * mAnimationTimeFraction
-                            canvas.clipRect(0f,  rectYRate, width.toFloat(), height - rectYRate) // 上下
-                            canvas.clipRect(rectXRate, 0f, width - rectXRate, height.toFloat())  // 左右
-                        }
-                    )
-                }
-                BaseAttrTextLayout.ANIMATION_CONTINUATION_OVAL -> {
-                    drawView(
-                        onCurrent = {
-                            val diagonal = sqrt(width.toFloat() * width + height * height)
-                            val widthHalf = width / 2f
-                            val heightHalf = height / 2f
-                            mPath.reset()
-                            mPath.addArc(widthHalf - diagonal, heightHalf - diagonal, width + diagonal - widthHalf, height + diagonal -heightHalf,270f,360 * mAnimationTimeFraction)
-                            mPath.lineTo(widthHalf,heightHalf)
-                            mPath.close()
-                            canvas.clipPath(mPath);
-                        },
-                        onNext = {
-                            val diagonal = sqrt(width.toFloat() * width + height * height)
-                            val widthHalf = width / 2f
-                            val heightHalf = height / 2f
-                            mPath.reset()
-                            mPath.addArc(widthHalf - diagonal, heightHalf - diagonal, width + diagonal - widthHalf, height + diagonal -heightHalf,270f,360 * mAnimationTimeFraction)
-                            mPath.lineTo(widthHalf,heightHalf)
-                            mPath.close()
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                canvas.clipOutPath(mPath)
-                            } else {
-                                canvas.clipPath(mPath, Region.Op.DIFFERENCE)
-                            }
-                        }
-                    )
-                }
-            }
-        }
+        // 执行动画
+        drawAnimation(canvas)
 
         // 文本列表长度
         val textListSize = mList.size
@@ -269,43 +204,118 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
 
         // 设置X和Y的坐标 ，Paint绘制的文本在descent位置 进行相对应的计算即可
         when(mGravity) {
-            BaseAttrTextLayout.GRAVITY_TOP_START -> {
+            GRAVITY_TOP_START -> {
                 mTextY = abs(mTextPaint.fontMetrics.ascent)
                 drawTopText(canvas, text, textListSize) { mTextX = 0f }
             }
-            BaseAttrTextLayout.GRAVITY_TOP_CENTER -> {
+            GRAVITY_TOP_CENTER -> {
                 mTextY = abs(mTextPaint.fontMetrics.ascent)
                 drawTopText(canvas, text, textListSize) { mTextX = (width shr 1) - it / 2 }
             }
-            BaseAttrTextLayout.GRAVITY_TOP_END -> {
+            GRAVITY_TOP_END -> {
                 mTextY = abs(mTextPaint.fontMetrics.ascent)
                 drawTopText(canvas, text, textListSize) { mTextX = width - it }
             }
-            BaseAttrTextLayout.GRAVITY_CENTER_START -> {
+            GRAVITY_CENTER_START -> {
                 drawCenterText(canvas, text, textListSize) { mTextX = 0f }
             }
-            BaseAttrTextLayout.GRAVITY_CENTER -> {
+            GRAVITY_CENTER -> {
                 drawCenterText(canvas, text, textListSize) { mTextX = (width shr 1) - it / 2 }
             }
-            BaseAttrTextLayout.GRAVITY_CENTER_END -> {
+            GRAVITY_CENTER_END -> {
                 drawCenterText(canvas, text, textListSize) { mTextX = width - it }
             }
-            BaseAttrTextLayout.GRAVITY_BOTTOM_START -> {
+            GRAVITY_BOTTOM_START -> {
                 mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
                 drawBottomText(canvas, text, textListSize) { mTextX = 0f }
             }
-            BaseAttrTextLayout.GRAVITY_BOTTOM_CENTER -> {
+            GRAVITY_BOTTOM_CENTER -> {
                 mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
                 drawBottomText(canvas, text, textListSize) { mTextX =  (width shr 1) - it /  2 }
             }
-            BaseAttrTextLayout.GRAVITY_BOTTOM_END -> {
+            GRAVITY_BOTTOM_END -> {
                 mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
                 drawBottomText(canvas, text, textListSize) { mTextX = width - it }
             }
         }
     }
 
-    private inline fun drawView(onCurrent: () -> Unit, onNext: () -> Unit) { if (mIsCurrentView) onCurrent() else onNext() }
+    /**
+     * ● 绘制Canvas动画
+     *
+     * ● 2023-12-22 15:21:59 周五 下午
+     * @author crowforkotlin
+     */
+    private fun drawAnimation(canvas: Canvas) {
+        if (mAnimationStartTime > 0) {
+            when(mAnimationMode) {
+                ANIMATION_CONTINUATION_ERASE_X -> {
+                    val widthFloat = width.toFloat()
+                    val heightFloat = height.toFloat()
+                    val xRate = widthFloat * mAnimationTimeFraction
+                    drawView(
+                        onCurrent = { canvas.drawEraseX(widthFloat, heightFloat, xRate) },
+                        onNext = { canvas.drawDifferenceEraseX(widthFloat, heightFloat, xRate) }
+                    )
+                }
+                ANIMATION_CONTINUATION_ERASE_Y -> {
+                    val widthFloat = width.toFloat()
+                    val heightFloat = height.toFloat()
+                    val heightRate = heightFloat * mAnimationTimeFraction
+                    drawView(
+                        onCurrent = { canvas.drawEraseY(widthFloat, heightFloat, heightRate) },
+                        onNext =  { canvas.drawDifferenceEraseY(widthFloat, heightFloat, heightRate) }
+                    )
+                }
+                ANIMATION_CONTINUATION_CROSS_EXTENSION -> {
+                    val rectXRate = (width shr 1) * mAnimationTimeFraction
+                    val rectYRate = (height shr 1) * mAnimationTimeFraction
+                    val widthFloat = width.toFloat()
+                    val heightFloat = height.toFloat()
+                    drawView(
+                        onCurrent = { canvas.drawCrossExtension(rectXRate, rectYRate, widthFloat, heightFloat) },
+                        onNext = { canvas.drawDifferenceCrossExtension(rectXRate, rectYRate, widthFloat, heightFloat) }
+                    )
+                }
+                ANIMATION_CONTINUATION_OVAL -> {
+                    withPath(mPath) {
+                        drawView(
+                            onCurrent = {
+                                canvas.drawOval(this, width, height, mAnimationTimeFraction)
+                                canvas.clipPath(this)
+                            },
+                            onNext = {
+                                canvas.drawOval(this, width, height, mAnimationTimeFraction)
+                                withApiO(
+                                    leastO = { canvas.clipOutPath(this) },
+                                    lessO = { canvas.clipPath(this, Region.Op.DIFFERENCE) }
+                                )
+                            }
+                        )
+                    }
+                }
+                ANIMATION_CONTINUATION_RHOMBUS -> {
+                    withPath(mPath) {
+                        canvas.drawRhombus(this, width, height, mAnimationTimeFraction)
+                        drawView(
+                            onCurrent = {
+                                withApiO(
+                                    leastO = { canvas.clipOutPath(this) },
+                                    lessO = { canvas.clipPath(this, Region.Op.XOR) }
+                                )
+                            },
+                            onNext = {
+                                withApiO(
+                                    leastO = { canvas.clipPath(this) },
+                                    lessO = { canvas.clipPath(this, Region.Op.REPLACE) }
+                                )
+                            }
+                        )
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * ● 绘制顶部文本
@@ -315,25 +325,22 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      */
     private inline fun drawTopText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onIniTextX: (Float) -> Unit) {
         if (mMultiLineEnable && textListSize > 1) {
-            val textHeight = ceil(getTextHeight(mTextPaint.fontMetrics))
+            val textHeight = getTextHeight(mTextPaint.fontMetrics)
             val maxLine = (measuredHeight / textHeight).toInt()
-            var pos = mListPosition * maxLine
+            var listStartPos = mListPosition * maxLine
             repeat(maxLine) {
-                if (pos < mList.size) {
-                    val currentText = mList[pos]
+                if (listStartPos < mList.size) {
+                    val currentText = mList[listStartPos]
                     onIniTextX(currentText.second)
-                    canvas.drawText(currentText.first, mTextX, mTextY, mTextPaint)
-                    onRunDebug(canvas)
+                    canvas.drawText(currentText.first)
                 }
                 else return@repeat
-                pos ++
+                listStartPos ++
                 mTextY += textHeight
             }
         } else {
             onIniTextX(text.second)
-            val currentText = text.first
-            canvas.drawText(currentText, 0, currentText.length, mTextX, mTextY, mTextPaint)
-            onRunDebug(canvas)
+            canvas.drawText(text.first)
         }
     }
 
@@ -343,41 +350,35 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-11-04 17:54:09 周六 下午
      * @author crowforkotlin
      */
-    private inline fun drawCenterText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onIniTextX: (Float) -> Unit) {
+    private inline fun drawCenterText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onInitializaTextX: (Float) -> Unit) {
+        val screenHeightHalf = height shr 1
+        val fontMetrics = mTextPaint.fontMetrics
+        val textHeight = getTextHeight(fontMetrics)
+        val baseLineOffsetY = calculateBaselineOffsetY(fontMetrics)
         if (mMultiLineEnable && textListSize > 1) {
-            val screenHeightHalf = height shr 1
-            val fontMetrics = mTextPaint.fontMetrics
-            val textHeight = ceil(getTextHeight(fontMetrics))
             val maxRow = min((height / textHeight).toInt(), textListSize)
-            var listStartPos = with(mListPosition * maxRow) { if (this == textListSize) this - maxRow else this }
+            var listStartPos = (mListPosition * maxRow).let { if (it >= textListSize) it - maxRow else it }
             val validRow = if (listStartPos + maxRow <= textListSize) maxRow else textListSize - listStartPos
-            val halfCount = ((screenHeightHalf - (textHeight / 2)) / textHeight).toInt()
-            val baseLineOffsetY = calculateBaselineOffsetY(fontMetrics)
-            val drawStartPointTextHeight = textHeight * if(validRow < 3) 0 else halfCount
-            val repeatTotalCount: Int
-            if (validRow % 2 == 0) {
-                repeatTotalCount = (screenHeightHalf / textHeight).toInt() shl 1
-                mTextY = screenHeightHalf - baseLineOffsetY - drawStartPointTextHeight
+            val halfCount = validRow shr 1
+            // 考虑到 偶数、奇数 行居中的效果 分别 进行对于的处理
+            mTextY = if (validRow % 2 == 0) {
+                (screenHeightHalf - (textHeight * if(validRow < ROW_VALID) 0 else halfCount - 1)) - baseLineOffsetY + ROW_DEVIATION
             } else {
-                repeatTotalCount = (halfCount shl 1) + 1
-                mTextY = screenHeightHalf + baseLineOffsetY - drawStartPointTextHeight
+                (screenHeightHalf - (textHeight * if(validRow < ROW_VALID) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION
             }
-            repeat(repeatTotalCount) {
+            for (count in 0 until validRow) {
                 if (listStartPos < textListSize) {
                     val currentText = mList[listStartPos]
-                    onIniTextX(currentText.second)
-                    canvas.drawText(currentText.first, mTextX, mTextY, mTextPaint)
-                    onRunDebug(canvas)
+                    onInitializaTextX(currentText.second)
+                    canvas.drawText(currentText.first)
                     listStartPos ++
-                    mTextY += textHeight
-                }
+                    mTextY += textHeight + 10f
+                } else return
             }
         } else {
-            onIniTextX(text.second)
-            mTextY = (height shr 1) + calculateBaselineOffsetY(mTextPaint.fontMetrics)
-            val currentText = text.first
-            canvas.drawText(currentText, 0, currentText.length, mTextX, mTextY, mTextPaint)
-            onRunDebug(canvas)
+            onInitializaTextX(text.second)
+            mTextY = screenHeightHalf + baseLineOffsetY
+            canvas.drawText(text.first)
         }
     }
 
@@ -389,7 +390,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      */
     private inline fun drawBottomText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onIniTextX: (Float) -> Unit) {
         if (mMultiLineEnable && textListSize > 1) {
-            val textHeight = ceil(getTextHeight(mTextPaint.fontMetrics))
+            val textHeight = getTextHeight(mTextPaint.fontMetrics)
             val maxLine = (measuredHeight / textHeight).toInt()
             val listSize = mList.size
             val startPos = (mListPosition + 1) * maxLine
@@ -399,8 +400,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                 if (pos >= endPos) {
                     val currentText = mList[pos]
                     onIniTextX(currentText.second)
-                    canvas.drawText(currentText.first, mTextX, mTextY, mTextPaint)
-                    onRunDebug(canvas)
+                    canvas.drawText(currentText.first)
                 }
                 else return@repeat
                 pos --
@@ -408,9 +408,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
             }
         } else {
             onIniTextX(text.second)
-            val currentText = text.first
-            canvas.drawText(currentText, 0, currentText.length, mTextX, mTextY, mTextPaint)
-            onRunDebug(canvas)
+            canvas.drawText(text.first)
         }
     }
 
@@ -420,35 +418,30 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * ● 2023-11-07 18:44:26 周二 下午
      * @author crowforkotlin
      */
-    private fun onRunDebug(canvas: Canvas) {
-        // DEBUG 模式
-        if (BaseAttrTextLayout.DEBUG) {
-            val paintColor = mTextPaint.color
+    private fun drawDebugTextLine(canvas: Canvas) {
 
-            // 绘制中线
-            mTextPaint.color = Color.RED
-            canvas.drawLine(0f, (height / 2).toFloat(), width.toFloat(), (height / 2).toFloat(), mTextPaint)
+        // 绘制中线
+        val paint = TextPaint()
+        paint.color = Color.GREEN
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
+        canvas.drawLine(0f, (height / 2).toFloat(), width.toFloat(), (height / 2).toFloat(), paint)
 
-            // 绘制底部线
-            mTextPaint.color = Color.YELLOW
-            canvas.drawLine(0f, mTextY, width.toFloat(), mTextY, mTextPaint)
+        // 绘制底部线
+        paint.color = Color.WHITE
+        canvas.drawLine(0f, mTextY, width.toFloat(), mTextY, paint)
 
-            // 绘制基线
-            mTextPaint.color = Color.GREEN
-            val ascentY = mTextY - abs(mTextPaint.fontMetrics.ascent)
-            canvas.drawLine(0f, ascentY, width.toFloat(), ascentY, mTextPaint)
+        // 绘制基线
+        mTextPaint.color = Color.WHITE
+        val ascentY = mTextY - abs(mTextPaint.fontMetrics.ascent)
+        canvas.drawLine(0f, ascentY, width.toFloat(), ascentY, mTextPaint)
 
-            // 蓝框范围
-            mTextPaint.color = Color.BLUE
-            mTextPaint.style = Paint.Style.STROKE
-            canvas.drawRect(0f, 0f, layoutParams.width.toFloat(), layoutParams.height.toFloat(), mTextPaint)
+        // 蓝框范围
+        paint.color = Color.BLUE
+        paint.style = Paint.Style.STROKE
+        canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
 
-            mTextPaint.color = Color.parseColor("#9575cd")
-            mTextPaint.style = Paint.Style.FILL
-            mTextPaint.alpha = 80
-            canvas.drawRect(1f, 1f, layoutParams.width.toFloat() - 1, layoutParams.height.toFloat() - 1, mTextPaint)
-            mTextPaint.color = paintColor
-        }
+
+        mTextPaint.color = Color.RED
     }
 
     /**
@@ -458,7 +451,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * @author crowforkotlin
      */
     private fun calculateBaselineOffsetY(fontMetrics: FontMetrics): Float {
-        return abs(fontMetrics.ascent) / 2 - fontMetrics.descent / 2
+        return -fontMetrics.ascent / 2f - fontMetrics.descent / 2f
     }
 
     /**
@@ -474,5 +467,31 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
                 if (mList.isNotEmpty()) invalidate()
             }
         }
+    }
+
+    /**
+     * ● 根据FLAG绘制视图
+     *
+     * ● 2023-12-22 19:05:36 周五 下午
+     * @author crowforkotlin
+     */
+    private inline fun drawView(onCurrent: () -> Unit, onNext: () -> Unit) { if (mIsCurrentView) onCurrent() else onNext() }
+
+    /**
+     * ● 绘制文本
+     *
+     * ● 2023-12-22 19:05:29 周五 下午
+     * @author crowforkotlin
+     */
+    private fun Canvas.drawText(text: String) {
+        debugText(
+            onDebug = {
+                drawText(text, 0, text.length, mTextX, mTextY, mTextPaint)
+                drawDebugTextLine(this)
+            },
+            orElse = {
+                drawText(text, 0, text.length, mTextX, mTextY, mTextPaint)
+            }
+        )
     }
 }
