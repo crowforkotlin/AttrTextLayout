@@ -1,4 +1,4 @@
-@file:Suppress("SpellCheckingInspection")
+@file:Suppress("SpellCheckingInspection", "unused", "DEPRECATION")
 
 package com.crow.attrtextlayout
 
@@ -8,7 +8,6 @@ import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Region
 import android.os.Build
-import kotlin.math.abs
 import kotlin.math.sqrt
 
 interface IBaseAttrTextExt {
@@ -23,12 +22,13 @@ interface IBaseAttrTextExt {
          */
         const val DEBUG = true
         const val DEBUG_TEXT = true
-        const val DEBUG_ANIMATION = false
+        const val DEBUG_ANIMATION = true
     }
 
     var mAnimationTop: Boolean
     var mAnimationLeft: Boolean
     var mAnimationMode: Short
+    var mMarginRow: Float
 
     /**
      * ● 获取文本高度：ascent绝对值 + descent
@@ -40,6 +40,12 @@ interface IBaseAttrTextExt {
         return fontMetrics.descent -fontMetrics.ascent
     }
 
+    /**
+     * ● 绘制菱形
+     *
+     * ● 2023-12-25 15:19:02 周一 下午
+     * @author crowforkotlin
+     */
     fun Canvas.drawRhombus(path: Path, width: Int, height: Int, fraction: Float) {
         val halfWidth = width shr 1
         val halfHeight = height shr 1
@@ -60,6 +66,12 @@ interface IBaseAttrTextExt {
         }
     }
 
+    /**
+     * ● 绘制圆形 时钟动画
+     *
+     * ● 2023-12-25 15:22:48 周一 下午
+     * @author crowforkotlin
+     */
     fun Canvas.drawOval(path: Path, width: Int, height: Int, fraction: Float) {
         val widthFloat = width.toFloat()
         val heightFloat = height.toFloat()
@@ -75,6 +87,12 @@ interface IBaseAttrTextExt {
         }
     }
 
+    /**
+     * ● 绘制十字扩展 动画
+     *
+     * ● 2023-12-25 15:23:15 周一 下午
+     * @author crowforkotlin
+     */
     fun Canvas.drawCrossExtension(width: Int, height: Int, fraction: Float) {
         val rectXRate = (width shr 1) * fraction
         val rectYRate = (height shr 1) * fraction
@@ -83,6 +101,12 @@ interface IBaseAttrTextExt {
         drawCrossExtension(rectXRate, rectYRate, widthFloat, heightFloat)
     }
 
+    /**
+     * ● 绘制十字扩展 动画
+     *
+     * ● 2023-12-25 15:23:15 周一 下午
+     * @author crowforkotlin
+     */
     fun Canvas.drawCrossExtension(rectXRate: Float, rectYRate: Float, widthFloat: Float, heightFloat: Float) {
         withApiO(
             leastO = {
@@ -106,6 +130,12 @@ interface IBaseAttrTextExt {
         )
     }
 
+    /**
+     * ● 绘制同方向 反效果的十字扩展 动画
+     *
+     * ● 2023-12-25 15:23:52 周一 下午
+     * @author crowforkotlin
+     */
     fun Canvas.drawDifferenceCrossExtension(rectXRate: Float, rectYRate: Float, widthFloat: Float, heightFloat: Float) {
         clipRect(0f,  rectYRate, widthFloat, height - rectYRate) // 上下
         clipRect(rectXRate, 0f, width - rectXRate, height.toFloat())  // 左右
@@ -116,6 +146,12 @@ interface IBaseAttrTextExt {
         }
     }
 
+    /**
+     * ● 绘制擦除Y轴方向的动画
+     *
+     * ● 2023-12-25 15:24:31 周一 下午
+     * @author crowforkotlin
+     */
     fun Canvas.drawEraseY(widthFloat: Float, heightFloat: Float, yRate: Float) {
         drawY(
             onTop = {
@@ -135,6 +171,12 @@ interface IBaseAttrTextExt {
         )
     }
 
+    /**
+     * ● 绘制同方向 反效果的擦除Y轴方向的动画
+     *
+     * ● 2023-12-25 15:24:43 周一 下午
+     * @author crowforkotlin
+     */
     fun Canvas.drawDifferenceEraseY(widthFloat: Float, heightFloat: Float, yRate: Float) {
         drawY(
             onTop = {
@@ -154,6 +196,12 @@ interface IBaseAttrTextExt {
         )
     }
 
+    /**
+     * ● 绘制擦除X轴方向的动画
+     *
+     * ● 2023-12-25 15:25:01 周一 下午
+     * @author crowforkotlin
+     */
     fun Canvas.drawEraseX(widthFloat: Float, heightFloat: Float, xRate: Float) {
         drawX(
             onLeft = {
@@ -173,6 +221,12 @@ interface IBaseAttrTextExt {
         )
     }
 
+    /**
+     * ● 绘制同方向 反效果的擦除X轴方向的动画
+     *
+     * ● 2023-12-25 15:25:48 周一 下午
+     * @author crowforkotlin
+     */
     fun Canvas.drawDifferenceEraseX(widthFloat: Float, heightFloat: Float, xRate: Float) {
         drawX(
             onLeft = {

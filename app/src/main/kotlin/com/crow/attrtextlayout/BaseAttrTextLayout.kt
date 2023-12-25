@@ -421,6 +421,14 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
     override var mAnimationTop: Boolean = false
 
     /**
+     * ● 每一行的行间距
+     *
+     * ● 2023-12-25 15:18:34 周一 下午
+     * @author crowforkotlin
+     */
+    override var mMarginRow: Float = 0f
+
+    /**
      * ● 初始化画笔
      *
      * ● 2023-11-10 14:35:22 周五 下午

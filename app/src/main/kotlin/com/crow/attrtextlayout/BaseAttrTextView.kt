@@ -30,9 +30,9 @@ import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_CENTER
 import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_END
 import com.crow.attrtextlayout.BaseAttrTextLayout.Companion.GRAVITY_TOP_START
 import kotlin.math.abs
-import kotlin.math.ceil
 import kotlin.math.min
 import kotlin.properties.Delegates
+import kotlin.system.measureTimeMillis
 
 
 /**
@@ -165,6 +165,14 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
      * @author crowforkotlin
      */
     override var mAnimationTop: Boolean = false
+
+    /**
+     * ● 每一行的行间距
+     *
+     * ● 2023-12-25 15:17:16 周一 下午
+     * @author crowforkotlin
+     */
+    override var mMarginRow: Float = 0f
 
     /**
      * ● 设置硬件加速渲染
@@ -355,24 +363,31 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         val fontMetrics = mTextPaint.fontMetrics
         val textHeight = getTextHeight(fontMetrics)
         val baseLineOffsetY = calculateBaselineOffsetY(fontMetrics)
+        var marginRow = mMarginRow
+        var halfMarginRow = marginRow / 2f
         if (mMultiLineEnable && textListSize > 1) {
-            val maxRow = min((height / textHeight).toInt(), textListSize)
+            val maxRow = min((height / (textHeight + marginRow)).toInt(), textListSize)
             var listStartPos = (mListPosition * maxRow).let { if (it >= textListSize) it - maxRow else it }
             val validRow = if (listStartPos + maxRow <= textListSize) maxRow else textListSize - listStartPos
             val halfCount = validRow shr 1
+            if (maxRow == 1) {
+                marginRow = 0f
+                halfMarginRow = 0f
+            }
             // 考虑到 偶数、奇数 行居中的效果 分别 进行对于的处理
             mTextY = if (validRow % 2 == 0) {
-                (screenHeightHalf - (textHeight * if(validRow < ROW_VALID) 0 else halfCount - 1)) - baseLineOffsetY + ROW_DEVIATION
+                (screenHeightHalf - (textHeight * if(validRow < ROW_VALID) 0 else halfCount - 1)) - baseLineOffsetY + ROW_DEVIATION - halfMarginRow
             } else {
-                (screenHeightHalf - (textHeight * if(validRow < ROW_VALID) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION
+                (screenHeightHalf - (textHeight * if(validRow < ROW_VALID) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION - halfMarginRow
             }
+
             for (count in 0 until validRow) {
                 if (listStartPos < textListSize) {
                     val currentText = mList[listStartPos]
                     onInitializaTextX(currentText.second)
                     canvas.drawText(currentText.first)
                     listStartPos ++
-                    mTextY += textHeight + 10f
+                    mTextY += textHeight + marginRow
                 } else return
             }
         } else {
