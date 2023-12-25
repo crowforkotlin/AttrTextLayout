@@ -1,10 +1,30 @@
+@file:Suppress("SpellCheckingInspection")
+
 package com.crow.attrtextlayout
 
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Region
+import android.os.Build
 import kotlin.math.abs
+import kotlin.math.sqrt
 
 interface IBaseAttrTextExt {
+
+    companion object {
+
+        /**
+         * ● 调试模式
+         *
+         * ● 2023-12-22 15:13:15 周五 下午
+         * @author crowforkotlin
+         */
+        const val DEBUG = true
+        const val DEBUG_TEXT = true
+        const val DEBUG_ANIMATION = false
+    }
 
     var mAnimationTop: Boolean
     var mAnimationLeft: Boolean
@@ -17,6 +37,188 @@ interface IBaseAttrTextExt {
      * @author crowforkotlin
      */
     fun getTextHeight(fontMetrics: Paint.FontMetrics) : Float {
-        return abs(fontMetrics.ascent) + fontMetrics.descent
+        return fontMetrics.descent -fontMetrics.ascent
     }
+
+    fun Canvas.drawRhombus(path: Path, width: Int, height: Int, fraction: Float) {
+        val halfWidth = width shr 1
+        val halfHeight = height shr 1
+        val halfWidthFloat = halfWidth.toFloat()
+        val halfHeightFloat = halfHeight.toFloat()
+        val xRate = width * fraction
+        val yRate = height * fraction
+        path.moveTo(halfWidthFloat, -halfHeight + yRate)
+        path.lineTo(-halfWidth + xRate, halfHeightFloat)
+        path.lineTo(halfWidthFloat, height + halfHeight - yRate)
+        path.lineTo(width + halfWidth - xRate, halfHeightFloat)
+        if (DEBUG_ANIMATION) {
+            val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
+            drawLine(halfWidthFloat, -halfHeight + yRate, halfWidthFloat + halfWidthFloat, (-halfHeight + yRate) + (-halfHeight + yRate), paint)
+            drawLine(-halfWidth + xRate, halfHeightFloat, (-halfWidth + xRate) + (-halfWidth + xRate), halfHeightFloat + halfHeightFloat, paint)
+            drawLine(halfWidthFloat, height + halfHeight - yRate, halfWidthFloat + halfWidthFloat, (height + halfHeight - yRate) + (height + halfHeight - yRate), paint)
+            drawLine(width + halfWidth - xRate, halfHeightFloat, (width + halfWidth - xRate) + (width + halfWidth - xRate), halfHeightFloat + halfHeightFloat, paint)
+        }
+    }
+
+    fun Canvas.drawOval(path: Path, width: Int, height: Int, fraction: Float) {
+        val widthFloat = width.toFloat()
+        val heightFloat = height.toFloat()
+        val diagonal = sqrt(widthFloat * widthFloat + heightFloat * heightFloat)
+        val widthHalf = widthFloat / 2f
+        val heightHalf = heightFloat / 2f
+        path.addArc(widthHalf - diagonal, heightHalf - diagonal, widthFloat + diagonal - widthHalf, heightFloat + diagonal -heightHalf,270f,360 * fraction)
+        path.lineTo(widthHalf,heightHalf)
+        if (DEBUG_ANIMATION) {
+            val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
+            drawLine(widthHalf - diagonal, heightHalf - diagonal, width + diagonal - widthHalf, height + diagonal - heightHalf, paint)
+            drawLine(0f, 0f, widthHalf, heightHalf, paint)
+        }
+    }
+
+    fun Canvas.drawCrossExtension(width: Int, height: Int, fraction: Float) {
+        val rectXRate = (width shr 1) * fraction
+        val rectYRate = (height shr 1) * fraction
+        val widthFloat = width.toFloat()
+        val heightFloat = height.toFloat()
+        drawCrossExtension(rectXRate, rectYRate, widthFloat, heightFloat)
+    }
+
+    fun Canvas.drawCrossExtension(rectXRate: Float, rectYRate: Float, widthFloat: Float, heightFloat: Float) {
+        withApiO(
+            leastO = {
+                clipOutRect(0f,  rectYRate, widthFloat, heightFloat - rectYRate) // 上下
+                clipOutRect(rectXRate, 0f, widthFloat - rectXRate, heightFloat)  // 左右
+                if (DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
+                    drawLine(0f,  rectYRate, widthFloat, heightFloat - rectYRate, paint) // 上下
+                    drawLine(rectXRate, 0f, widthFloat - rectXRate, heightFloat, paint)  // 左右
+                }
+            },
+            lessO = {
+                clipRect(0f,  rectYRate, widthFloat, heightFloat - rectYRate, Region.Op.DIFFERENCE) // 上下
+                clipRect(rectXRate, 0f, widthFloat - rectXRate, heightFloat, Region.Op.DIFFERENCE)  // 左右
+                if (DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
+                    drawLine(0f,  rectYRate, widthFloat, heightFloat - rectYRate, paint) // 上下
+                    drawLine(rectXRate, 0f, widthFloat - rectXRate, heightFloat, paint)  // 左右
+                }
+            }
+        )
+    }
+
+    fun Canvas.drawDifferenceCrossExtension(rectXRate: Float, rectYRate: Float, widthFloat: Float, heightFloat: Float) {
+        clipRect(0f,  rectYRate, widthFloat, height - rectYRate) // 上下
+        clipRect(rectXRate, 0f, width - rectXRate, height.toFloat())  // 左右
+        if (DEBUG_ANIMATION) {
+            val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
+            drawLine(0f,  rectYRate, widthFloat, height - rectYRate, paint)
+            drawLine(rectXRate, 0f, width - rectXRate, height.toFloat(), paint)
+        }
+    }
+
+    fun Canvas.drawEraseY(widthFloat: Float, heightFloat: Float, yRate: Float) {
+        drawY(
+            onTop = {
+                clipRect(0f, heightFloat - yRate, widthFloat, heightFloat)
+                if(DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
+                    drawLine(0f, heightFloat - yRate, widthFloat, heightFloat, paint)
+                }
+            },
+            onBottom = {
+                clipRect(0f, 0f, widthFloat, yRate)
+                if(DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
+                    drawLine(0f, 0f, widthFloat, yRate, paint)
+                }
+            }
+        )
+    }
+
+    fun Canvas.drawDifferenceEraseY(widthFloat: Float, heightFloat: Float, yRate: Float) {
+        drawY(
+            onTop = {
+                clipRect(0f, 0f, widthFloat, heightFloat - yRate)
+                if(DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
+                    drawLine(0f, 0f, widthFloat, heightFloat - yRate, paint)
+                }
+            },
+            onBottom = {
+                clipRect(0f, yRate, widthFloat, heightFloat)
+                if(DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 4f }
+                    drawLine(0f, yRate, widthFloat, heightFloat, paint)
+                }
+            }
+        )
+    }
+
+    fun Canvas.drawEraseX(widthFloat: Float, heightFloat: Float, xRate: Float) {
+        drawX(
+            onLeft = {
+                clipRect(widthFloat - xRate, 0f, widthFloat, heightFloat)
+                if(DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
+                    drawLine(widthFloat - xRate, 0f, widthFloat, heightFloat, paint)
+                }
+            },
+            onRight = {
+                if(DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f; }
+                    drawLine(0f, 0f, xRate, heightFloat, paint)
+                }
+                clipRect(0f, 0f, xRate, heightFloat)
+            }
+        )
+    }
+
+    fun Canvas.drawDifferenceEraseX(widthFloat: Float, heightFloat: Float, xRate: Float) {
+        drawX(
+            onLeft = {
+                clipRect(0f, 0f, widthFloat - xRate, heightFloat)
+                if(DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
+                    drawLine(0f, 0f, widthFloat - xRate, heightFloat, paint)
+                }
+            },
+            onRight = {
+                clipRect(xRate, 0f, widthFloat, heightFloat)
+                if(DEBUG_ANIMATION) {
+                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
+                    drawLine(xRate, 0f, widthFloat, heightFloat, paint)
+                }
+            }
+        )
+    }
+}
+
+inline fun IBaseAttrTextExt.drawY(onTop: () -> Unit, onBottom: () -> Unit) {
+    if (mAnimationTop) onTop() else onBottom()
+}
+
+inline fun IBaseAttrTextExt.drawX(onLeft: () -> Unit, onRight: () -> Unit) {
+    if (mAnimationLeft) onLeft() else onRight()
+}
+
+inline fun debug(onDebug: () -> Unit) {
+    if (IBaseAttrTextExt.DEBUG) onDebug()
+}
+
+inline fun debugText(onDebug: () -> Unit, orElse: () -> Unit) {
+    if (IBaseAttrTextExt.DEBUG_TEXT) onDebug() else orElse()
+}
+
+inline fun debugAnimation(onDebug: () -> Unit) {
+    if (IBaseAttrTextExt.DEBUG_ANIMATION) onDebug()
+}
+
+inline fun withPath(path:Path, pathOperations: Path.() -> Unit) {
+    path.reset()
+    path.pathOperations()
+    path.close()
+}
+
+inline fun withApiO(leastO: () -> Unit, lessO: () -> Unit) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) leastO() else lessO()
 }

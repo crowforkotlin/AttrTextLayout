@@ -1,4 +1,6 @@
-@file:Suppress("unused", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "NewApi", "SameParameterValue")
+@file:Suppress("unused", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "NewApi", "SameParameterValue",
+    "DEPRECATION"
+)
 
 package com.crow.attrtextlayout
 
@@ -10,6 +12,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
@@ -47,13 +50,6 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      */
     companion object {
 
-        /**
-         * ● 调试模式
-         *
-         * ● 2023-10-31 14:09:00 周二 下午
-         * @author crowforkotlin
-         */
-        internal const val DEBUG = false
         internal const val ENABLE_AUTO_UPDATE = false
         private const val NEWLINE_CHAR_FLAG_SLASH = '/'
         private const val NEWLINE_CHAR_FLAG_N = 'n'
@@ -92,14 +88,16 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         const val ANIMATION_FADE: Short = 303
         const val ANIMATION_FADE_SYNC: Short = 304
         const val ANIMATION_CENTER: Short = 305
-        const val ANIMATION_ERASE_Y: Short = 306
-        const val ANIMATION_ERASE_X: Short = 307
-        const val ANIMATION_CONTINUATION_ERASE_Y: Short = 308
-        const val ANIMATION_CONTINUATION_ERASE_X: Short = 309
+        const val ANIMATION_ERASE_X: Short = 306
+        const val ANIMATION_CONTINUATION_ERASE_X: Short = 307
+        const val ANIMATION_ERASE_Y: Short = 308
+        const val ANIMATION_CONTINUATION_ERASE_Y: Short = 309
         const val ANIMATION_CROSS_EXTENSION: Short = 310
         const val ANIMATION_CONTINUATION_CROSS_EXTENSION: Short = 311
         const val ANIMATION_OVAL: Short = 312
-        const val ANIMATION_CONTINUATION_OVAL: Short = 312
+        const val ANIMATION_CONTINUATION_OVAL: Short = 313
+        const val ANIMATION_RHOMBUS: Short = 314
+        const val ANIMATION_CONTINUATION_RHOMBUS: Short = 315
 
         /**
          * ● 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
@@ -457,48 +455,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * @author crowforkotlin
      */
     override fun dispatchDraw(canvas: Canvas) {
-        if (mAnimationStartTime > 0) {
-            when(mAnimationMode) {
-                ANIMATION_ERASE_Y -> {
-
-                    // Layout高度浮点
-                    val heightFloat = height.toFloat()
-
-                    // 剪切当前区域
-                    if (mAnimationTop) canvas.clipRect(0f, heightFloat - heightFloat * mAnimationTimeFraction, width.toFloat(), heightFloat)
-                    else canvas.clipRect(0f, 0f, width.toFloat(), heightFloat * mAnimationTimeFraction)
-                }
-                ANIMATION_ERASE_X -> {
-                    // Layout宽度浮点
-                    val widthFloat = width.toFloat()
-
-                    // 剪切当前区域
-                    if (mAnimationLeft) canvas.clipRect(widthFloat - widthFloat * mAnimationTimeFraction, 0f, widthFloat, height.toFloat())
-                    else canvas.clipRect(0f, 0f, widthFloat * mAnimationTimeFraction, height.toFloat())
-                }
-                ANIMATION_CROSS_EXTENSION -> {
-                    val rectXRate = (width shr 1) * mAnimationTimeFraction
-                    val rectYRate = (height shr 1) * mAnimationTimeFraction
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        canvas.clipOutRect(0f,  rectYRate, width.toFloat(), height - rectYRate) // 上下
-                        canvas.clipOutRect(rectXRate, 0f, width - rectXRate, height.toFloat())  // 左右
-                    } else {
-                        canvas.clipRect(0f,  rectYRate, width.toFloat(), height - rectYRate, Region.Op.DIFFERENCE) // 上下
-                        canvas.clipRect(rectXRate, 0f, width - rectXRate, height.toFloat(), Region.Op.DIFFERENCE)  // 左右
-                    }
-                }
-                ANIMATION_OVAL -> {
-                    val diagonal = sqrt(width.toFloat() * width + height * height)
-                    val widthHalf = width / 2f
-                    val heightHalf = height / 2f
-                    mPath.reset()
-                    mPath.addArc(widthHalf - diagonal, heightHalf - diagonal, width + diagonal - widthHalf, height + diagonal -heightHalf,270f,360 * mAnimationTimeFraction)
-                    mPath.lineTo(widthHalf,heightHalf)
-                    mPath.close()
-                    canvas.clipPath(mPath);
-                }
-            }
-        }
+        drawAnimation(canvas)
         super.dispatchDraw(canvas)
     }
 
@@ -510,7 +467,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      */
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
-        "onDetachedFromWindow".log()
+        debug("onDetachedFromWindow"::log)
         cancelAnimationJob()
         cancelAnimator()
         mCacheViews.clear()
@@ -528,7 +485,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
     private fun creatAttrTextView(): BaseAttrTextView {
         return BaseAttrTextView(context).also { view ->
             view.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-            view.mTextPaint = mTextPaint
+            initBaseAttrTextViewValue(view)
             view.mMultiLineEnable = mMultipleLineEnable
             view.mGravity = mGravity
             addView(view)
@@ -567,9 +524,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                         mCacheViews.add(creatAttrTextView())
                     }
                     firstInit = true
-                    if (DEBUG) {
-                        mCacheViews.forEachIndexed { index, attrTextView -> attrTextView.tag = index }
-                    }
+                    debug { mCacheViews.forEachIndexed { index, baseAttrTextView -> baseAttrTextView.tag = index  }}
                 }
                 onUpdatePosOrView(forceUpdate = firstInit)
                 onNotifyLayoutUpdate()
@@ -685,9 +640,11 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                     ANIMATION_OVAL -> launchDrawAnimation(isDelay = delay)
                     ANIMATION_CONTINUATION_OVAL -> launchContinuousDrawAnimation(isDelay= delay)
                     ANIMATION_CROSS_EXTENSION -> launchDrawAnimation(isDelay = delay)
+                    ANIMATION_RHOMBUS -> launchDrawAnimation(isDelay= delay)
                     ANIMATION_CONTINUATION_CROSS_EXTENSION -> launchContinuousDrawAnimation(isDelay = delay)
                     ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousDrawAnimation(isDelay= delay)
                     ANIMATION_CONTINUATION_ERASE_X -> launchContinuousDrawAnimation(isDelay= delay)
+                    ANIMATION_CONTINUATION_RHOMBUS -> launchContinuousDrawAnimation(isDelay= delay)
                 }
                 delay = true
             }
@@ -1290,6 +1247,77 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
     }
 
     /**
+     * ● 添加任务
+     *
+     * ● 2023-12-04 11:02:32 周一 上午
+     * @author crowforkotlin
+     */
+    private fun addTask(flag: Byte) {
+       if (mTask == null) mTask = mutableListOf(flag) else mTask?.add(flag)
+    }
+
+    /**
+     * ● 初始化BaseAttrTextView的基本属性
+     *
+     * ● 2023-12-22 15:09:52 周五 下午
+     * @author crowforkotlin
+     */
+    private fun initBaseAttrTextViewValue(view: BaseAttrTextView) {
+        view.mAnimationTop = mAnimationTop
+        view.mAnimationLeft = mAnimationLeft
+        view.mAnimationMode = mAnimationMode
+        view.mAnimationStartTime = 0
+        view.mTextPaint = mTextPaint
+    }
+
+    /**
+     * ● 绘制动画
+     *
+     * ● 2023-12-22 16:01:13 周五 下午
+     * @author crowforkotlin
+     */
+    private fun drawAnimation(canvas: Canvas) {
+        if (mAnimationStartTime > 0) {
+            when(mAnimationMode) {
+                ANIMATION_ERASE_Y -> {
+                    canvas.drawEraseY(width.toFloat(), height.toFloat(), height * mAnimationTimeFraction)
+                }
+                ANIMATION_ERASE_X -> {
+                    canvas.drawEraseX(width.toFloat(), height.toFloat(), height * mAnimationTimeFraction)
+                }
+                ANIMATION_CROSS_EXTENSION -> {
+                    canvas.drawCrossExtension(width, height, mAnimationTimeFraction)
+                }
+                ANIMATION_OVAL -> {
+                    withPath(mPath) {
+                        canvas.drawOval(this, width, height, mAnimationTimeFraction)
+                        canvas.clipPath(this)
+                    }
+                }
+                ANIMATION_RHOMBUS -> {
+                    withPath(mPath) {
+                        canvas.drawRhombus(this, width, height, mAnimationTimeFraction)
+                        withApiO(
+                            leastO = { canvas.clipOutPath(this) },
+                            lessO = { canvas.clipPath(this, Region.Op.XOR) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * ● 获取BaseAttrTextView快照
+     *
+     * ● 2023-12-22 15:58:38 周五 下午
+     * @author crowforkotlin
+     */
+    fun getSnapshotView(): MutableList<BaseAttrTextView> {
+        return mutableListOf(mCacheViews.first(), mCacheViews.last())
+    }
+
+    /**
      * ● 应用配置 -- 触发View的更新
      *
      * ● 2023-11-02 17:25:43 周四 下午
@@ -1306,6 +1334,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                 typeface = if (mFontMonoSpace) Typeface.MONOSPACE else Typeface.DEFAULT
             }
             mCacheViews.forEach {  view ->
+                initBaseAttrTextViewValue(view)
                 view.mGravity = mGravity
                 view.mMultiLineEnable = mMultipleLineEnable
             }
@@ -1313,19 +1342,5 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
             onUpdatePosOrView(updateAll = true)
             onUpdateIfResetAnimation()
         }
-    }
-
-    /**
-     * ● 添加任务
-     *
-     * ● 2023-12-04 11:02:32 周一 上午
-     * @author crowforkotlin
-     */
-    private fun addTask(flag: Byte) {
-       if (mTask == null) mTask = mutableListOf(flag) else mTask?.add(flag)
-    }
-
-    fun getSnapshotView(): MutableList<BaseAttrTextView> {
-        return mutableListOf(mCacheViews.first(), mCacheViews.last())
     }
 }
