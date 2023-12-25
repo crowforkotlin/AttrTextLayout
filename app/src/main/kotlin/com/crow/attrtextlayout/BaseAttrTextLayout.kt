@@ -137,6 +137,14 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
     }
 
     /**
+     * ● 是否更新全部View
+     *
+     * ● 2023-12-25 19:18:11 周一 下午
+     * @author crowforkotlin
+     */
+    private var mUpdateAll: Boolean = false
+
+    /**
      * ● Path -- 用于绘制动画
      *
      * ● 2023-12-21 19:15:44 周四 下午
@@ -604,11 +612,14 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         val size = mList.size
         when {
             size <= if (mMultipleLineEnable) mMultipleLinePos else mListPosition -> {
-                if (mMultipleLineEnable) mMultipleLinePos = 0 else {
-                    mListPosition = size - 1
-                }
+                mUpdateAll = mUpdateStrategy == STRATEGY_TEXT_UPDATE_DEFAULT
+                if (mMultipleLineEnable) mMultipleLinePos = 0 else mListPosition = size - 1
             }
-            mUpdateStrategy == STRATEGY_TEXT_UPDATE_DEFAULT || forceUpdate -> onNotifyViewUpdate(updateAll = updateAll)
+            forceUpdate -> onNotifyViewUpdate(updateAll = updateAll)
+            mUpdateStrategy == STRATEGY_TEXT_UPDATE_DEFAULT -> {
+                "update".debugLog()
+                onNotifyViewUpdate(updateAll = true)
+            }
         }
     }
 
@@ -724,7 +735,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-11-01 19:13:46 周三 下午
      * @author crowforkotlin
      */
-    private fun onNotifyViewUpdate(updateAll: Boolean = false) {
+    private fun onNotifyViewUpdate(updateAll: Boolean = mUpdateAll) {
         if (mList.isEmpty() || mCacheViews.isEmpty() || mCurrentViewPos > mCacheViews.size - 1) return
         val viewCurrentA = mCacheViews[mCurrentViewPos]
         val list : MutableList<Pair<String, Float>> = mList.toMutableList()
@@ -740,8 +751,14 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                 viewNextB.mListPosition = mListPosition
             }
         } else {
-            viewCurrentA.mListPosition = if (mMultipleLineEnable) mMultipleLinePos else mListPosition
-            if (updateAll) getNextView(mCurrentViewPos).invalidate()
+            val pos = if (mMultipleLineEnable) mMultipleLinePos else mListPosition
+            viewCurrentA.mListPosition = pos
+            if (updateAll) {
+                mUpdateAll = false
+                val viewNextB = getNextView(mCurrentViewPos)
+                viewNextB.mList = mList
+                viewNextB.mListPosition = pos
+            }
         }
     }
 
