@@ -464,6 +464,7 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         paint.color = Color.GREEN
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
         canvas.drawLine(0f, (height / 2).toFloat(), width.toFloat(), (height / 2).toFloat(), paint)
+        canvas.drawLine(width / 2f, 0f, width / 2f, height.toFloat(), paint)
 
         // 绘制底部线
         paint.color = Color.WHITE

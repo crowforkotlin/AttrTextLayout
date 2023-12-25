@@ -406,6 +406,14 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
     var mFontMonoSpace: Boolean = false
 
     /**
+     * ● 文本间距
+     *
+     * ● 2023-12-25 18:05:41 周一 下午
+     * @author crowforkotlin
+     */
+    var mFontSpacing: Float = 0f
+
+    /**
      * ● 动画模式（一般是默认）
      *
      * ● 2023-10-31 18:06:32 周二 下午
@@ -854,6 +862,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         if (mList.isEmpty()) return
         when(mMultipleLineEnable) {
             true -> {
+                mTextPaint.letterSpacing = mFontSpacing / mTextPaint.textSize
                 val textHeightWithMargin = getTextHeight(mTextPaint.fontMetrics) + mMarginRow
                 val textMaxLine = if(textHeightWithMargin > height) 1 else  (height / textHeightWithMargin).toInt()
                 if (textMaxLine <= 0) return
