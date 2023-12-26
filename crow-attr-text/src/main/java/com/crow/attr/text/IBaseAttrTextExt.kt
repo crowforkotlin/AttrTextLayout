@@ -1,4 +1,4 @@
-@file:Suppress("SpellCheckingInspection", "unused", "DEPRECATION")
+@file:Suppress("SpellCheckingInspection", "unused", "DEPRECATION", "LocalVariableName")
 
 package com.crow.attr.text
 
@@ -25,6 +25,11 @@ interface IBaseAttrTextExt {
         const val DEBUG = true
         const val DEBUG_TEXT = true
         const val DEBUG_ANIMATION = true
+
+
+        private val mDebugYelloPaint by lazy { Paint().also { it.strokeWidth = 2f; it.color = Color.YELLOW } }
+
+        private val mDebugBluePaint by lazy { Paint().also { it.strokeWidth = 2f; it.color = Color.BLUE } }
     }
 
     var mAnimationTop: Boolean
@@ -59,12 +64,11 @@ interface IBaseAttrTextExt {
         path.lineTo(-halfWidth + xRate, halfHeightFloat)
         path.lineTo(halfWidthFloat, height + halfHeight - yRate)
         path.lineTo(width + halfWidth - xRate, halfHeightFloat)
-        if (DEBUG_ANIMATION) {
-            val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
-            drawLine(halfWidthFloat, -halfHeight + yRate, halfWidthFloat + halfWidthFloat, (-halfHeight + yRate) + (-halfHeight + yRate), paint)
-            drawLine(-halfWidth + xRate, halfHeightFloat, (-halfWidth + xRate) + (-halfWidth + xRate), halfHeightFloat + halfHeightFloat, paint)
-            drawLine(halfWidthFloat, height + halfHeight - yRate, halfWidthFloat + halfWidthFloat, (height + halfHeight - yRate) + (height + halfHeight - yRate), paint)
-            drawLine(width + halfWidth - xRate, halfHeightFloat, (width + halfWidth - xRate) + (width + halfWidth - xRate), halfHeightFloat + halfHeightFloat, paint)
+        debugAnimation {
+            drawLine(halfWidthFloat, -halfHeight + yRate, halfWidthFloat + halfWidthFloat, (-halfHeight + yRate) + (-halfHeight + yRate), mDebugYelloPaint)
+            drawLine(-halfWidth + xRate, halfHeightFloat, (-halfWidth + xRate) + (-halfWidth + xRate), halfHeightFloat + halfHeightFloat, mDebugYelloPaint)
+            drawLine(halfWidthFloat, height + halfHeight - yRate, halfWidthFloat + halfWidthFloat, (height + halfHeight - yRate) + (height + halfHeight - yRate), mDebugYelloPaint)
+            drawLine(width + halfWidth - xRate, halfHeightFloat, (width + halfWidth - xRate) + (width + halfWidth - xRate), halfHeightFloat + halfHeightFloat, mDebugYelloPaint)
         }
     }
 
@@ -82,10 +86,9 @@ interface IBaseAttrTextExt {
         val heightHalf = heightFloat / 2f
         path.addArc(widthHalf - diagonal, heightHalf - diagonal, widthFloat + diagonal - widthHalf, heightFloat + diagonal -heightHalf,270f,360 * fraction)
         path.lineTo(widthHalf,heightHalf)
-        if (DEBUG_ANIMATION) {
-            val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
-            drawLine(widthHalf - diagonal, heightHalf - diagonal, width + diagonal - widthHalf, height + diagonal - heightHalf, paint)
-            drawLine(0f, 0f, widthHalf, heightHalf, paint)
+        debugAnimation {
+            drawLine(widthHalf - diagonal, heightHalf - diagonal, width + diagonal - widthHalf, height + diagonal - heightHalf, mDebugBluePaint)
+            drawLine(0f, 0f, widthHalf, heightHalf, mDebugBluePaint)
         }
     }
 
@@ -114,19 +117,17 @@ interface IBaseAttrTextExt {
             leastO = {
                 clipOutRect(0f,  rectYRate, widthFloat, heightFloat - rectYRate) // 上下
                 clipOutRect(rectXRate, 0f, widthFloat - rectXRate, heightFloat)  // 左右
-                if (DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
-                    drawLine(0f,  rectYRate, widthFloat, heightFloat - rectYRate, paint) // 上下
-                    drawLine(rectXRate, 0f, widthFloat - rectXRate, heightFloat, paint)  // 左右
+                debugAnimation {
+                    drawLine(0f,  rectYRate, widthFloat, heightFloat - rectYRate, mDebugBluePaint) // 上下
+                    drawLine(rectXRate, 0f, widthFloat - rectXRate, heightFloat, mDebugBluePaint)  // 左右
                 }
             },
             lessO = {
                 clipRect(0f,  rectYRate, widthFloat, heightFloat - rectYRate, Region.Op.DIFFERENCE) // 上下
                 clipRect(rectXRate, 0f, widthFloat - rectXRate, heightFloat, Region.Op.DIFFERENCE)  // 左右
-                if (DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
-                    drawLine(0f,  rectYRate, widthFloat, heightFloat - rectYRate, paint) // 上下
-                    drawLine(rectXRate, 0f, widthFloat - rectXRate, heightFloat, paint)  // 左右
+                debugAnimation {
+                    drawLine(0f,  rectYRate, widthFloat, heightFloat - rectYRate, mDebugBluePaint) // 上下
+                    drawLine(rectXRate, 0f, widthFloat - rectXRate, heightFloat, mDebugBluePaint)  // 左右
                 }
             }
         )
@@ -141,10 +142,9 @@ interface IBaseAttrTextExt {
     fun Canvas.drawDifferenceCrossExtension(rectXRate: Float, rectYRate: Float, widthFloat: Float, heightFloat: Float) {
         clipRect(0f,  rectYRate, widthFloat, height - rectYRate) // 上下
         clipRect(rectXRate, 0f, width - rectXRate, height.toFloat())  // 左右
-        if (DEBUG_ANIMATION) {
-            val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
-            drawLine(0f,  rectYRate, widthFloat, height - rectYRate, paint)
-            drawLine(rectXRate, 0f, width - rectXRate, height.toFloat(), paint)
+        debugAnimation {
+            drawLine(0f,  rectYRate, widthFloat, height - rectYRate, mDebugYelloPaint)
+            drawLine(rectXRate, 0f, width - rectXRate, height.toFloat(), mDebugYelloPaint)
         }
     }
 
@@ -158,17 +158,11 @@ interface IBaseAttrTextExt {
         drawY(
             onTop = {
                 clipRect(0f, heightFloat - yRate, widthFloat, heightFloat)
-                if(DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
-                    drawLine(0f, heightFloat - yRate, widthFloat, heightFloat, paint)
-                }
+                debugAnimation { drawLine(0f, heightFloat - yRate, widthFloat, heightFloat, mDebugBluePaint) }
             },
             onBottom = {
                 clipRect(0f, 0f, widthFloat, yRate)
-                if(DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
-                    drawLine(0f, 0f, widthFloat, yRate, paint)
-                }
+                debugAnimation { drawLine(0f, 0f, widthFloat, yRate, mDebugYelloPaint) }
             }
         )
     }
@@ -183,17 +177,11 @@ interface IBaseAttrTextExt {
         drawY(
             onTop = {
                 clipRect(0f, 0f, widthFloat, heightFloat - yRate)
-                if(DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
-                    drawLine(0f, 0f, widthFloat, heightFloat - yRate, paint)
-                }
+                debugAnimation { drawLine(0f, 0f, widthFloat, heightFloat - yRate, mDebugYelloPaint) }
             },
             onBottom = {
                 clipRect(0f, yRate, widthFloat, heightFloat)
-                if(DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 4f }
-                    drawLine(0f, yRate, widthFloat, heightFloat, paint)
-                }
+                debugAnimation { drawLine(0f, yRate, widthFloat, heightFloat, mDebugBluePaint) }
             }
         )
     }
@@ -208,15 +196,13 @@ interface IBaseAttrTextExt {
         drawX(
             onLeft = {
                 clipRect(widthFloat - xRate, 0f, widthFloat, heightFloat)
-                if(DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
-                    drawLine(widthFloat - xRate, 0f, widthFloat, heightFloat, paint)
+                debugAnimation {
+                    drawLine(widthFloat - xRate, 0f, widthFloat, heightFloat, mDebugBluePaint)
                 }
             },
             onRight = {
-                if(DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f; }
-                    drawLine(0f, 0f, xRate, heightFloat, paint)
+                debugAnimation {
+                    drawLine(0f, 0f, xRate, heightFloat, mDebugYelloPaint)
                 }
                 clipRect(0f, 0f, xRate, heightFloat)
             }
@@ -233,16 +219,14 @@ interface IBaseAttrTextExt {
         drawX(
             onLeft = {
                 clipRect(0f, 0f, widthFloat - xRate, heightFloat)
-                if(DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.YELLOW; strokeWidth = 2f }
-                    drawLine(0f, 0f, widthFloat - xRate, heightFloat, paint)
+                debugAnimation {
+                    drawLine(0f, 0f, widthFloat - xRate, heightFloat, mDebugYelloPaint)
                 }
             },
             onRight = {
                 clipRect(xRate, 0f, widthFloat, heightFloat)
-                if(DEBUG_ANIMATION) {
-                    val paint = Paint().apply { color = Color.BLUE; strokeWidth = 2f }
-                    drawLine(xRate, 0f, widthFloat, heightFloat, paint)
+                debugAnimation {
+                    drawLine(xRate, 0f, widthFloat, heightFloat, mDebugBluePaint)
                 }
             }
         )
