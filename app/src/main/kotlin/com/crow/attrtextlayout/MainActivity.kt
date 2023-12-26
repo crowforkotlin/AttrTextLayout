@@ -5,10 +5,12 @@ package com.crow.attrtextlayout
 import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
+import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.widget.FrameLayout
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -32,9 +34,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         onCreate()
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        createAttrTextLayout(0f, 0f, 128, 64)
+//        createAttrTextLayout(0f, 0f, 128, 64)
 //        createAttrTextLayout(0f, 0f, 512, 256)
-//        createAttrTextLayout(0f, 0f, MATCH_PARENT, MATCH_PARENT)
+        createAttrTextLayout(0f, 0f, resources.displayMetrics.widthPixels / 2, resources.displayMetrics.heightPixels / 2)
     }
 
     private fun onCreate() {
@@ -52,15 +54,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createAttrTextLayout(x: Float, y: Float, width: Int, height: Int): BaseAttrTextLayout {
-        val textSizeInPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13.6f, resources.displayMetrics) // 将文本大小从 sp 转换
+        val textSizeInPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 180f, resources.displayMetrics) // 将文本大小从 sp 转换
 //        val textSizeInPx = 14f
         val layout = BaseAttrTextLayout(this)
 //        layout.background = ContextCompat.getDrawable(this, android.R.color.white)
-        layout.x = x
-        layout.y = y
+//        layout.x = x
+//        layout.y = y
         layout.mFontSize = textSizeInPx
         mBinding.root.addView(layout)
-        layout.layoutParams = FrameLayout.LayoutParams(width, height)
+        val layoutParams = ConstraintLayout.LayoutParams(width, height)
+        layoutParams.endToEnd = MATCH_PARENT
+        layoutParams.startToStart = MATCH_PARENT
+        layoutParams.topToTop = MATCH_PARENT
+        layoutParams.bottomToBottom = MATCH_PARENT
+        layout.layoutParams = layoutParams
         layout.mGravity = BaseAttrTextLayout.GRAVITY_CENTER
         layout.mEnableSingleTextAnimation = true
         layout.mMultipleLineEnable = true
@@ -73,13 +80,13 @@ class MainActivity : AppCompatActivity() {
         layout.mAnimationStrategy = BaseAttrTextLayout.STRATEGY_ANIMATION_UPDATE_DEFAULT
         layout.mScrollSpeed = 5
         layout.mMarginRow = 10f
-        lifecycleScope.launch {
+        /*lifecycleScope.launch {
             repeat(Int.MAX_VALUE) {
 //                layout.mFontSpacing = (1..10).random().toFloat()
                 delay(3000)
                 layout.mText = "$it"
             }
-        }
+        }*/
         layout.mText = mContent
         return layout
     }
