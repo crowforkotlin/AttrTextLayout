@@ -36,6 +36,7 @@ interface IBaseAttrTextExt {
     var mAnimationLeft: Boolean
     var mAnimationMode: Short
     var mMarginRow: Float
+    var mSizeUnitStrategy: Short
 
     /**
      * ● 获取文本高度：ascent绝对值 + descent

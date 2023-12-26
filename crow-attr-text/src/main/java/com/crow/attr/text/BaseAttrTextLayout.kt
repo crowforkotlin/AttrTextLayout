@@ -130,6 +130,15 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
          * @author crowforkotlin
          */
         const val STRATEGY_ANIMATION_UPDATE_DEFAULT: Short = 603
+        
+        /**
+         * ● PX策略 和 DP策略
+         * 
+         * ● 2023-12-26 11:36:26 周二 上午
+         * @author crowforkotlin
+         */
+        const val STRATEGY_DIMENSION_PX: Short = 604
+        const val STRATEGY_DIMENSION_DP: Short = 605
     }
 
     /**
@@ -448,6 +457,14 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * @author crowforkotlin
      */
     override var mMarginRow: Float = 0f
+
+    /**
+     * ● 当前尺寸大小策略 默认PX
+     *
+     * ● 2023-12-26 11:37:20 周二 上午
+     * @author crowforkotlin
+     */
+    override var mSizeUnitStrategy: Short = STRATEGY_DIMENSION_DP
 
     /**
      * ● 初始化画笔
