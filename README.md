@@ -1,5 +1,5 @@
 # AttrTextLayout
-
+- 虽然 GIF 动画展示的效果可能看起来有些卡顿，但实际动画运行是非常平滑的。GIF 的逐帧录制方式有时可能无法完全捕捉到流畅的动态效果。
 <table>
 	<tr>
 		<td align="center" style="padding: 10px;"><img src="docs/img/EraseXLeft.gif"></td>
