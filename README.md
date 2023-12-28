@@ -3,9 +3,11 @@
 <table style="border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.5); background-color: #f0f0f0; border-radius: 10px; overflow: hidden;">
 	<tr>
 		<td align="center" style="padding: 10px;"><img src="docs/img/EraseXLeft.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Rhombus.gif"></td>
 	</tr>
     <tr>
-		<td align="center" style="padding: 10px;">EraseX - X轴往左擦除</td>
+		<td align="center" style="padding: 10px;">Continuation-EraseX - X轴往左连续擦除</td>
+		<td align="center" style="padding: 10px;">Continuation-Rhombus - 连续菱形</td>
 	</tr>
 </table>
 
