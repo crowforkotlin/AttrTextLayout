@@ -45,7 +45,7 @@ import kotlin.properties.Delegates
  * @author: crowforkotlin
  * @formatter:on
  */
-class AttrTextView(context: Context) : View(context), IBaseAttrTextExt {
+class AttrTextView(context: Context) : View(context), IAttrText {
 
     companion object {
 
@@ -469,7 +469,7 @@ class AttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         // 绘制中线
         val paint = TextPaint()
         paint.color = Color.GREEN
-        paint.strokeWidth = IBaseAttrTextExt.DEBUG_STROKE_WIDTH
+        paint.strokeWidth = IAttrText.DEBUG_STROKE_WIDTH
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
         canvas.drawLine(0f, (height / 2).toFloat(), width.toFloat(), (height / 2).toFloat(), paint)
         canvas.drawLine(width / 2f, 0f, width / 2f, height.toFloat(), paint)

@@ -8,11 +8,10 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Region
-import android.os.Build
 import android.util.Log
 import kotlin.math.sqrt
 
-interface IBaseAttrTextExt {
+interface IAttrText {
 
     companion object {
 
@@ -262,48 +261,4 @@ interface IBaseAttrTextExt {
     fun Context.px2sp(px: Float): Float {
         return px * resources.displayMetrics.density + 0.5f
     }
-}
-
-inline fun IBaseAttrTextExt.drawY(onTop: () -> Unit, onBottom: () -> Unit) {
-    if (mAnimationTop) onTop() else onBottom()
-}
-
-inline fun IBaseAttrTextExt.drawX(onLeft: () -> Unit, onRight: () -> Unit) {
-    if (mAnimationLeft) onLeft() else onRight()
-}
-
-/**
- * ● 错误输出
- *
- * ● 2023-12-28 15:27:47 周四 下午
- * @author crowforkotlin
- */
-fun Any?.errorLog(tag: String = IBaseAttrTextExt.TAG) {
-    Log.e(tag, this.toString())
-}
-
-inline fun debug(onDebug: () -> Unit) {
-    if (IBaseAttrTextExt.DEBUG) onDebug()
-}
-
-inline fun debugText(onDebug: () -> Unit, orElse: () -> Unit) {
-    if (IBaseAttrTextExt.DEBUG_TEXT) onDebug() else orElse()
-}
-
-inline fun debugAnimation(onDebug: () -> Unit) {
-    if (IBaseAttrTextExt.DEBUG_ANIMATION) onDebug()
-}
-
-inline fun withPath(path:Path, pathOperations: Path.() -> Unit) {
-    path.reset()
-    path.pathOperations()
-    path.close()
-}
-
-inline fun withApiO(leastO: () -> Unit, lessO: () -> Unit) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) leastO() else lessO()
-}
-
-inline fun IBaseAttrTextExt.withSizeUnit(px: () -> Float, orElse: () -> Float): Float {
-    return if (mSizeUnitStrategy == AttrTextLayout.STRATEGY_DIMENSION_DP_SP) orElse() else px()
 }

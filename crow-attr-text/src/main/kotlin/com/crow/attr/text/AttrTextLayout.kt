@@ -41,7 +41,7 @@ import kotlin.properties.Delegates
  * @author crowforkotlin
  * @formatter:on
  */
-class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt {
+class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
 
     /**
      * ● 静态区域
