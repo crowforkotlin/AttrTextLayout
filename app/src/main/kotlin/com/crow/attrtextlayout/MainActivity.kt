@@ -73,7 +73,7 @@ class MainActivity : AppCompatActivity() {
         layout.mFontMonoSpace = true
         layout.mUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_DEFAULT
         layout.mAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_DEFAULT
-        layout.mScrollSpeed = 5
+        layout.mScrollSpeed = 13
         layout.mMarginRow = 13.1835f
         /*lifecycleScope.launch {
             repeat(Int.MAX_VALUE) {

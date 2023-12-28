@@ -493,12 +493,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
      * ● 2023-12-26 11:37:20 周二 上午
      * @author crowforkotlin
      */
-    override var mSizeUnitStrategy: Short by Delegates.observable(STRATEGY_DIMENSION_DP_SP) { _, _ , _ ->
-        debug {
-            mDebugYelloPaint.strokeWidth = withSizeUnit(px = { mDebugYelloPaint.strokeWidth }, orElse = { context.px2dp(12f) })
-            mDebugBluePaint.strokeWidth = withSizeUnit(px = { mDebugBluePaint.strokeWidth }, orElse = { context.px2dp(12f) })
-        }
-    }
+    override var mSizeUnitStrategy: Short = STRATEGY_DIMENSION_DP_SP
 
     /**
      * ● 初始化画笔

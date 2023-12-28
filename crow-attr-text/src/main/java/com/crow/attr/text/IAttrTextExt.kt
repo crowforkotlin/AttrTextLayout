@@ -27,9 +27,9 @@ interface IBaseAttrTextExt {
         const val DEBUG_ANIMATION = true
 
         internal const val TAG = "IAttrTextExt-Crow"
-
-        internal val mDebugYelloPaint by lazy { Paint().also { it.strokeWidth = 2f; it.color = Color.YELLOW } }
-        internal val mDebugBluePaint by lazy { Paint().also { it.strokeWidth = 2f; it.color = Color.BLUE } }
+        internal const val DEBUG_STROKE_WIDTH = 10f
+        internal val mDebugYelloPaint by lazy { Paint().also { it.strokeWidth = DEBUG_STROKE_WIDTH; it.color = Color.YELLOW } }
+        internal val mDebugBluePaint by lazy { Paint().also { it.strokeWidth = DEBUG_STROKE_WIDTH; it.color = Color.BLUE } }
     }
 
     var mAnimationTop: Boolean

@@ -466,6 +466,7 @@ class AttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         // 绘制中线
         val paint = TextPaint()
         paint.color = Color.GREEN
+        paint.strokeWidth = IBaseAttrTextExt.DEBUG_STROKE_WIDTH
         paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
         canvas.drawLine(0f, (height / 2).toFloat(), width.toFloat(), (height / 2).toFloat(), paint)
         canvas.drawLine(width / 2f, 0f, width / 2f, height.toFloat(), paint)
@@ -475,12 +476,11 @@ class AttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         canvas.drawLine(0f, mTextY, width.toFloat(), mTextY, paint)
 
         // 绘制基线
-        mTextPaint.color = Color.WHITE
         val ascentY = mTextY - abs(mTextPaint.fontMetrics.ascent)
-        canvas.drawLine(0f, ascentY, width.toFloat(), ascentY, mTextPaint)
+        canvas.drawLine(0f, ascentY, width.toFloat(), ascentY, paint)
 
         // 蓝框范围
-        paint.color = Color.BLUE
+        paint.color = Color.CYAN
         paint.style = Paint.Style.STROKE
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), paint)
 
