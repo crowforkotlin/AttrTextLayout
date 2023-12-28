@@ -117,30 +117,30 @@ layout.mText = "Hello World!"
 ```
 
 ```kotlin 策略类别
-        /**
-         * ● 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
-         */
-        const val STRATEGY_TEXT_UPDATE_DEFAULT: Short = 600
+/**
+ * ● 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
+ */
+const val STRATEGY_TEXT_UPDATE_DEFAULT: Short = 600
 
-        /**
-         * ● 懒加载更新策略：当文本发生改变时 并不会触发绘制视图的需求 只有下次动画到来 或者 切换到下一个文本才会重新绘制视图
-         * 如果 文本列表只有一个元素 那么此策略将失效
-         */
-        const val STRATEGY_TEXT_UPDATE_LAZY: Short = 601
+/**
+ * ● 懒加载更新策略：当文本发生改变时 并不会触发绘制视图的需求 只有下次动画到来 或者 切换到下一个文本才会重新绘制视图
+ * 如果 文本列表只有一个元素 那么此策略将失效
+ */
+const val STRATEGY_TEXT_UPDATE_LAZY: Short = 601
 
-        /**
-         * ● 重新加载更新策略：当重新绘制的时候是否重新执行动画
-         */
-        const val STRATEGY_ANIMATION_UPDATE_RESTART: Short = 602
+/**
+ * ● 重新加载更新策略：当重新绘制的时候是否重新执行动画
+ */
+const val STRATEGY_ANIMATION_UPDATE_RESTART: Short = 602
 
-        /**
-         * ● 默认更新策略：当重新绘制的时候是否继续执行已停止的动画
-         */
-        const val STRATEGY_ANIMATION_UPDATE_DEFAULT: Short = 603
+/**
+ * ● 默认更新策略：当重新绘制的时候是否继续执行已停止的动画
+ */
+const val STRATEGY_ANIMATION_UPDATE_DEFAULT: Short = 603
 
-        /**
-         * ● PX策略 和 DP策略
-         */
-        const val STRATEGY_DIMENSION_PX: Short = 604
-        const val STRATEGY_DIMENSION_DP_SP: Short = 605
+/**
+ * ● PX策略 和 DP策略
+ */
+const val STRATEGY_DIMENSION_PX: Short = 604
+const val STRATEGY_DIMENSION_DP_SP: Short = 605
 ```
