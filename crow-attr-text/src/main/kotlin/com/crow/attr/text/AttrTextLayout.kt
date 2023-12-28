@@ -22,11 +22,8 @@ import android.util.Log
 import android.view.ViewTreeObserver
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
-import com.crow.attr.text.IBaseAttrTextExt.Companion.mDebugBluePaint
-import com.crow.attr.text.IBaseAttrTextExt.Companion.mDebugYelloPaint
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
@@ -158,7 +155,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
         private var mTaskJob = SupervisorJob()
 
         /**
-         * ● TaskScope 单例
+         * ● TaskScope 单例 暂时预留 考虑到文本数据处理采用单一线程解析，最后交由View进行对于处理
          *
          * ● 2023-12-28 15:24:09 周四 下午
          * @author crowforkotlin
@@ -702,6 +699,8 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
         var delay = isDelay
         val viewCurrentA = mCacheViews[mCurrentViewPos]
         val viewNextB = getNextView(mCurrentViewPos)
+
+        // 哪怕if逻辑即使再多也不要直接赋值 避免造成重绘影响性能
         if (viewCurrentA.alpha != 1f) viewCurrentA.alpha = 1f
         if (viewCurrentA.scaleX != 1f) viewCurrentA.scaleX = 1f
         if (viewCurrentA.scaleY != 1f) viewCurrentA.scaleY = 1f
@@ -1199,7 +1198,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
     }
 
     /**
-     * ● Y轴擦除动画
+     * ● Layout绘制非连续动画
      *
      * ● 2023-12-19 17:37:40 周二 下午
      * @author crowforkotlin
@@ -1245,7 +1244,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
     }
 
     /**
-     * ● Y轴擦除动画
+     * ● 子View绘制连续动画
      *
      * ● 2023-12-19 17:37:40 周二 下午
      * @author crowforkotlin

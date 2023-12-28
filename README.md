@@ -1,4 +1,5 @@
 # AttrTextLayout
+- 
 - 虽然 GIF 动画展示的效果可能看起来有些卡顿，但实际动画运行是非常平滑的。GIF 的逐帧录制方式有时可能无法完全捕捉到流畅的动态效果。
 - 此控件的连续特效模式意味着，当一个特效正在执行时，前一个特效的文本保持不变。而在非连续模式下，每个新特效都是从头开始执行，不保留前一个特效的文本状态。
 <table>
@@ -113,4 +114,33 @@ layout.mMarginRow = 10f
 
 // 设置文本（设置后会自动更新，前提你得吧这个layout添加到您的视图里面，直到您添加完成mText也会自动生效，除非不设置）
 layout.mText = "Hello World!"
+```
+
+```kotlin 策略类别
+        /**
+         * ● 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
+         */
+        const val STRATEGY_TEXT_UPDATE_DEFAULT: Short = 600
+
+        /**
+         * ● 懒加载更新策略：当文本发生改变时 并不会触发绘制视图的需求 只有下次动画到来 或者 切换到下一个文本才会重新绘制视图
+         * 如果 文本列表只有一个元素 那么此策略将失效
+         */
+        const val STRATEGY_TEXT_UPDATE_LAZY: Short = 601
+
+        /**
+         * ● 重新加载更新策略：当重新绘制的时候是否重新执行动画
+         */
+        const val STRATEGY_ANIMATION_UPDATE_RESTART: Short = 602
+
+        /**
+         * ● 默认更新策略：当重新绘制的时候是否继续执行已停止的动画
+         */
+        const val STRATEGY_ANIMATION_UPDATE_DEFAULT: Short = 603
+
+        /**
+         * ● PX策略 和 DP策略
+         */
+        const val STRATEGY_DIMENSION_PX: Short = 604
+        const val STRATEGY_DIMENSION_DP_SP: Short = 605
 ```

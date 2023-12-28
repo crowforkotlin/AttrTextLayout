@@ -34,6 +34,9 @@ import kotlin.math.abs
 import kotlin.math.min
 import kotlin.properties.Delegates
 
+/*
+* 在onDraw中尽量使用inline 减少频繁调用函数带来的性能开销，需要优化计算、实现方式
+* */
 
 /**
  * ● 属性文本组件
