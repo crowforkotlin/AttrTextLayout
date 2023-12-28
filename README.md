@@ -26,12 +26,35 @@
 <table>
 	<tr>
 		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-Cross.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Center.gif"></td>
 	</tr>
     <tr>
 		<td align="center" style="padding: 10px;">Continuation-Oval - 连续十字扩展</td>
+		<td align="center" style="padding: 10px;">Center - 中心缩放</td>
 	</tr>
 </table>
 
+<table>
+	<tr>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Move_XRight.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Move_YBottom.gif"></td>
+	</tr>
+    <tr>
+		<td align="center" style="padding: 10px;">Move Right - X轴向右移动</td>
+		<td align="center" style="padding: 10px;">Move Bottom - Y轴向下移动</td>
+	</tr>
+</table>
+
+<table>
+	<tr>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Fade.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Fade_Sync.gif"></td>
+	</tr>
+    <tr>
+		<td align="center" style="padding: 10px;">Fade - 淡入淡出_异步</td>
+		<td align="center" style="padding: 10px;">Fade-Sync - 淡入淡出_同步</td>
+	</tr>
+</table>
 ---
 
 - 这是一个属性文本布局控件，仅支持原生使用，能实现以下功能
