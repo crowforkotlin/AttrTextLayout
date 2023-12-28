@@ -21,9 +21,9 @@ interface IAttrText {
          * ● 2023-12-22 15:13:15 周五 下午
          * @author crowforkotlin
          */
-        const val DEBUG = true
-        const val DEBUG_TEXT = true
-        const val DEBUG_ANIMATION = true
+        const val DEBUG = false
+        const val DEBUG_TEXT = false
+        const val DEBUG_ANIMATION = false
 
         internal const val TAG = "IAttrTextExt-Crow"
         internal const val DEBUG_STROKE_WIDTH = 1f
