@@ -1,16 +1,36 @@
 # AttrTextLayout
 - 虽然 GIF 动画展示的效果可能看起来有些卡顿，但实际动画运行是非常平滑的。GIF 的逐帧录制方式有时可能无法完全捕捉到流畅的动态效果。
+- 此控件的连续特效模式意味着，当一个特效正在执行时，前一个特效的文本保持不变。而在非连续模式下，每个新特效都是从头开始执行，不保留前一个特效的文本状态。
 <table>
 	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/EraseXLeft.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Rhombus.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-EraseXLeft.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-EraseYTop.gif"></td>
 	</tr>
     <tr>
-		<td align="center" style="padding: 10px;">Continuation-EraseX - X轴往左连续擦除</td>
+		<td align="center" style="padding: 10px;">Continuation-EraseX - X轴向左连续擦除</td>
+		<td align="center" style="padding: 10px;">Continuation-EraseYTop - Y轴向上连续擦除</td>
+	</tr>
+</table>
+
+<table>
+	<tr>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-Oval.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-Rhombus.gif"></td>
+	</tr>
+    <tr>
+		<td align="center" style="padding: 10px;">Continuation-Oval - 连续圆形时钟</td>
 		<td align="center" style="padding: 10px;">Continuation-Rhombus - 连续菱形</td>
 	</tr>
 </table>
 
+<table>
+	<tr>
+		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-Cross.gif"></td>
+	</tr>
+    <tr>
+		<td align="center" style="padding: 10px;">Continuation-Oval - 连续十字扩展</td>
+	</tr>
+</table>
 
 ---
 
@@ -19,3 +39,55 @@
 - 支持多行（自动、手动换行）、单行、更新文本时继续执行特效
 - 支持配置多种文本策略
 - 毫秒级绘制处理，最大支持200个组件异步执行特效（略有卡顿）稳定50个
+
+---
+
+```kotlin
+// 创建AttrTextLayout对象
+val layout = AttrTextLayout(this)
+
+// 设置更新策略为DP和SP 接下来您指定的字体大小 文本间距都会自动以DP SP处理，而不是像素
+layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_DP_SP
+
+// 设置动画模式为连续X轴擦除 
+layout.mAnimationMode = AttrTextLayout.ANIMATION_CONTINUATION_ERASE_X
+
+// 设置默认文本更新策略 不设置也是默认
+layout.mUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_DEFAULT
+
+// 设置默认动画更新策略 不设置也是默认
+layout.mAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_DEFAULT
+
+// 设置文本居中
+layout.mGravity = AttrTextLayout.GRAVITY_CENTER
+
+// 启用单行文本动画
+layout.mEnableSingleTextAnimation = true
+
+// 支持多行文本
+layout.mMultipleLineEnable = true
+
+// 设置X轴的动画向左 false 为右
+layout.mAnimationLeft = true
+
+// 设置Y轴的动画向上 false 为下
+layout.mAnimationTop = true
+
+// 使用等宽字体 确保动态刷新时不会出现跳动
+layout.mFontMonoSpace = true
+
+// 设置停留时间
+layout.mResidenceTime = 1000
+
+// 设置字体大小
+layout.mFontSize = 28f
+
+// 设置滚动速度 （1 - 15）
+layout.mScrollSpeed = 13
+
+// 设置行间距
+layout.mMarginRow = 10f
+
+// 设置文本（设置后会自动更新，前提你得吧这个layout添加到您的视图里面，直到您添加完成mText也会自动生效，除非不设置）
+layout.mText = "Hello World!"
+```

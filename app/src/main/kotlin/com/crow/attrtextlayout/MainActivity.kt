@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         layout.mEnableSingleTextAnimation = true
         layout.mMultipleLineEnable = true
         layout.mResidenceTime = 1000
-        layout.mAnimationMode = AttrTextLayout.ANIMATION_CONTINUATION_RHOMBUS
+        layout.mAnimationMode = AttrTextLayout.ANIMATION_CONTINUATION_CROSS_EXTENSION
         layout.mAnimationLeft = true
         layout.mAnimationTop = true
         layout.mFontMonoSpace = true
