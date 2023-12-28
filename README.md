@@ -1,6 +1,15 @@
 # AttrTextLayout
 
-- [EraseX](./docx/img/EraseXLeft.gif)
+<table>
+	<tr>
+		<td align="center"><img src="docs/img/EraseXLeft.gif"></td>
+	</tr>
+    <tr>
+		<td align="center">EraseX - X轴往左擦除</td>
+	</tr>
+</table>
+
+---
 
 - 这是一个属性文本布局控件，仅支持原生使用，能实现以下功能
 - 支持各种文本的特效、例如四个方向移动、擦除、百叶窗、跑马灯、等特效
