@@ -22,12 +22,20 @@ import android.util.Log
 import android.view.ViewTreeObserver
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
+import com.crow.attr.text.IBaseAttrTextExt.Companion.mDebugBluePaint
+import com.crow.attr.text.IBaseAttrTextExt.Companion.mDebugYelloPaint
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 import kotlin.properties.Delegates
 
@@ -38,7 +46,7 @@ import kotlin.properties.Delegates
  * @author crowforkotlin
  * @formatter:on
  */
-class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt {
+class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt {
 
     /**
      * ● 静态区域
@@ -130,15 +138,32 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
          * @author crowforkotlin
          */
         const val STRATEGY_ANIMATION_UPDATE_DEFAULT: Short = 603
-        
+
         /**
          * ● PX策略 和 DP策略
-         * 
+         *
          * ● 2023-12-26 11:36:26 周二 上午
          * @author crowforkotlin
          */
         const val STRATEGY_DIMENSION_PX: Short = 604
-        const val STRATEGY_DIMENSION_DP: Short = 605
+        const val STRATEGY_DIMENSION_DP_SP: Short = 605
+
+
+        /**
+         * ● 任务作业 -- 确保任务在视图销毁后能够取消
+         *
+         * ● 2023-12-28 15:25:14 周四 下午
+         * @author crowforkotlin
+         */
+        private var mTaskJob = SupervisorJob()
+
+        /**
+         * ● TaskScope 单例
+         *
+         * ● 2023-12-28 15:24:09 周四 下午
+         * @author crowforkotlin
+         */
+        private val mTaskScope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher() + mTaskJob + CoroutineExceptionHandler { _, catch -> catch.stackTraceToString().errorLog() })
     }
 
     /**
@@ -260,7 +285,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-11-01 09:53:01 周三 上午
      * @author crowforkotlin
      */
-    private val mCacheViews = ArrayList<BaseAttrTextView>(REQUIRED_CACHE_SIZE)
+    private val mCacheViews = ArrayList<AttrTextView>(REQUIRED_CACHE_SIZE)
 
     /**
      * ● 当前视图的位置
@@ -268,7 +293,9 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-11-01 10:12:30 周三 上午
      * @author crowforkotlin
      */
-    private var mCurrentViewPos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged(FLAG_LAYOUT_REFRESH) }
+    private var mCurrentViewPos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged(
+        FLAG_LAYOUT_REFRESH
+    ) }
 
     /**
      * ● 文本列表位置 -- 设置后会触发重新绘制
@@ -292,7 +319,9 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-10-31 13:59:53 周二 下午
      * @author crowforkotlin
      */
-    var mScrollSpeed: Short by Delegates.observable(1) { _, _, _ -> onVariableChanged(FLAG_SCROLL_SPEED) }
+    var mScrollSpeed: Short by Delegates.observable(1) { _, _, _ -> onVariableChanged(
+        FLAG_SCROLL_SPEED
+    ) }
 
     /**
      * ● 文本内容 -- 设置后会触发重新绘制
@@ -464,7 +493,12 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-12-26 11:37:20 周二 上午
      * @author crowforkotlin
      */
-    override var mSizeUnitStrategy: Short = STRATEGY_DIMENSION_DP
+    override var mSizeUnitStrategy: Short by Delegates.observable(STRATEGY_DIMENSION_DP_SP) { _, _ , _ ->
+        debug {
+            mDebugYelloPaint.strokeWidth = withSizeUnit(px = { mDebugYelloPaint.strokeWidth }, orElse = { context.px2dp(12f) })
+            mDebugBluePaint.strokeWidth = withSizeUnit(px = { mDebugBluePaint.strokeWidth }, orElse = { context.px2dp(12f) })
+        }
+    }
 
     /**
      * ● 初始化画笔
@@ -517,6 +551,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         cancelAnimationJob()
         cancelAnimator()
         mCacheViews.clear()
+        mTaskJob.cancelChildren()
         mList.clear()
         mTask?.clear()
         mLastAnimation = -1
@@ -528,10 +563,10 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-11-08 11:24:35 周三 上午
      * @author crowforkotlin
      */
-    private fun creatAttrTextView(): BaseAttrTextView {
-        return BaseAttrTextView(context).also { view ->
+    private fun creatAttrTextView(): AttrTextView {
+        return AttrTextView(context).also { view ->
             view.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-            initBaseAttrTextViewValue(view)
+            onInitAttrTextViewValue(view)
             view.mMultiLineEnable = mMultipleLineEnable
             view.mGravity = mGravity
             addView(view)
@@ -558,19 +593,16 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                 val currentCacheViewSize = mCacheViews.size
                 if (currentCacheViewSize < REQUIRED_CACHE_SIZE) {
                     val viewsToAdd = REQUIRED_CACHE_SIZE - currentCacheViewSize
-                    mTextPaint.apply {
-                        color = mFontColor
-                        isAntiAlias = mEnableAntiAlias
-                        textSize = mFontSize
-                        isFakeBoldText = mFontBold
-                        textSkewX = if (mFontItalic) -0.25f else 0f
-                        typeface = if (mFontMonoSpace) Typeface.MONOSPACE else Typeface.DEFAULT
-                    }
+                    onInitTextPaint()
                     for (index in 0 until  viewsToAdd) {
                         mCacheViews.add(creatAttrTextView())
                     }
                     firstInit = true
-                    debug { mCacheViews.forEachIndexed { index, baseAttrTextView -> baseAttrTextView.tag = index  }}
+                    debug {
+                        mCacheViews.forEachIndexed { index, baseAttrTextView ->
+                            baseAttrTextView.tag = index
+                        }
+                    }
                 }
                 onUpdatePosOrView(forceUpdate = firstInit)
                 onNotifyLayoutUpdate()
@@ -585,15 +617,22 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                 setBackgroundColor(mBackgroundColor)
             }
             FLAG_FONT_SIZE -> {
-                val paintFontsize = mTextPaint.textSize
-                mTextPaint.textSize = mFontSize
+                var fontSize = 0f
+                val paintFontsize = withSizeUnit(px = {
+                    fontSize = mFontSize
+                    mTextPaint.textSize = mFontSize
+                    mTextPaint.textSize
+                }, orElse = {
+                    fontSize = context.px2sp(mFontSize)
+                    mTextPaint.textSize = fontSize
+                    context.px2sp(mTextPaint.textSize)
+                })
                 val textHeight = getTextHeight(mTextPaint.fontMetrics)
                 val textWidth = mTextPaint.measureText("O")
-                "textsize is error auto applyOption! textSize is $mFontSize \t textWidth is $textWidth \t textHeight is $textHeight \t width is $width \t height is $height".debugLog()
                 if (textWidth > width || textHeight > height) {
                     "textsize is error auto applyOption! textSize is $mFontSize \t textWidth is $textWidth \t textHeight is $textHeight \t width is $width \t height is $height".debugLog()
                     mFontSize = 12f
-                    mTextPaint.textSize = mFontSize
+                    mTextPaint.textSize = fontSize
                     applyOption()
                 } else {
                     mTextPaint.textSize = paintFontsize
@@ -630,7 +669,6 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
             }
             forceUpdate -> onNotifyViewUpdate(updateAll = updateAll)
             mUpdateStrategy == STRATEGY_TEXT_UPDATE_DEFAULT -> {
-                "update".debugLog()
                 onNotifyViewUpdate(updateAll = true)
             }
         }
@@ -734,7 +772,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-11-02 10:44:24 周四 上午
      * @author crowforkotlin
      */
-    private fun getNextView(pos: Int): BaseAttrTextView {
+    private fun getNextView(pos: Int): AttrTextView {
         return if (pos < mCacheViews.size - 1) {
             mCacheViews[pos + 1]
         } else {
@@ -786,7 +824,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         val textStringBuilder = StringBuilder()
         val textList: MutableList<Pair<String, Float>> = mutableListOf()
         val textMaxIndex = originText.length - 1
-        mTextPaint.textSize = mFontSize
+        mTextPaint.textSize = withSizeUnit(this@AttrTextLayout::mFontSize, orElse = { context.px2sp(mFontSize) } )
         originText.forEachIndexed { index, char ->
             val textWidth = mTextPaint.measureText(char.toString(), 0, 1)
             textStringWidth += textWidth
@@ -864,7 +902,6 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
                 }
             }
         }
-        "getTextLists : $textList".debugLog()
         return textList
     }
 
@@ -893,7 +930,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         when(mMultipleLineEnable) {
             true -> {
                 mTextPaint.letterSpacing = mFontSpacing / mTextPaint.textSize
-                val textHeightWithMargin = getTextHeight(mTextPaint.fontMetrics) + mMarginRow
+                val textHeightWithMargin = getTextHeight(mTextPaint.fontMetrics) + withSizeUnit(this::mMarginRow, orElse = { context.px2dp(mMarginRow) })
                 val textMaxLine = if(textHeightWithMargin > height) 1 else  (height / textHeightWithMargin).toInt()
                 if (textMaxLine <= 0) return
                 val textListSize = mList.size
@@ -1297,7 +1334,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
         }
     }
 
-     /**
+    /**
      * ● 取消动画任务
      *
      * ● 2023-11-02 17:24:00 周四 下午
@@ -1326,7 +1363,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * @author crowforkotlin
      */
     private fun addTask(flag: Byte) {
-       if (mTask == null) mTask = mutableListOf(flag) else mTask?.add(flag)
+        if (mTask == null) mTask = mutableListOf(flag) else mTask?.add(flag)
     }
 
     /**
@@ -1335,13 +1372,25 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-12-22 15:09:52 周五 下午
      * @author crowforkotlin
      */
-    private fun initBaseAttrTextViewValue(view: BaseAttrTextView) {
+    private fun onInitAttrTextViewValue(view: AttrTextView) {
+        view.mSizeUnitStrategy = mSizeUnitStrategy
         view.mAnimationTop = mAnimationTop
         view.mAnimationLeft = mAnimationLeft
         view.mAnimationMode = mAnimationMode
-        view.mMarginRow = mMarginRow
+        view.mMarginRow = withSizeUnit(this::mMarginRow, orElse = { context.px2dp(mMarginRow) })
         view.mAnimationStartTime = 0
         view.mTextPaint = mTextPaint
+    }
+
+    private fun onInitTextPaint() {
+        mTextPaint.apply {
+            color = mFontColor
+            isAntiAlias = mEnableAntiAlias
+            textSize = withSizeUnit(this@AttrTextLayout::mFontSize, orElse = { context.px2sp(mFontSize) } )
+            isFakeBoldText = mFontBold
+            textSkewX = if (mFontItalic) -0.25f else 0f
+            typeface = if (mFontMonoSpace) Typeface.MONOSPACE else Typeface.DEFAULT
+        }
     }
 
     /**
@@ -1387,7 +1436,7 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      * ● 2023-12-22 15:58:38 周五 下午
      * @author crowforkotlin
      */
-    fun getSnapshotView(): MutableList<BaseAttrTextView> {
+    fun getSnapshotView(): MutableList<AttrTextView> {
         return mutableListOf(mCacheViews.first(), mCacheViews.last())
     }
 
@@ -1399,16 +1448,8 @@ class BaseAttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrText
      */
     fun applyOption() {
         if (mCacheViews.isNotEmpty()) {
-            mTextPaint.apply {
-                color = mFontColor
-                isAntiAlias = mEnableAntiAlias
-                textSize = mFontSize
-                isFakeBoldText = mFontBold
-                textSkewX = if (mFontItalic) -0.25f else 0f
-                typeface = if (mFontMonoSpace) Typeface.MONOSPACE else Typeface.DEFAULT
-            }
             mCacheViews.forEach {  view ->
-                initBaseAttrTextViewValue(view)
+                onInitAttrTextViewValue(view)
                 view.mGravity = mGravity
                 view.mMultiLineEnable = mMultipleLineEnable
             }

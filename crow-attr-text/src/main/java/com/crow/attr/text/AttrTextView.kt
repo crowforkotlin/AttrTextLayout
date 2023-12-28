@@ -15,21 +15,21 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Region
 import android.text.TextPaint
 import android.view.View
-import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
-import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_X
-import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_Y
-import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
-import com.crow.attr.text.BaseAttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
-import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
-import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_END
-import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_BOTTOM_START
-import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_CENTER
-import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_CENTER_END
-import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_CENTER_START
-import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_TOP_CENTER
-import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_TOP_END
-import com.crow.attr.text.BaseAttrTextLayout.Companion.GRAVITY_TOP_START
-import com.crow.attr.text.BaseAttrTextLayout.Companion.STRATEGY_DIMENSION_PX
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_X
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_Y
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_END
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_START
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_CENTER
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_CENTER_END
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_CENTER_START
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_CENTER
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_END
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
+import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.properties.Delegates
@@ -42,7 +42,7 @@ import kotlin.properties.Delegates
  * @author: crowforkotlin
  * @formatter:on
  */
-class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
+class AttrTextView(context: Context) : View(context), IBaseAttrTextExt {
 
     companion object {
 
@@ -393,31 +393,26 @@ class BaseAttrTextView(context: Context) : View(context), IBaseAttrTextExt {
         val fontMetrics = mTextPaint.fontMetrics
         val textHeight = getTextHeight(fontMetrics)
         val baseLineOffsetY = calculateBaselineOffsetY(fontMetrics)
-        var marginRow = mMarginRow
-        var halfMarginRow = marginRow / 2f
+        var halfMarginRow = mMarginRow / 2f
         if (mMultiLineEnable && textListSize > 1) {
-            val textHeightWithMargin = textHeight + marginRow
+            val textHeightWithMargin = textHeight + mMarginRow
             val maxRow = if (height < textHeightWithMargin) 1 else min((height / (textHeightWithMargin)).toInt(), textListSize)
             var listStartPos = (mListPosition * maxRow).let { if (it >= textListSize) it - maxRow else it }
             val validRow = if (listStartPos + maxRow <= textListSize) maxRow else textListSize - listStartPos
             val halfCount = validRow shr 1
-            if (maxRow == 1 || validRow == 1) {
-                marginRow = 0f
-                halfMarginRow = 0f
-            }
+            if (maxRow == 1 || validRow == 1) halfMarginRow = 0f
             mTextY = if (validRow % 2 == 0) { // 考虑到 偶数、奇数 行居中的效果
-                (screenHeightHalf - (textHeight * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount - 1)) - baseLineOffsetY + ROW_DEVIATION - halfMarginRow
+                (screenHeightHalf - (textHeightWithMargin * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount - 1)) - baseLineOffsetY - halfMarginRow + ROW_DEVIATION
             } else {
-                (screenHeightHalf - (textHeight * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION - halfMarginRow
+                (screenHeightHalf - (textHeightWithMargin * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION
             }
-            val textYIncrement = textHeight + marginRow + halfMarginRow
             repeat(validRow) {
                 if (listStartPos < textListSize) {
                     val currentText = mList[listStartPos]
                     onInitializaTextX(currentText.second)
                     canvas.drawText(currentText.first)
                     listStartPos ++
-                    mTextY += textYIncrement
+                    mTextY += textHeightWithMargin
                 } else return
             }
         } else {

@@ -1,7 +1,8 @@
-@file:Suppress("SpellCheckingInspection", "unused", "DEPRECATION", "LocalVariableName")
+@file:Suppress("SpellCheckingInspection", "unused", "DEPRECATION", "LocalVariableName", "AnnotateVersionCheck")
 
 package com.crow.attr.text
 
+import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -9,7 +10,6 @@ import android.graphics.Path
 import android.graphics.Region
 import android.os.Build
 import android.util.Log
-import androidx.annotation.ChecksSdkIntAtLeast
 import kotlin.math.sqrt
 
 interface IBaseAttrTextExt {
@@ -26,10 +26,10 @@ interface IBaseAttrTextExt {
         const val DEBUG_TEXT = true
         const val DEBUG_ANIMATION = true
 
+        internal const val TAG = "IAttrTextExt-Crow"
 
-        private val mDebugYelloPaint by lazy { Paint().also { it.strokeWidth = 2f; it.color = Color.YELLOW } }
-
-        private val mDebugBluePaint by lazy { Paint().also { it.strokeWidth = 2f; it.color = Color.BLUE } }
+        internal val mDebugYelloPaint by lazy { Paint().also { it.strokeWidth = 2f; it.color = Color.YELLOW } }
+        internal val mDebugBluePaint by lazy { Paint().also { it.strokeWidth = 2f; it.color = Color.BLUE } }
     }
 
     var mAnimationTop: Boolean
@@ -239,8 +239,28 @@ interface IBaseAttrTextExt {
      * ● 2023-12-25 16:39:20 周一 下午
      * @author crowforkotlin
      */
-    fun Any?.debugLog(tag: String = "IBaseAttrTextExt-Crow",level: Int = Log.DEBUG) {
+    fun Any?.debugLog(tag: String = TAG,level: Int = Log.DEBUG) {
         debug { Log.println(level, tag, this.toString()) }
+    }
+
+    /**
+     * ● DP转PX
+     *
+     * ● 2023-12-28 10:44:00 周四 上午
+     * @author crowforkotlin
+     */
+    fun Context.px2dp(dp: Float): Float {
+        return dp * resources.displayMetrics.density + 0.5f
+    }
+
+    /**
+     * ● PX转SP
+     *
+     * ● 2023-12-28 10:44:26 周四 上午
+     * @author crowforkotlin
+     */
+    fun Context.px2sp(px: Float): Float {
+        return px * resources.displayMetrics.density + 0.5f
     }
 }
 
@@ -250,6 +270,16 @@ inline fun IBaseAttrTextExt.drawY(onTop: () -> Unit, onBottom: () -> Unit) {
 
 inline fun IBaseAttrTextExt.drawX(onLeft: () -> Unit, onRight: () -> Unit) {
     if (mAnimationLeft) onLeft() else onRight()
+}
+
+/**
+ * ● 错误输出
+ *
+ * ● 2023-12-28 15:27:47 周四 下午
+ * @author crowforkotlin
+ */
+fun Any?.errorLog(tag: String = IBaseAttrTextExt.TAG) {
+    Log.e(tag, this.toString())
 }
 
 inline fun debug(onDebug: () -> Unit) {
@@ -270,7 +300,10 @@ inline fun withPath(path:Path, pathOperations: Path.() -> Unit) {
     path.close()
 }
 
-@ChecksSdkIntAtLeast(api = Build.VERSION_CODES.O, lambda = 0)
 inline fun withApiO(leastO: () -> Unit, lessO: () -> Unit) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) leastO() else lessO()
+}
+
+inline fun IBaseAttrTextExt.withSizeUnit(px: () -> Float, orElse: () -> Float): Float {
+    return if (mSizeUnitStrategy == AttrTextLayout.STRATEGY_DIMENSION_DP_SP) orElse() else px()
 }
