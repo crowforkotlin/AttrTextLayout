@@ -288,9 +288,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
      * ● 2023-11-01 10:12:30 周三 上午
      * @author crowforkotlin
      */
-    private var mCurrentViewPos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged(
-        FLAG_LAYOUT_REFRESH
-    ) }
+    private var mCurrentViewPos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged(FLAG_LAYOUT_REFRESH) }
 
     /**
      * ● 文本列表位置 -- 设置后会触发重新绘制
@@ -314,9 +312,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
      * ● 2023-10-31 13:59:53 周二 下午
      * @author crowforkotlin
      */
-    var mScrollSpeed: Short by Delegates.observable(1) { _, _, _ -> onVariableChanged(
-        FLAG_SCROLL_SPEED
-    ) }
+    var mScrollSpeed: Short by Delegates.observable(1) { _, _, _ -> onVariableChanged(FLAG_SCROLL_SPEED) }
 
     /**
      * ● 文本内容 -- 设置后会触发重新绘制
@@ -419,17 +415,33 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
     var mResidenceTime: Long = 5000
 
     /**
-     * ● 字体粗体
+     * ● 字体假粗体 -- 通过算法渲染实现 性能会比设置样式略低
      *
      * ● 2023-11-10 14:34:58 周五 下午
+     * @author crowforkotlin
+     */
+    var mFontFakeBold: Boolean = false
+
+    /**
+     * ● 字体假斜体 -- 通过变换字体 实现斜体 资源同样比定义好的样式低
+     *
+     * ● 2023-11-10 14:35:09 周五 下午
+     * @author crowforkotlin
+     */
+    var mFontFakeItalic: Boolean = false
+
+    /**
+     * ● 字体粗体样式
+     *
+     * ● 2023-12-28 18:32:35 周四 下午
      * @author crowforkotlin
      */
     var mFontBold: Boolean = false
 
     /**
-     * ● 字体斜体
+     * ● 字体斜体样式
      *
-     * ● 2023-11-10 14:35:09 周五 下午
+     * ● 2023-12-28 18:32:49 周四 下午
      * @author crowforkotlin
      */
     var mFontItalic: Boolean = false
@@ -1374,14 +1386,29 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
         view.mTextPaint = mTextPaint
     }
 
+    /**
+     * ● 初始化文本画笔
+     *
+     * ● 2023-12-28 18:33:08 周四 下午
+     * @author crowforkotlin
+     */
     private fun onInitTextPaint() {
         mTextPaint.apply {
             color = mFontColor
             isAntiAlias = mEnableAntiAlias
             textSize = withSizeUnit(this@AttrTextLayout::mFontSize, orElse = { context.px2sp(mFontSize) } )
-            isFakeBoldText = mFontBold
-            textSkewX = if (mFontItalic) -0.25f else 0f
-            typeface = if (mFontMonoSpace) Typeface.MONOSPACE else Typeface.DEFAULT
+            isFakeBoldText = mFontFakeBold
+            textSkewX = if (mFontFakeItalic) -0.25f else 0f
+            val value = when {
+                mFontBold && mFontItalic -> { Typeface.BOLD_ITALIC }
+                mFontBold -> Typeface.BOLD
+                mFontItalic -> Typeface.ITALIC
+                else -> {
+                    typeface = if (mFontMonoSpace) Typeface.MONOSPACE else Typeface.DEFAULT
+                    null
+                }
+            } ?: return
+            typeface = Typeface.create(if (mFontMonoSpace) Typeface.MONOSPACE else Typeface.DEFAULT, value)
         }
     }
 

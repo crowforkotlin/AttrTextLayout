@@ -26,11 +26,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         onCreate()
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-        createAttrTextLayout(0f, 0f, 128, 64)
+//        createAttrTextLayout(0f, 0f, 128, 64)
 //        createAttrTextLayout(0f, 0f, 512, 256)
         val width = resources.displayMetrics.widthPixels / 2
         val height = resources.displayMetrics.heightPixels / 2
-//        createAttrTextLayout(0f, 0f, width, height)
+        createAttrTextLayout(0f, 0f, width, height)
     }
 
     private fun onCreate() {
@@ -48,33 +48,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createAttrTextLayout(x: Float, y: Float, width: Int, height: Int): AttrTextLayout {
-//        val textSizeInPx = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, 180f, resources.displayMetrics) // 将文本大小从 sp 转换
-        val textSizeInPx = 28f
         val layout = AttrTextLayout(this)
 //        layout.background = ContextCompat.getDrawable(this, android.R.color.white)
-        layout.x = x
-        layout.y = y
+//        layout.x = x
+////        layout.y = y
+//        layout.mBackgroundColor = Color.MAGENTA
         val layoutParams = ConstraintLayout.LayoutParams(width, height)
         mBinding.root.addView(layout)
-//        layoutParams.startToStart = mBinding.root.id
-//        layoutParams.topToTop = mBinding.root.id
-//        layoutParams.endToEnd = mBinding.root.id
-//        layoutParams.bottomToBottom = mBinding.root.id
-        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_PX
-        layout.mFontSize = textSizeInPx
+        layoutParams.startToStart = mBinding.root.id
+        layoutParams.topToTop = mBinding.root.id
+        layoutParams.endToEnd = mBinding.root.id
+        layoutParams.bottomToBottom = mBinding.root.id
+        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_DP_SP
+        layout.mFontSize = 20f
         layout.layoutParams = layoutParams
         layout.mGravity = AttrTextLayout.GRAVITY_CENTER
         layout.mEnableSingleTextAnimation = true
         layout.mMultipleLineEnable = true
         layout.mResidenceTime = 1000
-        layout.mAnimationMode = AttrTextLayout.ANIMATION_ERASE_X
+        layout.mAnimationMode = AttrTextLayout.ANIMATION_CONTINUATION_ERASE_X
         layout.mAnimationLeft = false
         layout.mAnimationTop = false
-        layout.mFontMonoSpace = true
+//        layout.mFontMonoSpace = true
+        layout.mFontBold = true
+        layout.mFontFakeBold = true
+        layout.mEnableAntiAlias = true
         layout.mUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_DEFAULT
         layout.mAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_DEFAULT
+        layout.mMarginRow = 4f
         layout.mScrollSpeed = 13
-        layout.mMarginRow = 13.1835f
         /*lifecycleScope.launch {
             repeat(Int.MAX_VALUE) {
 //                layout.mFontSpacing = (1..10).random().toFloat()
