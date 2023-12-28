@@ -26,11 +26,11 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         onCreate()
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//        createAttrTextLayout(0f, 0f, 128, 64)
+        createAttrTextLayout(0f, 0f, 128, 64)
 //        createAttrTextLayout(0f, 0f, 512, 256)
         val width = resources.displayMetrics.widthPixels / 2
         val height = resources.displayMetrics.heightPixels / 2
-        createAttrTextLayout(0f, 0f, width, height)
+//        createAttrTextLayout(0f, 0f, width, height)
     }
 
     private fun onCreate() {
@@ -52,22 +52,22 @@ class MainActivity : AppCompatActivity() {
         val textSizeInPx = 28f
         val layout = AttrTextLayout(this)
 //        layout.background = ContextCompat.getDrawable(this, android.R.color.white)
-//        layout.x = x
-//        layout.y = y
+        layout.x = x
+        layout.y = y
         val layoutParams = ConstraintLayout.LayoutParams(width, height)
         mBinding.root.addView(layout)
-        layoutParams.startToStart = mBinding.root.id
-        layoutParams.topToTop = mBinding.root.id
-        layoutParams.endToEnd = mBinding.root.id
-        layoutParams.bottomToBottom = mBinding.root.id
-        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_DP_SP
+//        layoutParams.startToStart = mBinding.root.id
+//        layoutParams.topToTop = mBinding.root.id
+//        layoutParams.endToEnd = mBinding.root.id
+//        layoutParams.bottomToBottom = mBinding.root.id
+        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_PX
         layout.mFontSize = textSizeInPx
         layout.layoutParams = layoutParams
         layout.mGravity = AttrTextLayout.GRAVITY_CENTER
         layout.mEnableSingleTextAnimation = true
         layout.mMultipleLineEnable = true
         layout.mResidenceTime = 1000
-        layout.mAnimationMode = AttrTextLayout.ANIMATION_CENTER
+        layout.mAnimationMode = AttrTextLayout.ANIMATION_ERASE_X
         layout.mAnimationLeft = false
         layout.mAnimationTop = false
         layout.mFontMonoSpace = true

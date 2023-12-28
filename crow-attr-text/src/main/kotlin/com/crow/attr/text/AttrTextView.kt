@@ -459,7 +459,7 @@ class AttrTextView(context: Context) : View(context), IBaseAttrTextExt {
     }
 
     /**
-     * ● Debug Login Function
+     * ● Debug Logic Function
      *
      * ● 2023-11-07 18:44:26 周二 下午
      * @author crowforkotlin

@@ -1,6 +1,4 @@
-@file:Suppress("unused", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "NewApi", "SameParameterValue",
-    "DEPRECATION"
-)
+@file:Suppress("unused", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "NewApi", "SameParameterValue", "DEPRECATION")
 
 package com.crow.attr.text
 
@@ -1396,11 +1394,11 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IBaseAttrTextExt 
     private fun drawAnimation(canvas: Canvas) {
         if (mAnimationStartTime > 0) {
             when(mAnimationMode) {
+                ANIMATION_ERASE_X -> {
+                    canvas.drawEraseX(width.toFloat(), height.toFloat(), width * mAnimationTimeFraction)
+                }
                 ANIMATION_ERASE_Y -> {
                     canvas.drawEraseY(width.toFloat(), height.toFloat(), height * mAnimationTimeFraction)
-                }
-                ANIMATION_ERASE_X -> {
-                    canvas.drawEraseX(width.toFloat(), height.toFloat(), height * mAnimationTimeFraction)
                 }
                 ANIMATION_CROSS_EXTENSION -> {
                     canvas.drawCrossExtension(width, height, mAnimationTimeFraction)
