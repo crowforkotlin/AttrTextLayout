@@ -1,13 +1,14 @@
 # AttrTextLayout
 
-<table>
+<table style="border-collapse: collapse; box-shadow: 0 0 10px rgba(0,0,0,0.5); background-color: #f0f0f0; border-radius: 10px; overflow: hidden;">
 	<tr>
-		<td align="center"><img src="docs/img/EraseXLeft.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/EraseXLeft.gif"></td>
 	</tr>
     <tr>
-		<td align="center">EraseX - X轴往左擦除</td>
+		<td align="center" style="padding: 10px;">EraseX - X轴往左擦除</td>
 	</tr>
 </table>
+
 
 ---
 
