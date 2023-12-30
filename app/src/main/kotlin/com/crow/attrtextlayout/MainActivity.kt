@@ -12,6 +12,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import com.crow.attr.text.AttrTextLayout
+import com.crow.attr.text.IAttrText
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 
 @Suppress("SpellCheckingInspection")

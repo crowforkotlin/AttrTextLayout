@@ -43,7 +43,6 @@ smartrefresh = "2.0.5"
 
 glide = "5.0.0-rc01"
 agp = "8.3.0-alpha17"
-kotlin2 = "1.9.10"
 core-ktx = "1.12.0"
 junit = "4.13.2"
 androidx-junit = "1.1.5"
@@ -51,6 +50,7 @@ espresso-core = "3.5.1"
 appcompat = "1.6.1"
 material = "1.11.0"
 
+maven = "0.26.0"
 
 [libraries]
 kotlin-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlin-coroutines-core" }
@@ -114,7 +114,9 @@ ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androi
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+
 [plugins]
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin2" }
+jetbrainsKotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version.ref = "maven" }
 

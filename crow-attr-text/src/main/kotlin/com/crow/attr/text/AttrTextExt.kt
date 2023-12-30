@@ -2,7 +2,6 @@
 
 package com.crow.attr.text
 
-import android.annotation.SuppressLint
 import android.graphics.Path
 import android.os.Build
 import android.util.Log
