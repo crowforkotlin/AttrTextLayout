@@ -11,15 +11,20 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.crow.attr.text.AttrTextLayout
-import com.crow.attr.text.IAttrText
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
+import com.crow.base.tools.extensions.copyFolder
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 @Suppress("SpellCheckingInspection")
 class MainActivity : AppCompatActivity() {
 
     private val mBinding by lazy { ActivityMainBinding.inflate(layoutInflater) }
-    private val mContent = "属性文本特效/n绘制MS级别/n文本支持多行/n支持多种颜色/n采用了协程框架/n文本支持实时更新/n绘制时间控制在<3ms"
+    private var mContent: String = ""
 //    val mContent = "好吧我觉得有BUG-确定吗？？？？我觉得是肯定的！！qweiqx@%!xTIQNAQWENXOQWEM#&IA我阿斯顿维拉4i9992188nnaduqwuzxucqwbdq!@$@#@snajaiw"
 //    val mContent = "好吧我觉得有BUG-确定吗？？？？我觉得是肯定的！！qweiqx@%!xTIQNAQWENXOQWEM#&IA"
 
@@ -31,7 +36,17 @@ class MainActivity : AppCompatActivity() {
 //        createAttrTextLayout(0f, 0f, 512, 256)
         val width = resources.displayMetrics.widthPixels / 2
         val height = resources.displayMetrics.heightPixels / 2
-        createAttrTextLayout(0f, 0f, width, height)
+        lifecycleScope.launch {
+            readFile()
+            createAttrTextLayout(0f, 0f, width, height)
+        }
+    }
+
+    private suspend fun readFile() {
+        withContext(Dispatchers.IO) {
+            copyFolder("content")
+            mContent = File(filesDir, "content/Content.txt").readText()
+        }
     }
 
     private fun onCreate() {
@@ -64,13 +79,14 @@ class MainActivity : AppCompatActivity() {
         layout.mFontSize = 20f
         layout.layoutParams = layoutParams
         layout.mGravity = AttrTextLayout.GRAVITY_CENTER
+        layout.mGradientDirection = null
         layout.mEnableSingleTextAnimation = true
         layout.mMultipleLineEnable = true
         layout.mResidenceTime = 1000
         layout.mAnimationMode = AttrTextLayout.ANIMATION_CONTINUATION_ERASE_X
         layout.mAnimationLeft = false
         layout.mAnimationTop = false
-//        layout.mFontMonoSpace = true
+        layout.mFontMonoSpace = false
         layout.mFontBold = true
         layout.mFontFakeBold = true
         layout.mEnableAntiAlias = true
@@ -78,13 +94,6 @@ class MainActivity : AppCompatActivity() {
         layout.mAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_DEFAULT
         layout.mMarginRow = 4f
         layout.mScrollSpeed = 13
-        /*lifecycleScope.launch {
-            repeat(Int.MAX_VALUE) {
-//                layout.mFontSpacing = (1..10).random().toFloat()
-                delay(3000)
-                layout.mText = "$it"
-            }
-        }*/
         layout.mText = mContent
         return layout
     }

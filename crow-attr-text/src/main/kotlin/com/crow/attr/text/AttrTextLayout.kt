@@ -10,13 +10,16 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.LinearGradient
 import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Region
+import android.graphics.Shader
 import android.graphics.Typeface
 import android.text.TextPaint
 import android.util.Log
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
@@ -52,6 +55,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
     companion object {
 
         internal const val ENABLE_AUTO_UPDATE = false
+        private const val NEWLINE_CHAR_FLAG = '\n'
         private const val NEWLINE_CHAR_FLAG_SLASH = '/'
         private const val NEWLINE_CHAR_FLAG_N = 'n'
         private const val MAX_SCROLL_SPEED: Short = 16
@@ -77,12 +81,16 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
         const val GRAVITY_BOTTOM_CENTER: Byte = 8
         const val GRAVITY_BOTTOM_END: Byte = 9
 
-        private const val FLAG_TEXT: Byte = 10
-        private const val FLAG_CHILD_REFRESH: Byte = 11
-        private const val FLAG_LAYOUT_REFRESH: Byte = 12
-        private const val FLAG_SCROLL_SPEED: Byte = 13
-        private const val FLAG_BACKGROUND_COLOR: Byte = 14
-        private const val FLAG_FONT_SIZE: Byte = 15
+        const val GRADIENT_BEVEL: Byte = 10
+        const val GRADIENT_HORIZONTAL: Byte = 11
+        const val GRADIENT_VERTICAL: Byte = 12
+
+        private const val FLAG_TEXT: Byte = 30
+        private const val FLAG_CHILD_REFRESH: Byte = 31
+        private const val FLAG_LAYOUT_REFRESH: Byte = 32
+        private const val FLAG_SCROLL_SPEED: Byte = 33
+        private const val FLAG_BACKGROUND_COLOR: Byte = 34
+        private const val FLAG_FONT_SIZE: Byte = 35
 
         const val ANIMATION_DEFAULT: Short = 300
         const val ANIMATION_MOVE_X: Short = 301
@@ -463,6 +471,14 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
     var mFontSpacing: Float = 0f
 
     /**
+     * ● 渐变方向
+     *
+     * ● 2024-01-02 18:26:09 周二 下午
+     * @author crowforkotlin
+     */
+    var mGradientDirection: Byte? = null
+
+    /**
      * ● 动画模式（一般是默认）
      *
      * ● 2023-10-31 18:06:32 周二 下午
@@ -830,12 +846,18 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
         val textMaxIndex = originText.length - 1
         mTextPaint.textSize = withSizeUnit(this@AttrTextLayout::mFontSize, orElse = { context.px2sp(mFontSize) } )
         originText.forEachIndexed { index, char ->
+            println(char)
             val textWidth = mTextPaint.measureText(char.toString(), 0, 1)
             textStringWidth += textWidth
 
             // 字符串宽度 < 测量宽度 假设宽度是 128  那么范围在 0 - 127 故用小于号而不是小于等于
             if (textStringWidth < measuredWidth) {
                 when(char) {
+                    NEWLINE_CHAR_FLAG -> {
+                        textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
+                        textStringBuilder.clear()
+                        textStringWidth = 0f
+                    }
                     NEWLINE_CHAR_FLAG_SLASH -> {
                         if (originText.getOrNull(index + 1) == NEWLINE_CHAR_FLAG_N) {
                             textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
@@ -1394,6 +1416,17 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
      */
     private fun onInitTextPaint() {
         mTextPaint.apply {
+            // 设置线性渐变效果
+            val widthFloat = width.toFloat()
+            val heightFloat = height.toFloat()
+            val halfWidth = width / 2f
+            val halfHeight = height / 2f
+            shader = when(mGradientDirection) {
+                GRADIENT_BEVEL -> LinearGradient(0f, 0f, widthFloat, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
+                GRADIENT_VERTICAL -> LinearGradient(halfWidth, 0f, halfWidth, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
+                GRADIENT_HORIZONTAL -> LinearGradient(0f, halfHeight, widthFloat, halfHeight, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
+                else -> { null }
+            }
             color = mFontColor
             isAntiAlias = mEnableAntiAlias
             textSize = withSizeUnit(this@AttrTextLayout::mFontSize, orElse = { context.px2sp(mFontSize) } )
