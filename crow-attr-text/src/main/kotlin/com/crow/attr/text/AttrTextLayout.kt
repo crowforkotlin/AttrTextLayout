@@ -29,8 +29,10 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.Executors
@@ -568,6 +570,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
         "onDetachedFromWindow".debugLog()
         cancelAnimationJob()
         cancelAnimator()
+        mViewScope.cancel()
         mCacheViews.clear()
         mTaskJob.cancelChildren()
         mList.clear()
@@ -740,7 +743,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
         viewCurrentA.mAnimationMode = mAnimationMode
         viewNextB.mAnimationMode = mAnimationMode
         mAnimationJob = mViewScope.launch(CoroutineExceptionHandler { _, throwable -> throwable.stackTraceToString().debugLog(level = Log.ERROR) }) {
-            while(true) {
+            while(isActive) {
                 if (isListSizeFitPage() && !mEnableSingleTextAnimation) return@launch run {
                     if (viewNextB.visibility == VISIBLE) viewNextB.visibility = INVISIBLE
                     viewCurrentA.translationX = 0f
