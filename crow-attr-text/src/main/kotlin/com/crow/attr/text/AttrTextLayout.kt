@@ -150,7 +150,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
          * ● 2023-12-28 15:25:14 周四 下午
          * @author crowforkotlin
          */
-        private var mTaskJob = SupervisorJob()
+//        private var mTaskJob = SupervisorJob()
 
         /**
          * ● TaskScope 单例 暂时预留 考虑到文本数据处理采用单一线程解析，最后交由View进行对于处理
@@ -158,7 +158,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
          * ● 2023-12-28 15:24:09 周四 下午
          * @author crowforkotlin
          */
-        private val mTaskScope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher() + mTaskJob + CoroutineExceptionHandler { _, catch -> catch.stackTraceToString().errorLog() })
+//        private val mTaskScope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher() + mTaskJob + CoroutineExceptionHandler { _, catch -> catch.stackTraceToString().errorLog() })
     }
 
     /**
@@ -553,7 +553,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
         cancelAnimationJob()
         cancelAnimator()
         mCacheViews.clear()
-        mTaskJob.cancelChildren()
+//        mTaskJob.cancelChildren()
         mList.clear()
         mTask?.clear()
         mLastAnimation = -1
@@ -619,7 +619,7 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
                 setBackgroundColor(mBackgroundColor)
             }
             FLAG_FONT_SIZE -> {
-                var fontSize = 0f
+                var fontSize: Float
                 val paintFontsize = withSizeUnit(px = {
                     fontSize = mFontSize
                     mTextPaint.textSize = mFontSize
@@ -632,13 +632,9 @@ class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
                 val textHeight = getTextHeight(mTextPaint.fontMetrics)
                 val textWidth = mTextPaint.measureText("O")
                 if (textWidth > width || textHeight > height) {
-                    "textsize is error auto applyOption! textSize is $mFontSize \t textWidth is $textWidth \t textHeight is $textHeight \t width is $width \t height is $height".debugLog()
-                    mFontSize = 12f
-                    mTextPaint.textSize = fontSize
-                    applyOption()
-                } else {
-                    mTextPaint.textSize = paintFontsize
+                    "textsize is error $mFontSize \t textWidth is $textWidth \t textHeight is $textHeight \t width is $width \t height is $height".debugLog()
                 }
+                mTextPaint.textSize = paintFontsize
             }
         }
     }
