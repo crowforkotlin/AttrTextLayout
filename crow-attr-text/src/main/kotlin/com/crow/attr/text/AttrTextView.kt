@@ -45,7 +45,7 @@ import kotlin.properties.Delegates
  * @author: crowforkotlin
  * @formatter:on
  */
-class AttrTextView(context: Context) : View(context), IAttrText {
+class AttrTextView internal constructor(context: Context) : View(context), IAttrText {
 
     companion object {
 

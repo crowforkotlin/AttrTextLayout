@@ -18,6 +18,7 @@ import android.graphics.Region
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.text.TextPaint
+import android.util.AttributeSet
 import android.util.Log
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -46,7 +47,11 @@ import kotlin.properties.Delegates
  * @author crowforkotlin
  * @formatter:on
  */
-class AttrTextLayout(context: Context) : FrameLayout(context), IAttrText {
+class AttrTextLayout : FrameLayout, IAttrText {
+
+    constructor(context: Context) : super(context)
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) : super(context, attrs, defStyleAttr)
 
     /**
      * ● 静态区域
