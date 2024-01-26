@@ -13,6 +13,7 @@ import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Region
+import android.graphics.Xfermode
 import android.text.TextPaint
 import android.view.View
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
@@ -20,6 +21,7 @@ import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_Y
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_END
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_START
@@ -213,7 +215,7 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
     init {
 
         // 设置View使用硬件加速渲染绘制， 不然Animation移动View会造成绘制的内容抖动
-        setLayerType(LAYER_TYPE_HARDWARE, null)
+        // setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
     /**
@@ -284,7 +286,7 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
      * ● 2023-12-22 15:21:59 周五 下午
      * @author crowforkotlin
      */
-    private fun drawAnimation(canvas: Canvas) {
+    private fun drawAnimation(canvas: Canvas) : Boolean{
         if (mAnimationStartTime > 0) {
             when(mAnimationMode) {
                 ANIMATION_CONTINUATION_ERASE_X -> {
@@ -351,8 +353,19 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
                         )
                     }
                 }
+                ANIMATION_MOVE_X_DRAW -> {
+                    drawView(
+                        onCurrent = {
+                            canvas.translate(-(width - mAnimationTimeFraction), 0f)
+                        },
+                        onNext = {
+                            canvas.translate(mAnimationTimeFraction * width - width, 0f)
+                        }
+                    )
+                    return true }
             }
         }
+        return false
     }
 
     /**

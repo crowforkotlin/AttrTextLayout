@@ -16,6 +16,7 @@ import com.crow.attr.text.AttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 import com.crow.base.tools.extensions.copyFolder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -32,13 +33,23 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         onCreate()
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//        createAttrTextLayout(0f, 0f, 128, 64)
 //        createAttrTextLayout(0f, 0f, 512, 256)
-        val width = resources.displayMetrics.widthPixels / 2
-        val height = resources.displayMetrics.heightPixels / 2
+//        val width = resources.displayMetrics.widthPixels / 2
+//        val height = resources.displayMetrics.heightPixels / 2
+
         lifecycleScope.launch {
             readFile()
-            createAttrTextLayout(0f, 0f, width, height)
+            /*.also { layout ->
+                val text = layout.mText + "456"
+                lifecycleScope.launch {
+                    repeat(Int.MAX_VALUE) {
+                        delay(2000)
+                        layout.mText = text
+                    }
+                }*/
+            createAttrTextLayout(0f, 0f, 128, 64, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+//            createAttrTextLayout(0f, 32f, 128, 32, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+//            createAttrTextLayout(0f, 0f, width, height)
         }
     }
 
@@ -63,37 +74,36 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun createAttrTextLayout(x: Float, y: Float, width: Int, height: Int): AttrTextLayout {
+    private fun createAttrTextLayout(x: Float, y: Float, width: Int, height: Int, animationStrategy: Short): AttrTextLayout {
         val layout = AttrTextLayout(this)
 //        layout.background = ContextCompat.getDrawable(this, android.R.color.white)
-//        layout.x = x
-////        layout.y = y
+        layout.x = x
+        layout.y = y
 //        layout.mBackgroundColor = Color.MAGENTA
         val layoutParams = ConstraintLayout.LayoutParams(width, height)
         mBinding.root.addView(layout)
         layoutParams.startToStart = mBinding.root.id
         layoutParams.topToTop = mBinding.root.id
-        layoutParams.endToEnd = mBinding.root.id
-        layoutParams.bottomToBottom = mBinding.root.id
-        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_DP_SP
-        layout.mFontSize = 20f
+        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_PX
+        layout.mFontSize = 14f
         layout.layoutParams = layoutParams
         layout.mGravity = AttrTextLayout.GRAVITY_CENTER
         layout.mGradientDirection = null
         layout.mEnableSingleTextAnimation = true
         layout.mMultipleLineEnable = true
         layout.mResidenceTime = 1000
-        layout.mAnimationMode = AttrTextLayout.ANIMATION_CONTINUATION_ERASE_X
-        layout.mAnimationLeft = false
+        layout.mAnimationMode = animationStrategy
+        layout.mAnimationLeft = true
         layout.mAnimationTop = false
         layout.mFontMonoSpace = false
-        layout.mFontBold = true
-        layout.mFontFakeBold = true
-        layout.mEnableAntiAlias = true
-        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_DEFAULT
+        layout.mFontBold = false
+        layout.mFontFakeBold = false
+        layout.mEnableAntiAlias = false
+        layout.mGradientDirection = AttrTextLayout.GRADIENT_BEVEL
+        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_LAZY
         layout.mAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_DEFAULT
         layout.mMarginRow = 4f
-        layout.mScrollSpeed = 13
+        layout.mScrollSpeed = 14
         layout.mText = mContent
         return layout
     }
