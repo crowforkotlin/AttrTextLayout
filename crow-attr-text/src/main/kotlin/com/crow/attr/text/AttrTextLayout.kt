@@ -20,23 +20,18 @@ import android.graphics.Typeface
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
-import android.view.ViewGroup
+import android.view.View
 import android.view.ViewTreeObserver
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 import kotlin.properties.Delegates
 
@@ -837,6 +832,31 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
     }
 
+    /*override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val desiredWidth = suggestedMinimumWidth + paddingLeft + paddingRight + width
+        val desiredHeight = suggestedMinimumHeight + paddingTop + paddingBottom + height
+
+
+        setMeasuredDimension(
+            measureDimension(desiredWidth, widthMeasureSpec).also { it.debugLog() },
+            measureDimension(desiredHeight, heightMeasureSpec)
+        )
+    }*/
+
+    fun View.measureDimension(desiredSize: Int, measureSpec: Int): Int {
+        var result: Int
+        val specMode = View.MeasureSpec.getMode(measureSpec)
+        val specSize = View.MeasureSpec.getSize(measureSpec)
+        if (specMode == View.MeasureSpec.EXACTLY) {
+            result = specSize
+        } else {
+            result = desiredSize
+            if (specMode == View.MeasureSpec.AT_MOST) {
+                result = result.coerceAtMost(specSize)
+            }
+        }
+        return result
+    }
     /**
      * ● 动态计算可容纳字符个数获取文本列表
      *
@@ -848,9 +868,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
         val textStringBuilder = StringBuilder()
         val textList: MutableList<Pair<String, Float>> = mutableListOf()
         val textMaxIndex = originText.length - 1
-        mTextPaint.textSize = withSizeUnit(this@AttrTextLayout::mFontSize, orElse = { context.px2sp(mFontSize) } )
+        mTextPaint.textSize = withSizeUnit(px = this@AttrTextLayout::mFontSize, orElse = { context.px2sp(mFontSize) } )
         originText.forEachIndexed { index, char ->
-            println(char)
             val textWidth = mTextPaint.measureText(char.toString(), 0, 1)
             textStringWidth += textWidth
 

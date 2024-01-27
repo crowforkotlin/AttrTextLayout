@@ -4,6 +4,8 @@ package com.crow.attrtextlayout
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -11,6 +13,8 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.crow.attr.text.AttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
@@ -34,11 +38,13 @@ class MainActivity : AppCompatActivity() {
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 //        createAttrTextLayout(0f, 0f, 128, 64)
 //        createAttrTextLayout(0f, 0f, 512, 256)
-        val width = resources.displayMetrics.widthPixels / 2
-        val height = resources.displayMetrics.heightPixels / 2
+//        val width = resources.displayMetrics.widthPixels
+//        val height = resources.displayMetrics.heightPixels
+//        val width = FrameLayout.LayoutParams.MATCH_PARENT
+//        val height = FrameLayout.LayoutParams.MATCH_PARENT
         lifecycleScope.launch {
             readFile()
-            createAttrTextLayout(0f, 0f, width, height)
+            createAttrTextLayout(0f, 0f, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
         }
     }
 
@@ -56,9 +62,14 @@ class MainActivity : AppCompatActivity() {
         )
         setContentView(mBinding.root)
         WindowCompat.getInsetsController(window, mBinding.root).isAppearanceLightStatusBars = false
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        WindowCompat.getInsetsController(window, mBinding.root).apply {
+            this.hide(WindowInsetsCompat.Type.systemBars())
+        }
+        ViewCompat.setOnApplyWindowInsetsListener(mBinding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            systemBars.right.log()
+            systemBars.left.log()
             insets
         }
     }
@@ -69,17 +80,17 @@ class MainActivity : AppCompatActivity() {
 //        layout.x = x
 ////        layout.y = y
 //        layout.mBackgroundColor = Color.MAGENTA
-        val layoutParams = ConstraintLayout.LayoutParams(width, height)
+        val layoutParams = FrameLayout.LayoutParams(width, height)
         mBinding.root.addView(layout)
-        layoutParams.startToStart = mBinding.root.id
-        layoutParams.topToTop = mBinding.root.id
-        layoutParams.endToEnd = mBinding.root.id
-        layoutParams.bottomToBottom = mBinding.root.id
-        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_DP_SP
-        layout.mFontSize = 20f
+//        layoutParams.startToStart = mBinding.root.id
+//        layoutParams.topToTop = mBinding.root.id
+//        layoutParams.endToEnd = mBinding.root.id
+//        layoutParams.bottomToBottom = mBinding.root.id
         layout.layoutParams = layoutParams
+        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_DP_SP
+        layout.mFontSize = 48f
         layout.mGravity = AttrTextLayout.GRAVITY_CENTER
-        layout.mGradientDirection = null
+        layout.mGradientDirection = AttrTextLayout.GRADIENT_BEVEL
         layout.mEnableSingleTextAnimation = true
         layout.mMultipleLineEnable = true
         layout.mResidenceTime = 1000
