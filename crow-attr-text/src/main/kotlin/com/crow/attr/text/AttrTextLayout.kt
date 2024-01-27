@@ -20,7 +20,6 @@ import android.graphics.Typeface
 import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
-import android.view.View
 import android.view.ViewTreeObserver
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
@@ -37,23 +36,42 @@ import kotlin.properties.Delegates
 
 /**
  * ● 属性文本组件 -- 布局
- *
+ * 动画更新说明：视图A和视图B，当动画执行时A和B呼唤身份，此时当前的动画为B，A被设置为下一个视图，如此反复交换实现视图AB的多种动画效果
+ * 文本更新说明：设置mText属性触发绘制更新文本、根据文本策略执行对应的效果
  * ● 2023/10/30 15:53
  * @author crowforkotlin
  * @formatter:on
  */
 class AttrTextLayout : FrameLayout, IAttrText {
 
+    internal open inner class AttrAnimatorListener(val mAnimatorSet: AnimatorSet, val isDrawAnimation: Boolean = false  ) : Animator.AnimatorListener {
+        override fun onAnimationStart(animation: Animator) {
+            updateViewPosition()
+            updateTextListPosition()
+            if (isDrawAnimation) onNotifyViewVisibility(mCurrentViewPos)
+            mAnimationUpdateListener?.onAnimationStart(animation)
+        }
+
+        override fun onAnimationEnd(animation: Animator) {
+            mAnimationUpdateListener?.onAnimationEnd(animation)
+        }
+
+        override fun onAnimationCancel(animation: Animator) {
+            if (mAnimationStrategy == STRATEGY_ANIMATION_UPDATE_DEFAULT) {
+                mCurrentDuration = mAnimatorSet.duration - mAnimatorSet.currentPlayTime
+            }
+            whenAnimationCancel()
+            mAnimationUpdateListener?.onAnimationCancel(animation)
+        }
+
+        override fun onAnimationRepeat(animation: Animator) {
+            mAnimationUpdateListener?.onAnimationRepeat(animation)
+        }
+    }
+
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs)
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) : super(context, attrs, defStyleAttr)
-
-    /**
-     * ● 静态区域
-     *
-     * ● 2023-11-08 11:29:59 周三 上午
-     * @author crowforkotlin
-     */
     companion object {
 
         internal const val ENABLE_AUTO_UPDATE = false
@@ -71,7 +89,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
          * @author crowforkotlin
          */
         private const val REQUIRED_CACHE_SIZE = 2
-        private const val MAX_STRING_LENGTH = 1 shl 9
+        private const val MAX_STRING_LENGTH = 1 shl 10
 
         const val GRAVITY_TOP_START: Byte = 1
         const val GRAVITY_TOP_CENTER: Byte = 2
@@ -110,6 +128,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         const val ANIMATION_CONTINUATION_OVAL: Short = 313
         const val ANIMATION_RHOMBUS: Short = 314
         const val ANIMATION_CONTINUATION_RHOMBUS: Short = 315
+        const val ANIMATION_MOVE_X_DRAW: Short = 316
 
         /**
          * ● 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
@@ -120,8 +139,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         const val STRATEGY_TEXT_UPDATE_DEFAULT: Short = 600
 
         /**
-         * ● 懒加载更新策略：当文本发生改变时 并不会触发绘制视图的需求 只有下次动画到来 或者 切换到下一个文本才会重新绘制视图
-         * 如果 文本列表只有一个元素 那么此策略将失效
+         * ● 懒加载更新策略：当文本发生改变时 视图正在执行动画则不会更新，否则更新所有视图
          *
          * ● 2023-10-31 14:09:59 周二 下午
          * @author crowforkotlin
@@ -137,7 +155,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         const val STRATEGY_ANIMATION_UPDATE_RESTART: Short = 602
 
         /**
-         * ● 默认更新策略：当重新绘制的时候是否继续执行已停止的动画
+         * ● 默认更新策略：当重新绘制的时候继续执行已停止的动画
          *
          * ● 2023-11-06 16:04:22 周一 下午
          * @author crowforkotlin
@@ -152,6 +170,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
          */
         const val STRATEGY_DIMENSION_PX: Short = 604
         const val STRATEGY_DIMENSION_DP_SP: Short = 605
+
+        /**
+         * ● 文本更新策略：当文本发生改变时，只会更新当前视图的文本（不管动画是否停止执行都会进行更新）
+         *
+         * ● 2024-01-26 17:19:40 周五 下午
+         * @author crowforkotlin
+         */
+        const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 606
 
 
         /**
@@ -315,6 +341,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private var mMultipleLinePos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged( FLAG_CHILD_REFRESH) }
+
+    /**
+     * ● 动画更新监听器
+     *
+     * ● 2024-01-26 17:33:06 周五 下午
+     * @author crowforkotlin
+     */
+    private var mAnimationUpdateListener: Animator.AnimatorListener? = null
 
     /**
      * ● 滚动速度 --- 设置滚动速度实际上是对动画持续时间进行设置 重写SET函数，实现滚动速度设置 对动画时间进行相对的设置，设置后会触发重新绘制 IntRange(from = 1, to = 15)
@@ -685,7 +719,13 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 if (mMultipleLineEnable) mMultipleLinePos = 0 else mListPosition = size - 1
             }
             forceUpdate -> onNotifyViewUpdate(updateAll = updateAll)
-            mUpdateStrategy == STRATEGY_TEXT_UPDATE_DEFAULT -> {
+            mUpdateStrategy == STRATEGY_TEXT_UPDATE_CURRENT -> {
+                onNotifyViewUpdate(updateAll = false)
+            }
+            mUpdateStrategy == STRATEGY_TEXT_UPDATE_LAZY && (mViewAnimatorSet == null || mViewAnimatorSet?.isRunning == false) -> {
+                onNotifyViewUpdate(updateAll = true)
+            }
+            mUpdateStrategy == STRATEGY_TEXT_UPDATE_DEFAULT || mAnimationMode == ANIMATION_DEFAULT-> {
                 onNotifyViewUpdate(updateAll = true)
             }
         }
@@ -766,6 +806,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousDrawAnimation(isDelay= delay)
                     ANIMATION_CONTINUATION_ERASE_X -> launchContinuousDrawAnimation(isDelay= delay)
                     ANIMATION_CONTINUATION_RHOMBUS -> launchContinuousDrawAnimation(isDelay= delay)
+                    ANIMATION_MOVE_X_DRAW -> launchContinuousDrawAnimation(isDelay = isDelay)
                 }
                 delay = true
             }
@@ -832,31 +873,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
     }
 
-    /*override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val desiredWidth = suggestedMinimumWidth + paddingLeft + paddingRight + width
-        val desiredHeight = suggestedMinimumHeight + paddingTop + paddingBottom + height
-
-
-        setMeasuredDimension(
-            measureDimension(desiredWidth, widthMeasureSpec).also { it.debugLog() },
-            measureDimension(desiredHeight, heightMeasureSpec)
-        )
-    }*/
-
-    fun View.measureDimension(desiredSize: Int, measureSpec: Int): Int {
-        var result: Int
-        val specMode = View.MeasureSpec.getMode(measureSpec)
-        val specSize = View.MeasureSpec.getSize(measureSpec)
-        if (specMode == View.MeasureSpec.EXACTLY) {
-            result = specSize
-        } else {
-            result = desiredSize
-            if (specMode == View.MeasureSpec.AT_MOST) {
-                result = result.coerceAtMost(specSize)
-            }
-        }
-        return result
-    }
     /**
      * ● 动态计算可容纳字符个数获取文本列表
      *
@@ -868,7 +884,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         val textStringBuilder = StringBuilder()
         val textList: MutableList<Pair<String, Float>> = mutableListOf()
         val textMaxIndex = originText.length - 1
-        mTextPaint.textSize = withSizeUnit(px = this@AttrTextLayout::mFontSize, orElse = { context.px2sp(mFontSize) } )
+        mTextPaint.textSize = withSizeUnit(this@AttrTextLayout::mFontSize, orElse = { context.px2sp(mFontSize) } )
         originText.forEachIndexed { index, char ->
             val textWidth = mTextPaint.measureText(char.toString(), 0, 1)
             textStringWidth += textWidth
@@ -1041,28 +1057,28 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.playSequentially(viewAnimationA, viewAnimationB)
-                animatorSet.addListener(object : Animator.AnimatorListener {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
+                        viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
                         if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
                         if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
                         viewNextB.scaleX = 0f
                         viewNextB.scaleY = 0f
                         mCurrentDuration = mAnimationDuration
-                        updateViewPosition()
-                        updateTextListPosition()
+                        super.onAnimationStart(animation)
                     }
-
                     override fun onAnimationEnd(animation: Animator) {
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
+                        super.onAnimationEnd(animation)
                     }
-
                     override fun onAnimationCancel(animation: Animator) {
-                        if (mAnimationStrategy == STRATEGY_ANIMATION_UPDATE_DEFAULT) {
-                            mCurrentDuration = animatorSet.duration - animatorSet.currentPlayTime
-                        }
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        super.onAnimationCancel(animation)
                     }
-
-                    override fun onAnimationRepeat(animation: Animator) {}
                 })
                 animatorSet.start()
             }
@@ -1115,24 +1131,26 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
-                animatorSet.addListener(object : Animator.AnimatorListener {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
+                        viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
                         if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
                         if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
                         mCurrentDuration = mAnimationDuration
-                        updateViewPosition()
-                        updateTextListPosition()
+                        super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
+                        super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        if (mAnimationStrategy == STRATEGY_ANIMATION_UPDATE_DEFAULT) {
-                            mCurrentDuration = animatorSet.duration - animatorSet.currentPlayTime
-                        }
-                        whenAnimationCancel()
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        super.onAnimationCancel(animation)
                     }
-                    override fun onAnimationRepeat(animation: Animator) {}
                 })
                 animatorSet.start()
             }
@@ -1179,26 +1197,26 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
-                animatorSet.addListener(object : Animator.AnimatorListener {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
                         if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
                         if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
                         mCurrentDuration = mAnimationDuration
-                        updateViewPosition()
-                        updateTextListPosition()
+                        super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        if (!continuation.isCompleted) {
-                            continuation.resume(Unit)
-                        }
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        if (!continuation.isCompleted) continuation.resume(Unit)
+                        super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        if (mAnimationStrategy == STRATEGY_ANIMATION_UPDATE_DEFAULT) {
-                            mCurrentDuration = animatorSet.duration - animatorSet.currentPlayTime
-                        }
-                        whenAnimationCancel()
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        super.onAnimationCancel(animation)
                     }
-                    override fun onAnimationRepeat(animation: Animator) {}
                 })
                 animatorSet.start()
             }
@@ -1229,23 +1247,26 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 } else {
                     animatorSet.playTogether(viewAnimationA, viewAnimationB)
                 }
-                animatorSet.addListener(object : Animator.AnimatorListener {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
+                        viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
                         if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
                         if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
                         viewNextB.alpha = 0f
-                        updateViewPosition()
-                        updateTextListPosition()
+                        super.onAnimationStart(animation)
                     }
-
                     override fun onAnimationEnd(animation: Animator) {
-                        if (!continuation.isCompleted) {
-                            continuation.resume(Unit)
-                        }
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        if (!continuation.isCompleted) continuation.resume(Unit)
+                        super.onAnimationEnd(animation)
                     }
-
-                    override fun onAnimationCancel(animation: Animator) {}
-                    override fun onAnimationRepeat(animation: Animator) {}
+                    override fun onAnimationCancel(animation: Animator) {
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        super.onAnimationCancel(animation)
+                    }
                 })
                 animatorSet.start()
             }
@@ -1273,24 +1294,23 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.play(valueAnimator)
-                animatorSet.addListener(object : Animator.AnimatorListener {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
+                        setLayerType(LAYER_TYPE_HARDWARE, null)
                         mAnimationStartTime = System.currentTimeMillis()
                         mCurrentDuration = mAnimationDuration
-                        updateViewPosition()
-                        updateTextListPosition()
-                        onNotifyViewVisibility(mCurrentViewPos)
+                        super.onAnimationStart(animation)
                     }
-                    override fun onAnimationEnd(animation: Animator) {
-                        if (!continuation.isCompleted) continuation.resume(Unit)
-                    }
-                    override fun onAnimationCancel(animation: Animator) {
-                        if (mAnimationStrategy == STRATEGY_ANIMATION_UPDATE_DEFAULT) {
-                            mCurrentDuration = animatorSet.duration - animatorSet.currentPlayTime
-                        }
-                    }
-                    override fun onAnimationRepeat(animation: Animator) {
 
+                    override fun onAnimationEnd(animation: Animator) {
+                        setLayerType(LAYER_TYPE_NONE, null)
+                        if (!continuation.isCompleted) continuation.resume(Unit)
+                        super.onAnimationEnd(animation)
+                    }
+
+                    override fun onAnimationCancel(animation: Animator) {
+                        setLayerType(LAYER_TYPE_NONE, null)
+                        super.onAnimationCancel(animation)
                     }
                 })
                 animatorSet.start()
@@ -1324,27 +1344,28 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.play(valueAnimator)
-                animatorSet.addListener(object : Animator.AnimatorListener {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
+                        viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
                         mAnimationStartTime = System.currentTimeMillis()
                         mCurrentDuration = mAnimationDuration
                         viewCurrentA.mAnimationStartTime = mAnimationStartTime
                         viewNextB.mAnimationStartTime = mAnimationStartTime
                         viewCurrentA.mIsCurrentView = false
                         viewNextB.mIsCurrentView = true
-                        updateViewPosition()
-                        updateTextListPosition()
+                        super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
+                        super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        if (mAnimationStrategy == STRATEGY_ANIMATION_UPDATE_DEFAULT) {
-                            mCurrentDuration = animatorSet.duration - animatorSet.currentPlayTime
-                        }
-                    }
-                    override fun onAnimationRepeat(animation: Animator) {
-
+                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        super.onAnimationCancel(animation)
                     }
                 })
                 animatorSet.start()
@@ -1533,4 +1554,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
             onUpdateIfResetAnimation()
         }
     }
+
+    fun setOnAnimationUpdateListener(listener: Animator.AnimatorListener) { mAnimationUpdateListener = listener }
+    fun removeOnAnimationUpdateListener() { mAnimationUpdateListener = null }
 }
