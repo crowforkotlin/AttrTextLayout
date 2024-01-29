@@ -13,7 +13,6 @@ import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Region
-import android.graphics.Xfermode
 import android.text.TextPaint
 import android.view.View
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
@@ -227,8 +226,12 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
+        val width = width
+
+        val height = height
+
         // 执行动画
-        drawAnimation(canvas)
+        drawAnimation(width, height, canvas)
 
         // 文本列表长度
         val textListSize = mList.size
@@ -286,7 +289,7 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
      * ● 2023-12-22 15:21:59 周五 下午
      * @author crowforkotlin
      */
-    private fun drawAnimation(canvas: Canvas) : Boolean{
+    private fun drawAnimation(width: Int, height: Int, canvas: Canvas) : Boolean{
         if (mAnimationStartTime > 0) {
             when(mAnimationMode) {
                 ANIMATION_CONTINUATION_ERASE_X -> {
@@ -354,6 +357,7 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
                     }
                 }
                 ANIMATION_MOVE_X_DRAW -> {
+                    mAnimationTimeFraction.debugLog()
                     drawView(
                         onCurrent = {
                             canvas.translate(-(width - mAnimationTimeFraction), 0f)
@@ -362,7 +366,8 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
                             canvas.translate(mAnimationTimeFraction * width - width, 0f)
                         }
                     )
-                    return true }
+                    return true
+                }
             }
         }
         return false
