@@ -29,13 +29,21 @@ internal interface IAttrText {
         internal const val DEBUG_STROKE_WIDTH = 1f
         internal val mDebugYelloPaint by lazy { Paint().also { it.strokeWidth = DEBUG_STROKE_WIDTH; it.color = Color.YELLOW } }
         internal val mDebugBluePaint by lazy { Paint().also { it.strokeWidth = DEBUG_STROKE_WIDTH; it.color = Color.BLUE } }
+
+        /**
+         * ● 绘制时间16MS
+         *
+         * ● 2024-01-30 15:43:47 周二 下午
+         * @author crowforkotlin
+         */
+        internal const val DRAW_VIEW_MIN_DURATION = 16L
     }
 
-    var mAnimationTop: Boolean
-    var mAnimationLeft: Boolean
-    var mAnimationMode: Short
-    var mMarginRow: Float
-    var mSizeUnitStrategy: Short
+    var mTextAnimationTopEnable: Boolean
+    var mTextAnimationLeftEnable: Boolean
+    var mTextAnimationMode: Short
+    var mTextRowMargin: Float
+    var mTextSizeUnitStrategy: Short
 
     /**
      * ● 获取文本高度：ascent绝对值 + descent

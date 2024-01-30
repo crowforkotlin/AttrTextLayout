@@ -8,11 +8,11 @@ import android.util.Log
 
 
 internal inline fun IAttrText.drawY(onTop: () -> Unit, onBottom: () -> Unit) {
-    if (mAnimationTop) onTop() else onBottom()
+    if (mTextAnimationTopEnable) onTop() else onBottom()
 }
 
 internal inline fun IAttrText.drawX(onLeft: () -> Unit, onRight: () -> Unit) {
-    if (mAnimationLeft) onLeft() else onRight()
+    if (mTextAnimationLeftEnable) onLeft() else onRight()
 }
 
 internal inline fun debug(onDebug: () -> Unit) {
@@ -37,8 +37,8 @@ internal inline fun withApiO(leastO: () -> Unit, lessO: () -> Unit) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) leastO() else lessO()
 }
 
-internal inline fun IAttrText.withSizeUnit(px: () -> Float, orElse: () -> Float): Float {
-    return if (mSizeUnitStrategy == AttrTextLayout.STRATEGY_DIMENSION_DP_SP) orElse() else px()
+internal inline fun IAttrText.withSizeUnit(pxOrDefault: () -> Float, dpOrSp: () -> Float): Float {
+    return if (mTextSizeUnitStrategy == AttrTextLayout.STRATEGY_DIMENSION_DP_OR_SP) dpOrSp() else pxOrDefault()
 }
 
 /**

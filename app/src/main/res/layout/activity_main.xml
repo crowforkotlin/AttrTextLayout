@@ -5,6 +5,34 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:ignore="PxUsage"
     tools:context=".MainActivity">
+
+    <com.crow.attr.text.AttrTextLayout
+        android:id="@+id/attrTextLayout"
+        android:layout_width="128px"
+        android:layout_height="64px"
+        app:textSize="14sp"
+        app:textAnimationX="left"
+        app:textAnimationY="bottom"
+        app:textMonoSpaceEnable="false"
+        app:textBoldEnable="false"
+        app:textFakeBoldEnable="false"
+        app:textAntiAliasEnable="false"
+        app:textColor="@color/white"
+        app:textItalicEnable="false"
+        app:singleTextAnimationEnable="true"
+        app:textMultipleLineEnable="true"
+        app:textGravity="center"
+        app:textGradientDirection="vertical"
+        app:textResidenceTime="3000"
+        app:textAnimationMode="move_x_high_brushing_draw"
+        app:textSizeUnitStrategy="defaultOrSp"
+        app:textUpdateStrategy="update_all"
+        app:textAnimationStrategy="continua"
+        app:textRowMargin="1px"
+        app:textCharSpacing="1px"
+        app:textScrollSpeed="13"
+        app:text="com.crow.attr.text.AttrTextLayout -- Manually implemented by Crow" />
 
 </FrameLayout>

@@ -8,8 +8,6 @@ import android.widget.FrameLayout
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -18,7 +16,6 @@ import com.crow.attr.text.AttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 import com.crow.base.tools.extensions.copyFolder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -49,8 +46,8 @@ class MainActivity : AppCompatActivity() {
                         layout.mText = text
                     }
                 }*/
-            repeat(20) {
-                createAttrTextLayout(0f, it * 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+            repeat(4) {
+                // createAttrTextLayout(0f, it * 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
 //                createAttrTextLayout(0f, 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
 //                createAttrTextLayout(0f, 32f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
 //                createAttrTextLayout(0f, 48f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
@@ -89,25 +86,27 @@ class MainActivity : AppCompatActivity() {
         val layoutParams = FrameLayout.LayoutParams(width, height)
         mBinding.root.addView(layout)
         layout.layoutParams = layoutParams
-        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_PX
-        layout.mFontSize = 14f
-        layout.mGravity = AttrTextLayout.GRAVITY_CENTER
-        layout.mGradientDirection = null
-        layout.mEnableSingleTextAnimation = true
-        layout.mMultipleLineEnable = false
-        layout.mResidenceTime = 3000
-        layout.mAnimationMode = animationStrategy
-        layout.mAnimationLeft = false
-        layout.mAnimationTop = false
-        layout.mFontMonoSpace = false
-        layout.mFontBold = false
-        layout.mFontFakeBold = false
-        layout.mEnableAntiAlias = true
-        layout.mGradientDirection = AttrTextLayout.GRADIENT_BEVEL
-        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_DEFAULT
-        layout.mAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_DEFAULT
-        layout.mMarginRow = 4f
-        layout.mScrollSpeed = 15
+        layout.mTextSize = 14f
+        layout.mTextGravity = AttrTextLayout.GRAVITY_CENTER
+        layout.mTextGradientDirection = AttrTextLayout.GRADIENT_VERTICAL
+        layout.mSingleTextAnimationEnable = true
+        layout.mTextMultipleLineEnable = false
+        layout.mTextResidenceTime = 3000
+        layout.mTextAnimationMode = animationStrategy
+        layout.mTextAnimationLeftEnable = false
+        layout.mTextAnimationTopEnable = false
+        layout.mTextMonoSpaceEnable = false
+        layout.mTextBoldEnable = false
+        layout.mTextFakeBoldEnable = false
+        layout.mTextAntiAliasEnable = false
+        layout.mTextItalicEnable = false
+        layout.mTextSizeUnitStrategy
+        layout.mTextGradientDirection = AttrTextLayout.GRADIENT_BEVEL
+        layout.mTextUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_ALL
+        layout.mTextAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_CONTINUA
+        layout.mTextRowMargin = 4f
+        layout.mTextCharSpacing = 1f
+        layout.mTextScrollSpeed = 13
         layout.mText = mContent
         return layout
     }
