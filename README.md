@@ -22,11 +22,13 @@ repository { mavenCentral() }
 implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 ```
 
-- [x] 配置文本策略、样式、换行、特效(擦出、移动、始终、连续动画、非连续动画)
+- [x] 支持配置文本策略、样式、换行、特效(擦除、移动、圆形、连续、非连续) 动画
+- [x] 支持XML和动态创建
 - [x] 优化绘制速度 < 3MS 
 - [x] 增加渐变色
-- [x] 增加高刷新率动画
-- [x] 支持XML和动态创建
+- [x] 增加高刷新率动画(仅支持左右移动、上下移动后续跟进)
+- [] 配置渐变色RGB
+- [] 配置字体类型
 
 
 <table>
@@ -87,6 +89,9 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 ---
 
 ```kotlin
+// 设置和AttrTextLayout有关的类执行动画个数 限制5个 设置0或者不设置默认不限制（防止过多视图同时执行特效卡顿）
+AttrTextLayout.mAwaitAnimationCount = 5
+
 // 创建AttrTextLayout对象
 val layout = AttrTextLayout(this)
 
@@ -99,7 +104,7 @@ layout.mTextGravity = AttrTextLayout.GRAVITY_CENTER
 // 设置文本渐变方向为垂直
 layout.mTextGradientDirection = AttrTextLayout.GRADIENT_VERTICAL
 
-// 启用单行文本动画
+// 启用单行文本动画  (如果使用的是连续动画，那么很难能看出动画效果，实际上正在执行，后续优化)
 layout.mSingleTextAnimationEnable = true
 
 // 禁用多行文本
