@@ -19,7 +19,7 @@
 repository { mavenCentral() }
 
 // 引入远程依赖
-implementation("com.kotlincrow.android.component:AttrTextLayout:1.4")
+implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 ```
 
 - [x] 配置文本策略、样式、换行、特效(擦出、移动、始终、连续动画、非连续动画)
