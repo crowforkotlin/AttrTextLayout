@@ -16,6 +16,7 @@ import com.crow.attr.text.AttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 import com.crow.base.tools.extensions.copyFolder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -38,6 +39,8 @@ class MainActivity : AppCompatActivity() {
         AttrTextLayout.mAwaitAnimationCount = 1
         lifecycleScope.launch {
             readFile()
+            delay(4000)
+            mBinding.attrTextLayout.mTextAnimationLeftEnable = false
             /*.also { layout ->
                 val text = layout.mText + "456"
                 lifecycleScope.launch {

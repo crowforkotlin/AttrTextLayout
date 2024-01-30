@@ -22,6 +22,8 @@ import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_DRAW
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_END
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_START
@@ -261,26 +263,54 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                 drawTopText(canvas, text, textListSize) { mTextX = width - it }
             }
             GRAVITY_CENTER_START -> {
-                drawCenterText(canvas, text, textListSize) { mTextX = 0f }
+                drawCenterText(canvas, text, textListSize,
+                    onInitializaTextY = {
+
+                    },
+                    onInitializaTextX = {
+                        mTextX = 0f
+                    }
+                )
             }
             GRAVITY_CENTER -> {
-                drawCenterText(canvas, text, textListSize) {
-                    val width = (width shr 1) - it / 2f
-                    if (isDrawBrushingAnimation) {
-                        drawView(
-                            onCurrent = {
-                                mTextX = -(this.width - width) + mTextAxisValue
-                            },
-                            onNext = {
-                                mTextX =  width + mTextAxisValue
-                            }
-                        )
+                drawCenterText(canvas, text, textListSize,
+                    onInitializaTextY = {
+                        if (mTextAnimationMode == ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW) {
+                            drawView(
+                                onCurrent = {
+                                    mTextY += (if(mTextAnimationTopEnable) this.height + it else -(this.height - it)) + mTextAxisValue
+                                },
+                                onNext = {
+                                    mTextY += mTextAxisValue
+                                }
+                            )
+                        }
+                    },
+                    onInitializaTextX = {
+                        val width = (width shr 1) - it / 2f
+                        if (mTextAnimationMode == ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW) {
+                            drawView(
+                                onCurrent = {
+                                    mTextX = (if(mTextAnimationLeftEnable) this.width + width else -(this.width - width)) + mTextAxisValue
+                                },
+                                onNext = {
+                                    mTextX =  width + mTextAxisValue
+                                }
+                            )
+                        }
+                        else mTextX = width
                     }
-                    else mTextX = width
-                }
+                )
             }
             GRAVITY_CENTER_END -> {
-                drawCenterText(canvas, text, textListSize) { mTextX = width - it }
+                drawCenterText(canvas, text, textListSize,
+                    onInitializaTextY = {
+
+                    },
+                    onInitializaTextX = {
+                        mTextX = width - it
+                    }
+                )
             }
             GRAVITY_BOTTOM_START -> {
                 mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
@@ -384,6 +414,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                     )
                 }
                 ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW -> return true
+                ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> return true
             }
         }
         return false
@@ -456,7 +487,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2023-11-04 17:54:09 周六 下午
      * @author crowforkotlin
      */
-    private inline fun drawCenterText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onInitializaTextX: (Float) -> Unit) {
+    private inline fun drawCenterText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onInitializaTextY: (Float) -> Unit, onInitializaTextX: (Float) -> Unit) {
         val screenHeightHalf = height shr 1
         val fontMetrics = mTextPaint.fontMetrics
         val textHeight = getTextHeight(fontMetrics)
@@ -478,14 +509,16 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                 if (listStartPos < textListSize) {
                     val currentText = mList[listStartPos]
                     onInitializaTextX(currentText.second)
+                    onInitializaTextY(mTextY)
                     canvas.drawText(currentText.first)
                     listStartPos ++
                     mTextY += textHeightWithMargin
                 } else return
             }
         } else {
-            onInitializaTextX(text.second)
             mTextY = screenHeightHalf + baseLineOffsetY
+            onInitializaTextX(text.second)
+            onInitializaTextY(mTextY)
             canvas.drawText(text.first)
         }
     }

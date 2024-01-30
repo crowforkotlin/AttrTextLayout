@@ -51,11 +51,10 @@ import kotlin.properties.Delegates
  */
 class AttrTextLayout : FrameLayout, IAttrText {
 
-    internal open inner class AttrAnimatorListener(val mAnimatorSet: AnimatorSet, val isDrawAnimation: Boolean = false) : Animator.AnimatorListener {
+    internal open inner class AttrAnimatorListener(val mAnimatorSet: AnimatorSet) : Animator.AnimatorListener {
         override fun onAnimationStart(animation: Animator) {
             updateViewPosition()
             updateTextListPosition()
-            if (isDrawAnimation) onNotifyViewVisibility(mCurrentViewPos)
             mAnimationUpdateListener?.onAnimationStart(animation)
         }
 
@@ -120,7 +119,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 else -> error("AttrTextLayout Get Unknow SizeUnitStrategy Value $value!")
             }
             mTextAnimationMode = when(val value = getInt(R.styleable.AttrTextLayout_textAnimationMode, ANIMATION_DEFAULT.toInt())) {
-                in ANIMATION_DEFAULT..ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW -> value.toShort()
+                in ANIMATION_DEFAULT..ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> value.toShort()
                 else -> error("AttrTextLayout Get Unknow AnimationMode Value $value!")
             }
             mTextAnimationStrategy = when(val value = getInt(R.styleable.AttrTextLayout_textAnimationStrategy, STRATEGY_ANIMATION_UPDATE_CONTINUA.toInt())) {
@@ -190,7 +189,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
         const val ANIMATION_RHOMBUS: Short = 314
         const val ANIMATION_CONTINUATION_RHOMBUS: Short = 315
         const val ANIMATION_MOVE_X_DRAW: Short = 316
-        const val ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW: Short = 317
+        const val ANIMATION_MOVE_Y_DRAW: Short = 316
+        const val ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW: Short = 318
+        const val ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW: Short = 319
 
         /**
          * ● 重新加载更新策略：当重新绘制的时候是否重新执行动画
@@ -1084,6 +1085,11 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     cancelAnimator()
                     cancelAnimationJob()
                 }
+                // 实时同步AB的 四个方向
+                viewCurrentA.mTextAnimationLeftEnable = mTextAnimationLeftEnable
+                viewNextB.mTextAnimationLeftEnable = mTextAnimationLeftEnable
+                viewCurrentA.mTextAnimationTopEnable = mTextAnimationTopEnable
+                viewNextB.mTextAnimationTopEnable = mTextAnimationTopEnable
                 when(mTextAnimationMode) {
                     ANIMATION_DEFAULT -> launchDefaultAnimation(isDelay = delay)
                     ANIMATION_MOVE_X -> launchMoveXAnimation(isDelay = delay)
@@ -1102,7 +1108,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     ANIMATION_CONTINUATION_ERASE_X -> launchContinuousDrawAnimation(isDelay= delay)
                     ANIMATION_CONTINUATION_RHOMBUS -> launchContinuousDrawAnimation(isDelay= delay)
                     ANIMATION_MOVE_X_DRAW -> launchContinuousDrawAnimation(isDelay = delay)
-                    ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW -> launchHighBrushingDrawAnimation()
+                    ANIMATION_MOVE_Y_DRAW -> launchContinuousDrawAnimation(isDelay = delay)
+                    ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW -> launchHighBrushingDrawAnimation(isX = true)
+                    ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> launchHighBrushingDrawAnimation(isX = false)
                 }
                 delay = true
             }
@@ -1115,9 +1123,10 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ● 2024-01-29 17:00:36 周一 下午
      * @author crowforkotlin
      */
-    private suspend fun launchHighBrushingDrawAnimation() {
+    private suspend fun launchHighBrushingDrawAnimation(isX: Boolean) {
         delay(mAnimationDuration)
         tryAwaitAnimationTask()
+
         val viewCurrentA = mCacheViews[mCurrentViewPos]
         val viewNextB = getNextView(mCurrentViewPos)
         viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
@@ -1131,11 +1140,12 @@ class AttrTextLayout : FrameLayout, IAttrText {
         updateViewPosition()
         updateTextListPosition()
         val duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1)  16L else 16L + (4 * this) }
-        mViewScope.launch { viewCurrentA.launchHighBrushingDrawAnimation(mViewScope,true, duration) }
-        mViewScope.async { viewNextB.launchHighBrushingDrawAnimation(mViewScope,true, duration) }.await()
+        mViewScope.launch { viewCurrentA.launchHighBrushingDrawAnimation(mViewScope,isX, duration) }
+        mViewScope.async { viewNextB.launchHighBrushingDrawAnimation(mViewScope,isX, duration) }.await()
         viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
         viewNextB.setLayerType(LAYER_TYPE_NONE, null)
         tryReduceAniamtionTaskCount()
+        delay(IAttrText.DRAW_VIEW_MIN_DURATION)
     }
 
     /**

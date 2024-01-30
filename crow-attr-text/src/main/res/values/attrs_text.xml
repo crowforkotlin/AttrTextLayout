@@ -71,7 +71,9 @@
             <enum name="rhombus" value="314" />
             <enum name="continuation_rhombus" value="315" />
             <enum name="move_x_draw" value="316" />
-            <enum name="move_x_high_brushing_draw" value="317" />
+            <enum name="move_y_draw" value="317" />
+            <enum name="move_x_high_brushing_draw" value="318" />
+            <enum name="move_y_high_brushing_draw" value="319" />
         </attr>
 
     </declare-styleable>
