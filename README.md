@@ -3,7 +3,7 @@
 ![Kotlin Support Verison](https://img.shields.io/badge/Kotlin_Version-1.3.0+-blue) ![Android Support Version](https://img.shields.io/badge/Android_Version-4.4+-blue) ![Compat](https://img.shields.io/badge/Compat-AndroidX_&_Support_Library-blue)
 
 ```text
-1.5版本引入了X轴高刷新率动画。在Android中，动画ValueAnimator用于完成0-1024的匀速插值，
+1.5版本引入了X轴高刷新率动画。在Android中，动画ValueAnimator用于完成数值A-B的匀速插值(假设0-1024)，
 以实现对View的动画表现。但是，如果动画时间较快，就会导致在这个期间内0-1024不能以+1+1的形式表示，
 在像素级视图中就会出现丢帧的情况。 为了实现高刷新率，可以考虑使用OpenGLEs绘制的文本，
 但是性能开销十分明显。因此，采用了协程机制为自定义View的高刷新进行了对应的处理，
