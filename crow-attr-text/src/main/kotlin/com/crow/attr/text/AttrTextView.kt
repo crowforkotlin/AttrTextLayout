@@ -31,6 +31,14 @@ import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_CENTER
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_END
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
 import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.actor
+import kotlinx.coroutines.channels.produce
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.properties.Delegates
@@ -90,6 +98,14 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
      * @author crowforkotlin
      */
     private var mTextX : Float = 0f
+
+    /**
+     * ● XY轴量值
+     *
+     * ● 2024-01-29 17:03:09 周一 下午
+     * @author crowforkotlin
+     */
+    private var mTextAxisValue: Float = 0f
 
     /**
      * ● 文本Y坐标
@@ -172,7 +188,6 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
      */
     override var mAnimationMode: Short = 0
 
-
     /**
      * ● 动画X方向
      *
@@ -206,18 +221,6 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
     override var mSizeUnitStrategy: Short = STRATEGY_DIMENSION_PX
 
     /**
-     * ● 设置硬件加速渲染
-     *
-     * ● 2023-11-10 15:16:42 周五 下午
-     * @author crowforkotlin
-     */
-    init {
-
-        // 设置View使用硬件加速渲染绘制， 不然Animation移动View会造成绘制的内容抖动
-        // setLayerType(LAYER_TYPE_HARDWARE, null)
-    }
-
-    /**
      * ● 绘制文本
      *
      * ● 2023-10-31 13:33:44 周二 下午
@@ -225,25 +228,17 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
      */
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-
-        val width = width
-
-        val height = height
-
-        // 执行动画
-        drawAnimation(width, height, canvas)
-
         // 文本列表长度
         val textListSize = mList.size
 
+        // 列表为空
+        if (mList.isEmpty()) return
+
         // 文本长度是否无效？
-        val isLengthInvalid = mListPosition > textListSize - 1
+        val text = if (mListPosition !in 0..< textListSize) { mList.last() } else mList[mListPosition]
 
-        // 画笔未初始化 长度是否无效 列表位置是否小于0
-        if (!::mTextPaint.isInitialized || isLengthInvalid || mListPosition < 0) return
-
-        // 获取文本
-        val text = if (isLengthInvalid) { mList.last() } else mList[mListPosition]
+        // 执行动画
+        val isDrawAnimation = drawAnimation(canvas)
 
         // 设置X和Y的坐标 ，Paint绘制的文本在descent位置 进行相对应的计算即可
         when(mGravity) {
@@ -263,7 +258,20 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
                 drawCenterText(canvas, text, textListSize) { mTextX = 0f }
             }
             GRAVITY_CENTER -> {
-                drawCenterText(canvas, text, textListSize) { mTextX = (width shr 1) - it / 2f }
+                drawCenterText(canvas, text, textListSize) {
+                    val width = (width shr 1) - it / 2f
+                    if (isDrawAnimation) {
+                        drawView(
+                            onCurrent = {
+                                mTextX = -(this.width - width) + mTextAxisValue
+                            },
+                            onNext = {
+                                mTextX =  width + mTextAxisValue
+                            }
+                        )
+                    }
+                    else mTextX = width
+                }
             }
             GRAVITY_CENTER_END -> {
                 drawCenterText(canvas, text, textListSize) { mTextX = width - it }
@@ -281,6 +289,31 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
                 drawBottomText(canvas, text, textListSize) { mTextX = width - it }
             }
         }
+        mJob?.cancel()
+        mTextAxisValue.debugLog()
+    }
+    private var mJob: Job?= null
+
+    suspend fun launchHighBrushingAnimation(scope: CoroutineScope,isX: Boolean, druation: Long = 16) {
+        mTextAxisValue = 0f
+        val isLeft = mAnimationLeft
+        val isTop = mAnimationLeft
+        if (isX) {
+            repeat(width) {
+                mJob = scope.launch {
+                    if(isLeft) mTextAxisValue -- else mTextAxisValue ++
+                    invalidate()
+                    delay(druation)
+                }
+                mJob?.join()
+            }
+        } else {
+            repeat(width) {
+                if(isTop) mTextAxisValue -- else mTextAxisValue ++
+                invalidate()
+                delay(druation)
+            }
+        }
     }
 
     /**
@@ -289,7 +322,8 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
      * ● 2023-12-22 15:21:59 周五 下午
      * @author crowforkotlin
      */
-    private fun drawAnimation(width: Int, height: Int, canvas: Canvas) : Boolean{
+
+    private fun drawAnimation(canvas: Canvas) : Boolean{
         if (mAnimationStartTime > 0) {
             when(mAnimationMode) {
                 ANIMATION_CONTINUATION_ERASE_X -> {
@@ -357,15 +391,14 @@ class AttrTextView internal constructor(context: Context) : View(context), IAttr
                     }
                 }
                 ANIMATION_MOVE_X_DRAW -> {
-                    mAnimationTimeFraction.debugLog()
-                    drawView(
+                    /*drawView(
                         onCurrent = {
-                            canvas.translate(-(width - mAnimationTimeFraction), 0f)
+                            canvas.translate(width * mAnimationTimeFraction, 0f)
                         },
                         onNext = {
                             canvas.translate(mAnimationTimeFraction * width - width, 0f)
                         }
-                    )
+                    )*/
                     return true
                 }
             }

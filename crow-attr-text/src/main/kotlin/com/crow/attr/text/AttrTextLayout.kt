@@ -24,13 +24,19 @@ import android.view.ViewTreeObserver
 import android.view.animation.LinearInterpolator
 import android.widget.FrameLayout
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import java.util.concurrent.Executors
 import kotlin.coroutines.resume
 import kotlin.properties.Delegates
 
@@ -44,7 +50,7 @@ import kotlin.properties.Delegates
  */
 class AttrTextLayout : FrameLayout, IAttrText {
 
-    internal open inner class AttrAnimatorListener(val mAnimatorSet: AnimatorSet, val isDrawAnimation: Boolean = false  ) : Animator.AnimatorListener {
+    internal open inner class AttrAnimatorListener(val mAnimatorSet: AnimatorSet, val isDrawAnimation: Boolean = false) : Animator.AnimatorListener {
         override fun onAnimationStart(animation: Animator) {
             updateViewPosition()
             updateTextListPosition()
@@ -54,6 +60,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
 
         override fun onAnimationEnd(animation: Animator) {
             mAnimationUpdateListener?.onAnimationEnd(animation)
+            tryReduceAniamtionTaskCount()
         }
 
         override fun onAnimationCancel(animation: Animator) {
@@ -186,7 +193,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
          * ● 2023-12-28 15:25:14 周四 下午
          * @author crowforkotlin
          */
-//        private var mTaskJob = SupervisorJob()
+        private var mTaskJob = SupervisorJob()
 
         /**
          * ● TaskScope 单例 暂时预留 考虑到文本数据处理采用单一线程解析，最后交由View进行对于处理
@@ -194,7 +201,35 @@ class AttrTextLayout : FrameLayout, IAttrText {
          * ● 2023-12-28 15:24:09 周四 下午
          * @author crowforkotlin
          */
-//        private val mTaskScope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher() + mTaskJob + CoroutineExceptionHandler { _, catch -> catch.stackTraceToString().errorLog() })
+        private val mTaskScope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher() + mTaskJob + CoroutineExceptionHandler { _, catch -> catch.stackTraceToString().errorLog() })
+
+        /**
+         * ● 动画任务个数
+         *
+         * ● 2024-01-29 16:52:10 周一 下午
+         * @author crowforkotlin
+         */
+        private var mAnimationTaskCount: Int = 0
+
+        /**
+         * ● 等待动画个数 0 跳过
+         *
+         * ● 2024-01-29 16:49:10 周一 下午
+         * @author crowforkotlin
+         */
+        var mAwaitAnimationCount = 0
+
+        /**
+         * ● 等待动画时检查时间
+         *
+         * ● 2024-01-29 16:51:46 周一 下午
+         * @author crowforkotlin
+         */
+        var mAwaitCheckAnimationDuration = 1000L
+
+        private fun tryReduceAniamtionTaskCount() {
+            if (mAnimationTaskCount > 0) mAnimationTaskCount --
+        }
     }
 
     /**
@@ -565,7 +600,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         * 这里一定要设置xfermode（在源图像中显示目标图像，目标图像仅在源图像上显示）
         * 否则使用Canvas绘制的动画例如子View实现的 就会导致clipRect的时候文字出现边角出现缺失
         * */
-        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
+        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
         mTextPaint.color = mFontColor
         mTextPaint.textSize = mFontSize
         mTextPaint.typeface = if (mFontMonoSpace) Typeface.MONOSPACE else Typeface.DEFAULT
@@ -606,7 +641,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         cancelAnimator()
         mViewScope.cancel()
         mCacheViews.clear()
-//        mTaskJob.cancelChildren()
+        mTaskJob.cancelChildren()
         mList.clear()
         mTask?.clear()
         mLastAnimation = -1
@@ -747,69 +782,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
             totalCount == 1
         } else {
             mList.size == 1
-        }
-    }
-
-    /**
-     * ● 通知视图更新
-     *
-     * ● 2023-11-01 10:15:07 周三 上午
-     * @author crowforkotlin
-     */
-    private fun onNotifyLayoutUpdate(isDelay: Boolean = true) {
-        if (mLastAnimation == mAnimationMode) return
-        else { mLastAnimation = mAnimationMode }
-        cancelAnimator()
-        cancelAnimationJob()
-        var delay = isDelay
-        val viewCurrentA = mCacheViews[mCurrentViewPos]
-        val viewNextB = getNextView(mCurrentViewPos)
-
-        // 哪怕if逻辑即使再多也不要直接赋值 避免造成重绘影响性能
-        if (viewCurrentA.alpha != 1f) viewCurrentA.alpha = 1f
-        if (viewCurrentA.scaleX != 1f) viewCurrentA.scaleX = 1f
-        if (viewCurrentA.scaleY != 1f) viewCurrentA.scaleY = 1f
-        if (viewCurrentA.translationX != 0f) viewCurrentA.translationX = 0f
-        if (viewCurrentA.translationY != 0f) viewCurrentA.translationY = 0f
-        if (viewNextB.alpha != 1f) viewNextB.alpha = 1f
-        if (viewNextB.scaleX != 1f) viewNextB.scaleX = 1f
-        if (viewNextB.scaleY != 1f) viewNextB.scaleY = 1f
-        if (viewNextB.translationX != 0f) viewNextB.translationX = 0f
-        if (viewNextB.translationY != 0f) viewNextB.translationY = 0f
-        viewCurrentA.mAnimationMode = mAnimationMode
-        viewNextB.mAnimationMode = mAnimationMode
-        mAnimationJob = mViewScope.launch(CoroutineExceptionHandler { _, throwable -> throwable.stackTraceToString().debugLog(level = Log.ERROR) }) {
-            while(isActive) {
-                if (isListSizeFitPage() && !mEnableSingleTextAnimation) return@launch run {
-                    if (viewNextB.visibility == VISIBLE) viewNextB.visibility = INVISIBLE
-                    viewCurrentA.translationX = 0f
-                    viewCurrentA.translationY = 0f
-                    viewNextB.translationX = 0f
-                    viewNextB.translationY = 0f
-                    cancelAnimator()
-                    cancelAnimationJob()
-                }
-                when(mAnimationMode) {
-                    ANIMATION_DEFAULT -> launchDefaultAnimation(isDelay = delay)
-                    ANIMATION_MOVE_X -> launchMoveXAnimation(isDelay = delay)
-                    ANIMATION_MOVE_Y -> launchMoveYAnimation(isDelay = delay)
-                    ANIMATION_FADE -> launchFadeAnimation(isDelay = delay, isSync = false)
-                    ANIMATION_FADE_SYNC -> launchFadeAnimation(isDelay = delay, isSync = true)
-                    ANIMATION_CENTER -> launchCenterAnimation(isDelay = delay)
-                    ANIMATION_ERASE_Y -> launchDrawAnimation(isDelay= delay)
-                    ANIMATION_ERASE_X -> launchDrawAnimation(isDelay= delay)
-                    ANIMATION_OVAL -> launchDrawAnimation(isDelay = delay)
-                    ANIMATION_CONTINUATION_OVAL -> launchContinuousDrawAnimation(isDelay= delay)
-                    ANIMATION_CROSS_EXTENSION -> launchDrawAnimation(isDelay = delay)
-                    ANIMATION_RHOMBUS -> launchDrawAnimation(isDelay= delay)
-                    ANIMATION_CONTINUATION_CROSS_EXTENSION -> launchContinuousDrawAnimation(isDelay = delay)
-                    ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousDrawAnimation(isDelay= delay)
-                    ANIMATION_CONTINUATION_ERASE_X -> launchContinuousDrawAnimation(isDelay= delay)
-                    ANIMATION_CONTINUATION_RHOMBUS -> launchContinuousDrawAnimation(isDelay= delay)
-                    ANIMATION_MOVE_X_DRAW -> launchContinuousDrawAnimation(isDelay = isDelay)
-                }
-                delay = true
-            }
         }
     }
 
@@ -1018,16 +990,110 @@ class AttrTextLayout : FrameLayout, IAttrText {
     }
 
     /**
+     * ● 通知视图更新
+     *
+     * ● 2023-11-01 10:15:07 周三 上午
+     * @author crowforkotlin
+     */
+    private fun onNotifyLayoutUpdate(isDelay: Boolean = true) {
+        if (mLastAnimation == mAnimationMode) return
+        else { mLastAnimation = mAnimationMode }
+        cancelAnimator()
+        cancelAnimationJob()
+        var delay = isDelay
+        val viewCurrentA = mCacheViews[mCurrentViewPos]
+        val viewNextB = getNextView(mCurrentViewPos)
+
+        // 哪怕if逻辑即使再多也不要直接赋值 避免造成重绘影响性能
+        if (viewCurrentA.alpha != 1f) viewCurrentA.alpha = 1f
+        if (viewCurrentA.scaleX != 1f) viewCurrentA.scaleX = 1f
+        if (viewCurrentA.scaleY != 1f) viewCurrentA.scaleY = 1f
+        if (viewCurrentA.translationX != 0f) viewCurrentA.translationX = 0f
+        if (viewCurrentA.translationY != 0f) viewCurrentA.translationY = 0f
+        if (viewNextB.alpha != 1f) viewNextB.alpha = 1f
+        if (viewNextB.scaleX != 1f) viewNextB.scaleX = 1f
+        if (viewNextB.scaleY != 1f) viewNextB.scaleY = 1f
+        if (viewNextB.translationX != 0f) viewNextB.translationX = 0f
+        if (viewNextB.translationY != 0f) viewNextB.translationY = 0f
+        viewCurrentA.mAnimationMode = mAnimationMode
+        viewNextB.mAnimationMode = mAnimationMode
+        mAnimationJob = mViewScope.launch(CoroutineExceptionHandler { _, throwable -> throwable.stackTraceToString().debugLog(level = Log.ERROR) }) {
+            while(isActive) {
+                if (isListSizeFitPage() && !mEnableSingleTextAnimation) return@launch run {
+                    if (viewNextB.visibility == VISIBLE) viewNextB.visibility = INVISIBLE
+                    viewCurrentA.translationX = 0f
+                    viewCurrentA.translationY = 0f
+                    viewNextB.translationX = 0f
+                    viewNextB.translationY = 0f
+                    cancelAnimator()
+                    cancelAnimationJob()
+                }
+                when(mAnimationMode) {
+                    ANIMATION_DEFAULT -> launchDefaultAnimation(isDelay = delay)
+                    ANIMATION_MOVE_X -> launchMoveXAnimation(isDelay = delay)
+                    ANIMATION_MOVE_Y -> launchMoveYAnimation(isDelay = delay)
+                    ANIMATION_FADE -> launchFadeAnimation(isDelay = delay, isSync = false)
+                    ANIMATION_FADE_SYNC -> launchFadeAnimation(isDelay = delay, isSync = true)
+                    ANIMATION_CENTER -> launchCenterAnimation(isDelay = delay)
+                    ANIMATION_ERASE_Y -> launchDrawAnimation(isDelay= delay)
+                    ANIMATION_ERASE_X -> launchDrawAnimation(isDelay= delay)
+                    ANIMATION_OVAL -> launchDrawAnimation(isDelay = delay)
+                    ANIMATION_CONTINUATION_OVAL -> launchContinuousDrawAnimation(isDelay= delay)
+                    ANIMATION_CROSS_EXTENSION -> launchDrawAnimation(isDelay = delay)
+                    ANIMATION_RHOMBUS -> launchDrawAnimation(isDelay= delay)
+                    ANIMATION_CONTINUATION_CROSS_EXTENSION -> launchContinuousDrawAnimation(isDelay = delay)
+                    ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousDrawAnimation(isDelay= delay)
+                    ANIMATION_CONTINUATION_ERASE_X -> launchContinuousDrawAnimation(isDelay= delay)
+                    ANIMATION_CONTINUATION_RHOMBUS -> launchContinuousDrawAnimation(isDelay= delay)
+                    ANIMATION_MOVE_X_DRAW -> launchDrawHighBrushingAnimation()
+                }
+                delay = true
+            }
+        }
+    }
+
+    /**
+     * ● 高刷动画
+     *
+     * ● 2024-01-29 17:00:36 周一 下午
+     * @author crowforkotlin
+     */
+    private suspend fun launchDrawHighBrushingAnimation() {
+        delay(mAnimationDuration)
+        tryAwaitAnimationTask()
+        val viewCurrentA = mCacheViews[mCurrentViewPos]
+        val viewNextB = getNextView(mCurrentViewPos)
+        viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
+        viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
+        mAnimationStartTime = System.currentTimeMillis()
+        mCurrentDuration = mAnimationDuration
+        viewCurrentA.mAnimationStartTime = mAnimationStartTime
+        viewNextB.mAnimationStartTime = mAnimationStartTime
+        viewCurrentA.mIsCurrentView = false
+        viewNextB.mIsCurrentView = true
+        updateViewPosition()
+        updateTextListPosition()
+        val duration: Long = with(MAX_SCROLL_SPEED - mScrollSpeed) { if (this <= 1)  16L else 16L + (4 * this) }
+        mViewScope.launch { viewCurrentA.launchHighBrushingAnimation(mViewScope,true, duration) }
+        mViewScope.async { viewNextB.launchHighBrushingAnimation(mViewScope,true, duration) }.await()
+        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
+        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+        tryReduceAniamtionTaskCount()
+    }
+
+    /**
      * ● 默认的动画
      *
      * ● 2023-11-01 09:51:05 周三 上午
      * @author crowforkotlin
      */
     private suspend fun launchDefaultAnimation(isDelay: Boolean) {
+        setLayerType(LAYER_TYPE_HARDWARE, null)
         onNotifyViewVisibility(mCurrentViewPos)
         if(isDelay) delay(if (mResidenceTime < 500) 500 else mResidenceTime)
         updateViewPosition()
         updateTextListPosition()
+        setLayerType(LAYER_TYPE_NONE, null)
     }
 
     /**
@@ -1324,14 +1390,15 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ● 2023-12-19 17:37:40 周二 下午
      * @author crowforkotlin
      */
-    private suspend fun launchContinuousDrawAnimation(isDelay: Boolean) {
+    private suspend fun launchContinuousDrawAnimation(isDelay: Boolean, ofInt: Boolean = false, ofIntEnd: Int = 1) {
         if(isDelay) delay(mResidenceTime)
+        tryAwaitAnimationTask()
         return suspendCancellableCoroutine { continuation ->
             mViewAnimatorSet?.cancel()
             mViewAnimatorSet = AnimatorSet()
             val viewCurrentA = mCacheViews[mCurrentViewPos]
             val viewNextB = getNextView(mCurrentViewPos)
-            val valueAnimator = ValueAnimator.ofFloat(0f, 1f)
+            val valueAnimator = if (ofInt) ValueAnimator.ofInt(1, ofIntEnd) else ValueAnimator.ofFloat(0f, 1f)
             valueAnimator.addUpdateListener {
                 mAnimationTimeFraction = it.animatedFraction
                 viewCurrentA.mAnimationTimeFraction = mAnimationTimeFraction
@@ -1369,6 +1436,21 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     }
                 })
                 animatorSet.start()
+            }
+        }
+    }
+
+    private suspend fun tryAwaitAnimationTask() {
+        if (mAwaitAnimationCount > 0) {
+            if (mAnimationTaskCount >= mAwaitAnimationCount) {
+                mTaskScope.async {
+                    while (mAnimationTaskCount >= mAwaitAnimationCount) {
+                        delay(1000L)
+                    }
+                    mAnimationTaskCount++
+                }.await()
+            } else {
+                mAnimationTaskCount ++
             }
         }
     }

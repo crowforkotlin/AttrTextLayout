@@ -4,10 +4,12 @@ package com.crow.attrtextlayout
 
 import android.graphics.Color
 import android.os.Bundle
+import android.widget.FrameLayout
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -36,7 +38,7 @@ class MainActivity : AppCompatActivity() {
 //        createAttrTextLayout(0f, 0f, 512, 256)
 //        val width = resources.displayMetrics.widthPixels / 2
 //        val height = resources.displayMetrics.heightPixels / 2
-
+        AttrTextLayout.mAwaitAnimationCount = 1
         lifecycleScope.launch {
             readFile()
             /*.also { layout ->
@@ -47,7 +49,12 @@ class MainActivity : AppCompatActivity() {
                         layout.mText = text
                     }
                 }*/
-            createAttrTextLayout(0f, 0f, 128, 64, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+            repeat(20) {
+                createAttrTextLayout(0f, it * 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+//                createAttrTextLayout(0f, 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+//                createAttrTextLayout(0f, 32f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+//                createAttrTextLayout(0f, 48f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+            }
 //            createAttrTextLayout(0f, 32f, 128, 32, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
 //            createAttrTextLayout(0f, 0f, width, height)
         }
@@ -79,31 +86,28 @@ class MainActivity : AppCompatActivity() {
 //        layout.background = ContextCompat.getDrawable(this, android.R.color.white)
         layout.x = x
         layout.y = y
-//        layout.mBackgroundColor = Color.MAGENTA
-        val layoutParams = ConstraintLayout.LayoutParams(width, height)
+        val layoutParams = FrameLayout.LayoutParams(width, height)
         mBinding.root.addView(layout)
-        layoutParams.startToStart = mBinding.root.id
-        layoutParams.topToTop = mBinding.root.id
+        layout.layoutParams = layoutParams
         layout.mUpdateStrategy = AttrTextLayout.STRATEGY_DIMENSION_PX
         layout.mFontSize = 14f
-        layout.layoutParams = layoutParams
         layout.mGravity = AttrTextLayout.GRAVITY_CENTER
         layout.mGradientDirection = null
         layout.mEnableSingleTextAnimation = true
-        layout.mMultipleLineEnable = true
-        layout.mResidenceTime = 1000
+        layout.mMultipleLineEnable = false
+        layout.mResidenceTime = 3000
         layout.mAnimationMode = animationStrategy
-        layout.mAnimationLeft = true
+        layout.mAnimationLeft = false
         layout.mAnimationTop = false
         layout.mFontMonoSpace = false
         layout.mFontBold = false
         layout.mFontFakeBold = false
-        layout.mEnableAntiAlias = false
+        layout.mEnableAntiAlias = true
         layout.mGradientDirection = AttrTextLayout.GRADIENT_BEVEL
-        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_LAZY
+        layout.mUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_DEFAULT
         layout.mAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_DEFAULT
         layout.mMarginRow = 4f
-        layout.mScrollSpeed = 14
+        layout.mScrollSpeed = 15
         layout.mText = mContent
         return layout
     }
