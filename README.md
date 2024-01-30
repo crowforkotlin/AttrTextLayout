@@ -130,6 +130,12 @@ layout.mTextAntiAliasEnable = false
 // 禁用斜体
 layout.mTextItalicEnable = false
 
+// 禁用虚斜体
+layout.mTextFakeItalicEnable = false
+
+// 设置尺寸策略为PX 或 默认
+layout.mTextSizeUnitStrategy = AttrTextLayout.STRATEGY_DIMENSION_PX_OR_DEFAULT
+
 // 设置文本渐变方向为斜向
 layout.mTextGradientDirection = AttrTextLayout.GRADIENT_BEVEL
 
