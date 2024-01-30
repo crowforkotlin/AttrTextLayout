@@ -23,8 +23,10 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 ```
 
 - [x] 配置文本策略、样式、换行、特效(擦出、移动、始终、连续动画、非连续动画)
-- [x] 优化绘制速度 < 3MS
+- [x] 优化绘制速度 < 3MS 
 - [x] 增加渐变色
+- [x] 增加高刷新率动画
+- [x] 支持XML和动态创建
 
 
 <table>
