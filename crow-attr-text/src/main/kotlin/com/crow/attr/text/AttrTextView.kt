@@ -22,7 +22,6 @@ import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW
-import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_END
@@ -36,7 +35,7 @@ import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
 import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX_OR_DEFAULT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -279,7 +278,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                         if (mTextAnimationMode == ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW) {
                             drawView(
                                 onCurrent = {
-                                    mTextY += (if(mTextAnimationTopEnable) this.height + it else -(this.height - it)) + mTextAxisValue
+                                    mTextY +=((if(mTextAnimationTopEnable) height.toFloat() else -height.toFloat())) + mTextAxisValue
                                 },
                                 onNext = {
                                     mTextY += mTextAxisValue
@@ -328,20 +327,10 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         }
 
         // 如果执行的是高刷新绘制动画那么需要取消任务
-        if (isDrawBrushingAnimation) {
+        if (isDrawBrushingAnimation && mHighBrushingJob?.isCompleted == false) {
             mHighBrushingJob?.cancel()
-            return
-            val time = System.currentTimeMillis() - mStartTime
-            if(time <3 ) {
-                scope.launch {
-                    delay(3 - time)
-                    mHighBrushingJob?.cancel()
-                }
-            } else {
-            }
         }
     }
-    val scope = MainScope()
 
     /**
      * ● 绘制Canvas动画
@@ -419,21 +408,20 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                 ANIMATION_MOVE_X_DRAW -> {
                     drawView(
                         onCurrent = {
-                            canvas.translate(width * mAnimationTimeFraction, 0f)
+                            val dx = if (mTextAnimationLeftEnable) width - mAnimationTimeFraction * width else -width + mAnimationTimeFraction * width
+                            canvas.translate(dx, 0f)
                         },
                         onNext = {
-                            canvas.translate(mAnimationTimeFraction * width - width, 0f)
+                            val dx = if (mTextAnimationLeftEnable) mAnimationTimeFraction * -width else mAnimationTimeFraction * width
+                            canvas.translate(dx, 0f)
                         }
                     )
                 }
-                ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW -> return true
-                ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> return true
+                ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW, ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> return true
             }
         }
         return false
     }
-
-    private var mStartTime = 0L
 
     /**
      * ● 启动高刷绘制动画
@@ -444,21 +432,17 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     internal suspend fun launchHighBrushingDrawAnimation(scope: CoroutineScope, isX: Boolean, duration: Long = IAttrText.DRAW_VIEW_MIN_DURATION) {
         mTextAxisValue = 0f
         if (isX) {
-            val isLeft = mTextAnimationLeftEnable
-            repeat(width) {
-                mHighBrushingJob = scope.launch {
-                    if(isLeft) mTextAxisValue -- else mTextAxisValue ++
-                    mStartTime = System.currentTimeMillis()
-                    invalidate()
-                    delay(duration)
-                }
-                mHighBrushingJob?.join()
-            }
+            launchHighBrushingRepeat(width, mTextAnimationLeftEnable, duration)
         } else {
-            val isTop = mTextAnimationLeftEnable
-            repeat(width) {
-                mHighBrushingJob = scope.launch {
-                    if(isTop) mTextAxisValue -- else mTextAxisValue ++
+            launchHighBrushingRepeat(height, mTextAnimationTopEnable, duration)
+        }
+    }
+
+    private suspend fun launchHighBrushingRepeat(count: Int, isTopOrLeft: Boolean, duration: Long) {
+        coroutineScope {
+            repeat(height) {
+                mHighBrushingJob = launch {
+                    if (isTopOrLeft) mTextAxisValue-- else mTextAxisValue++
                     invalidate()
                     delay(duration)
                 }

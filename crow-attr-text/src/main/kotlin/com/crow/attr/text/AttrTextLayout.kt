@@ -94,7 +94,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
             mTextScrollSpeed = getInt(R.styleable.AttrTextLayout_textScrollSpeed, defaultValue).toShort()
             mTextRowMargin = getDimensionPixelOffset(R.styleable.AttrTextLayout_textRowMargin, defaultValue).toFloat()
             mTextCharSpacing = getDimensionPixelOffset(R.styleable.AttrTextLayout_textCharSpacing, defaultValue).toFloat()
-            mTextCharSpacing.debugLog()
             mTextResidenceTime = getInt(R.styleable.AttrTextLayout_textResidenceTime, defaultValue).toLong()
             mTextAnimationLeftEnable = getInt(R.styleable.AttrTextLayout_textAnimationX, defaultValue) == defaultValue
             mTextAnimationTopEnable = getInt(R.styleable.AttrTextLayout_textAnimationY, defaultValue) == defaultValue

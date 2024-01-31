@@ -11,9 +11,9 @@
     <com.crow.attr.text.AttrTextLayout
         android:id="@+id/attrTextLayout"
         android:layout_width="128px"
-        android:layout_height="16px"
+        android:layout_height="64px"
         app:textSize="14sp"
-        app:textAnimationX="left"
+        app:textAnimationX="right"
         app:textAnimationY="bottom"
         app:textMonoSpaceEnable="false"
         app:textBoldEnable="false"
@@ -26,7 +26,7 @@
         app:textGravity="center"
         app:textGradientDirection="vertical"
         app:textResidenceTime="3000"
-        app:textAnimationMode="move_x_high_brushing_draw"
+        app:textAnimationMode="move_x_draw"
         app:textSizeUnitStrategy="defaultOrSp"
         app:textUpdateStrategy="update_all"
         app:textAnimationStrategy="continua"
@@ -35,12 +35,12 @@
         app:textScrollSpeed="13"
         app:text="com.crow.attr.text.AttrTextLayout -- Manually implemented by Crow" />
 
-    <com.crow.attr.text.AttrTextLayout
+ <!--   <com.crow.attr.text.AttrTextLayout
         android:layout_width="128px"
         android:layout_height="16px"
         app:singleTextAnimationEnable="true"
         android:layout_marginTop="16px"
-        app:text="com.crow.attr.text.AttrTextLayout -- Manually implemented by Crow"
+        app:text="com.crow.attr.text.AttrTextLayout &#45;&#45; Manually implemented by Crow"
         app:textAnimationMode="move_x_high_brushing_draw"
         app:textAnimationStrategy="continua"
         app:textAnimationX="left"
@@ -66,7 +66,7 @@
         android:layout_width="128px"
         android:layout_height="16px"
         app:singleTextAnimationEnable="true"
-        app:text="com.crow.attr.text.AttrTextLayout -- Manually implemented by Crow"
+        app:text="com.crow.attr.text.AttrTextLayout &#45;&#45; Manually implemented by Crow"
         app:textAnimationMode="move_x_high_brushing_draw"
         app:textAnimationStrategy="continua"
         android:layout_marginTop="32px"
@@ -93,7 +93,7 @@
         android:layout_width="128px"
         android:layout_height="16px"
         app:singleTextAnimationEnable="true"
-        app:text="com.crow.attr.text.AttrTextLayout -- Manually implemented by Crow"
+        app:text="com.crow.attr.text.AttrTextLayout &#45;&#45; Manually implemented by Crow"
         app:textAnimationMode="move_x_high_brushing_draw"
         app:textAnimationStrategy="continua"
         app:textAnimationX="left"
@@ -117,4 +117,4 @@
         app:textSizeUnitStrategy="defaultOrSp"
         app:textUpdateStrategy="update_all" />
 
-</FrameLayout>
+--></FrameLayout>

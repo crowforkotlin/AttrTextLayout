@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             readFile()
             delay(4000)
-            mBinding.attrTextLayout.mTextAnimationLeftEnable = false
+            // mBinding.attrTextLayout.mTextAnimationLeftEnable = false
             /*.also { layout ->
                 val text = layout.mText + "456"
                 lifecycleScope.launch {
