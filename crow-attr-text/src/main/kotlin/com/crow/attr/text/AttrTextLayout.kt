@@ -731,26 +731,28 @@ class AttrTextLayout : FrameLayout, IAttrText {
             FLAG_LAYOUT_REFRESH -> { onNotifyLayoutUpdate() }
             FLAG_CHILD_REFRESH -> { onNotifyViewUpdate() }
             FLAG_TEXT -> {
-                val text = if (mText.length > MAX_STRING_LENGTH) { mText.substring(0, MAX_STRING_LENGTH) } else mText
-                var firstInit = false
-                mList = getTextLists(text)
-                // 如果缓存View < 2个 则初始化缓存View
-                val currentCacheViewSize = mCacheViews.size
-                if (currentCacheViewSize < REQUIRED_CACHE_SIZE) {
-                    val viewsToAdd = REQUIRED_CACHE_SIZE - currentCacheViewSize
-                    onInitTextPaint()
-                    for (index in 0 until  viewsToAdd) {
-                        mCacheViews.add(creatAttrTextView())
-                    }
-                    firstInit = true
-                    debug {
-                        mCacheViews.forEachIndexed { index, baseAttrTextView ->
-                            baseAttrTextView.tag = index
+                mViewScope.launch {
+                    val text = if (mText.length > MAX_STRING_LENGTH) { mText.substring(0, MAX_STRING_LENGTH) } else mText
+                    var firstInit = false
+                    mList = mTaskScope.async { getTextLists(text) }.await()
+                    // 如果缓存View < 2个 则初始化缓存View
+                    val currentCacheViewSize = mCacheViews.size
+                    if (currentCacheViewSize < REQUIRED_CACHE_SIZE) {
+                        val viewsToAdd = REQUIRED_CACHE_SIZE - currentCacheViewSize
+                        onInitTextPaint()
+                        for (index in 0 until  viewsToAdd) {
+                            mCacheViews.add(creatAttrTextView())
+                        }
+                        firstInit = true
+                        debug {
+                            mCacheViews.forEachIndexed { index, baseAttrTextView ->
+                                baseAttrTextView.tag = index
+                            }
                         }
                     }
+                    onUpdatePosOrView(forceUpdate = firstInit)
+                    onNotifyLayoutUpdate()
                 }
-                onUpdatePosOrView(forceUpdate = firstInit)
-                onNotifyLayoutUpdate()
             }
             FLAG_SCROLL_SPEED -> {
                 // 根据 mScrollSpeed 动态调整 mAnimationDuration
@@ -911,8 +913,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
         val textStringBuilder = StringBuilder()
         val textList: MutableList<Pair<String, Float>> = mutableListOf()
         val textMaxIndex = originText.length - 1
-        mTextPaint.textSize = withSizeUnit(this@AttrTextLayout::mTextSize, dpOrSp = { context.px2sp(mTextSize) } )
-        mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+//        mTextPaint.textSize = withSizeUnit(this@AttrTextLayout::mTextSize, dpOrSp = { context.px2sp(mTextSize) } )
+//        mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+        onInitTextPaint()
         originText.forEachIndexed { index, char ->
             val textWidth = mTextPaint.measureText(char.toString(), 0, 1)
             textStringWidth += textWidth
@@ -1625,17 +1628,22 @@ class AttrTextLayout : FrameLayout, IAttrText {
             textSize = withSizeUnit(this@AttrTextLayout::mTextSize, dpOrSp = { context.px2sp(mTextSize) } )
             isFakeBoldText = mTextFakeBoldEnable
             textSkewX = if (mTextFakeItalicEnable) -0.25f else 0f
-            val value = when {
-                mTextBoldEnable && mTextItalicEnable -> { Typeface.BOLD_ITALIC }
-                mTextBoldEnable -> Typeface.BOLD
-                mTextItalicEnable -> Typeface.ITALIC
-                else -> {
-                    typeface = if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT
-                    null
-                }
-            } ?: return
-            typeface = Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value)
+            letterSpacing = mTextCharSpacing / mTextPaint.textSize
+            initPaintTypeFace(this)
         }
+    }
+
+    private fun initPaintTypeFace(textPaint: TextPaint) {
+        val value = when {
+            mTextBoldEnable && mTextItalicEnable -> { Typeface.BOLD_ITALIC }
+            mTextBoldEnable -> Typeface.BOLD
+            mTextItalicEnable -> Typeface.ITALIC
+            else -> {
+                textPaint.typeface = if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT
+                null
+            }
+        } ?: return
+        textPaint.typeface = Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value)
     }
 
     /**

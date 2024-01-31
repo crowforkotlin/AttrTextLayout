@@ -252,78 +252,58 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         // 设置X和Y的坐标 ，Paint绘制的文本在descent位置 进行相对应的计算即可
         when(mGravity) {
             GRAVITY_TOP_START -> {
-                mTextY = abs(mTextPaint.fontMetrics.ascent)
-                drawTopText(canvas, text, textListSize) { mTextX = 0f }
+                drawTopText(canvas, text, textListSize,
+                    onInitializaTextY = { layoutHighBrushingY(it) },
+                    onInitializaTextX = { layoutHighBrushingX(0f) }
+                )
             }
             GRAVITY_TOP_CENTER -> {
-                mTextY = abs(mTextPaint.fontMetrics.ascent)
-                drawTopText(canvas, text, textListSize) { mTextX = (width shr 1) - it / 2f }
+                drawTopText(canvas, text, textListSize,
+                    onInitializaTextY = {  layoutHighBrushingY(it) },
+                    onInitializaTextX = { layoutHighBrushingX((width shr 1) - it / 2f) }
+                )
             }
             GRAVITY_TOP_END -> {
-                mTextY = abs(mTextPaint.fontMetrics.ascent)
-                drawTopText(canvas, text, textListSize) { mTextX = width - it }
+                drawTopText(canvas, text, textListSize,
+                    onInitializaTextY = {  layoutHighBrushingY(it) },
+                    onInitializaTextX = { layoutHighBrushingX(width - it) }
+                )
             }
             GRAVITY_CENTER_START -> {
                 drawCenterText(canvas, text, textListSize,
-                    onInitializaTextY = {
-
-                    },
-                    onInitializaTextX = {
-                        mTextX = 0f
-                    }
+                    onInitializaTextY = { layoutHighBrushingY(it) },
+                    onInitializaTextX = { layoutHighBrushingX(0f) }
                 )
             }
             GRAVITY_CENTER -> {
                 drawCenterText(canvas, text, textListSize,
-                    onInitializaTextY = {
-                        if (mTextAnimationMode == ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW) {
-                            drawView(
-                                onCurrent = {
-                                    mTextY +=((if(mTextAnimationTopEnable) height.toFloat() else -height.toFloat())) + mTextAxisValue
-                                },
-                                onNext = {
-                                    mTextY += mTextAxisValue
-                                }
-                            )
-                        }
-                    },
-                    onInitializaTextX = {
-                        val width = (width shr 1) - it / 2f
-                        if (mTextAnimationMode == ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW) {
-                            drawView(
-                                onCurrent = {
-                                    mTextX = (if(mTextAnimationLeftEnable) this.width + width else -(this.width - width)) + mTextAxisValue
-                                },
-                                onNext = {
-                                    mTextX =  width + mTextAxisValue
-                                }
-                            )
-                        }
-                        else mTextX = width
-                    }
+                    onInitializaTextY = { layoutHighBrushingY(it) },
+                    onInitializaTextX = { layoutHighBrushingX((width shr 1) - it / 2f) }
                 )
             }
             GRAVITY_CENTER_END -> {
                 drawCenterText(canvas, text, textListSize,
-                    onInitializaTextY = {
-
-                    },
-                    onInitializaTextX = {
-                        mTextX = width - it
-                    }
+                    onInitializaTextY = { layoutHighBrushingY(it) },
+                    onInitializaTextX = { layoutHighBrushingX(width - it) }
                 )
             }
             GRAVITY_BOTTOM_START -> {
-                mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
-                drawBottomText(canvas, text, textListSize) { mTextX = 0f }
+                drawBottomText(canvas, text, textListSize,
+                    onInitializaTextY = { layoutHighBrushingY(it) },
+                    onInitializaTextX = { layoutHighBrushingX(0f) }
+                )
             }
             GRAVITY_BOTTOM_CENTER -> {
-                mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
-                drawBottomText(canvas, text, textListSize) { mTextX =  (width shr 1) - it /  2f }
+                drawBottomText(canvas, text, textListSize,
+                    onInitializaTextY = { layoutHighBrushingY(it) },
+                    onInitializaTextX = { layoutHighBrushingX((width shr 1) - it /  2f) }
+                )
             }
             GRAVITY_BOTTOM_END -> {
-                mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
-                drawBottomText(canvas, text, textListSize) { mTextX = width - it }
+                drawBottomText(canvas, text, textListSize,
+                    onInitializaTextY = { layoutHighBrushingY(it) },
+                    onInitializaTextX = { layoutHighBrushingX(width - it) }
+                )
             }
         }
 
@@ -331,6 +311,27 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         if (isDrawBrushingAnimation && mHighBrushingJob?.isCompleted == false) {
             mHighBrushingJob?.cancel()
         }
+    }
+
+    private fun layoutHighBrushingY(originY: Float) : Float {
+        var y = originY
+        if (mTextAnimationMode == ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW) {
+            drawView(
+                onCurrent = { y +=((if(mTextAnimationTopEnable) height.toFloat() else -height.toFloat())) + mTextAxisValue },
+                onNext = { y += mTextAxisValue }
+            )
+        }
+        return y
+    }
+
+    private fun layoutHighBrushingX(originX: Float)  {
+        if (mTextAnimationMode == ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW) {
+            drawView(
+                onCurrent = { mTextX = (if(mTextAnimationLeftEnable) width + originX else -(width - originX)) + mTextAxisValue },
+                onNext = { mTextX =  originX + mTextAxisValue }
+            )
+        }
+        else mTextX = originX
     }
 
     /**
@@ -453,7 +454,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
 
     private suspend fun launchHighBrushingRepeat(count: Int, isTopOrLeft: Boolean, duration: Long) {
         coroutineScope {
-            repeat(height) {
+            repeat(count) {
                 mHighBrushingJob = launch {
                     if (isTopOrLeft) mTextAxisValue-- else mTextAxisValue++
                     invalidate()
@@ -470,7 +471,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2023-11-04 17:53:43 周六 下午
      * @author crowforkotlin
      */
-    private inline fun drawTopText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onIniTextX: (Float) -> Unit) {
+    private inline fun drawTopText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onInitializaTextY: (Float) -> Float, onInitializaTextX: (Float) -> Unit) {
         if (mMultiLineEnable && textListSize > 1) {
             val heightHalf = height shr 1
             val textHeight = getTextHeight(mTextPaint.fontMetrics)
@@ -479,17 +480,19 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             val maxLine =  if (height < textHeightWithMargin) 1 else (measuredHeight / (textHeightWithMargin)).toInt()
             var listStartPos = mListPosition * maxLine
             val textYIncremenet = textHeight + marginRow
+            mTextY = onInitializaTextY(abs(mTextPaint.fontMetrics.ascent))
             repeat(maxLine) {
                 if (listStartPos < mList.size) {
                     val currentText = mList[listStartPos]
-                    onIniTextX(currentText.second)
+                    onInitializaTextX(currentText.second)
                     canvas.drawText(currentText.first)
                     listStartPos ++
                     mTextY += textYIncremenet
                 } else return
             }
         } else {
-            onIniTextX(text.second)
+            mTextY = abs(mTextPaint.fontMetrics.ascent)
+            onInitializaTextX(text.second)
             canvas.drawText(text.first)
         }
     }
@@ -500,7 +503,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2023-11-04 17:54:09 周六 下午
      * @author crowforkotlin
      */
-    private inline fun drawCenterText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onInitializaTextY: (Float) -> Unit, onInitializaTextX: (Float) -> Unit) {
+    private inline fun drawCenterText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onInitializaTextY: (Float) -> Float, onInitializaTextX: (Float) -> Unit) {
         val screenHeightHalf = height shr 1
         val fontMetrics = mTextPaint.fontMetrics
         val textHeight = getTextHeight(fontMetrics)
@@ -513,25 +516,26 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             val validRow = if (listStartPos + maxRow <= textListSize) maxRow else textListSize - listStartPos
             val halfCount = validRow shr 1
             if (maxRow == 1 || validRow == 1) halfMarginRow = 0f
-            mTextY = if (validRow % 2 == 0) { // 考虑到 偶数、奇数 行居中的效果
-                (screenHeightHalf - (textHeightWithMargin * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount - 1)) - baseLineOffsetY - halfMarginRow + ROW_DEVIATION
-            } else {
-                (screenHeightHalf - (textHeightWithMargin * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION
-            }
+            mTextY = onInitializaTextY(
+                if (validRow % 2 == 0) { // 考虑到 偶数、奇数 行居中的效果
+                    (screenHeightHalf - (textHeightWithMargin * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount - 1)) - baseLineOffsetY - halfMarginRow + ROW_DEVIATION
+                } else {
+                    (screenHeightHalf - (textHeightWithMargin * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION
+                }
+            )
+//            mTextY = onInitializaTextY(mTextY)
             repeat(validRow) {
                 if (listStartPos < textListSize) {
                     val currentText = mList[listStartPos]
                     onInitializaTextX(currentText.second)
-                    onInitializaTextY(mTextY)
                     canvas.drawText(currentText.first)
                     listStartPos ++
                     mTextY += textHeightWithMargin
                 } else return
             }
         } else {
-            mTextY = screenHeightHalf + baseLineOffsetY
+            mTextY = onInitializaTextY(screenHeightHalf + baseLineOffsetY)
             onInitializaTextX(text.second)
-            onInitializaTextY(mTextY)
             canvas.drawText(text.first)
         }
     }
@@ -542,8 +546,9 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2023-11-04 17:54:00 周六 下午
      * @author crowforkotlin
      */
-    private inline fun drawBottomText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onIniTextX: (Float) -> Unit) {
+    private inline fun drawBottomText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onInitializaTextY: (Float) -> Float, onInitializaTextX: (Float) -> Unit) {
         if (mMultiLineEnable && textListSize > 1) {
+            val height = height
             val heightHalf = height shr 1
             val marginRow = if (mTextRowMargin >= heightHalf) heightHalf.toFloat() else mTextRowMargin
             val textHeight = getTextHeight(mTextPaint.fontMetrics)
@@ -554,17 +559,19 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             val endPos = mListPosition * maxLine
             var pos = if (listSize >= startPos) startPos - 1 else listSize - 1
             val textYIncrement = textHeight + marginRow
+            mTextY = onInitializaTextY(height - calculateBaselineOffsetY(mTextPaint.fontMetrics))
             repeat(maxLine) {
                 if (pos >= endPos) {
                     val currentText = mList[pos]
-                    onIniTextX(currentText.second)
+                    onInitializaTextX(currentText.second)
                     canvas.drawText(currentText.first)
                     pos --
                     mTextY -= textYIncrement
                 } else return
             }
         } else {
-            onIniTextX(text.second)
+            mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
+            onInitializaTextX(text.second)
             canvas.drawText(text.first)
         }
     }

@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity() {
         AttrTextLayout.mAwaitAnimationCount = 4
         lifecycleScope.launch {
             readFile()
-            delay(4000)
             // mBinding.attrTextLayout.mTextAnimationLeftEnable = false
             /*.also { layout ->
                 val text = layout.mText + "456"
@@ -50,14 +49,10 @@ class MainActivity : AppCompatActivity() {
                         layout.mText = text
                     }
                 }*/
+            mBinding.attrTextLayout.mText = mContent
             repeat(4) {
                 // createAttrTextLayout(0f, it * 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
-//                createAttrTextLayout(0f, 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
-//                createAttrTextLayout(0f, 32f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
-//                createAttrTextLayout(0f, 48f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
             }
-//            createAttrTextLayout(0f, 32f, 128, 32, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
-//            createAttrTextLayout(0f, 0f, width, height)
         }
     }
 
@@ -74,7 +69,10 @@ class MainActivity : AppCompatActivity() {
             navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
         )
         setContentView(mBinding.root)
-        WindowCompat.getInsetsController(window, mBinding.root).isAppearanceLightStatusBars = false
+        WindowCompat.getInsetsController(window, mBinding.root).apply {
+            isAppearanceLightStatusBars = false
+            hide(WindowInsetsCompat.Type.systemBars())
+        }
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
