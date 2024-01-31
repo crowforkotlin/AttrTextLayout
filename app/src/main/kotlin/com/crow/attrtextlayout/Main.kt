@@ -1,6 +1,9 @@
 package com.crow.attrtextlayout
 
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.async
@@ -19,16 +22,16 @@ val main2 = Main()
 val ui = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
 fun main() = runBlocking {
     val scope = CoroutineScope(Executors.newSingleThreadExecutor().asCoroutineDispatcher())
-    val job = scope.launch {
-        running(scope, main1)
-        delay(Long.MAX_VALUE)
-    }
-    scope.async {delay(1000)
-        running(scope, main2) }
-    job.join()
-    println("----------------------------------------")
-    println(main1.value)
-    println(main2.value)
+    var a: Deferred<Unit>? = null
+    scope.async(CoroutineExceptionHandler { coroutineContext, throwable -> println("2")}) {
+        scope.launch(CoroutineExceptionHandler { coroutineContext, throwable -> println("1")}) {
+            delay(2000)
+            a?.cancel()
+        }
+        a = scope.async(CoroutineExceptionHandler { coroutineContext, throwable -> println("3")}) { delay(5000) }
+        a?.await()
+    }.await()
+    println("end")
     this.coroutineContext.job.join()
 }
 

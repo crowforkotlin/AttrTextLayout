@@ -18,7 +18,7 @@
         app:textMonoSpaceEnable="true"
         app:textBoldEnable="false"
         app:textFakeBoldEnable="false"
-        app:textAntiAliasEnable="true"
+        app:textAntiAliasEnable="false"
         app:textColor="@color/white"
         app:textItalicEnable="false"
         app:singleTextAnimationEnable="true"

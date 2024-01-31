@@ -36,7 +36,9 @@ import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
 import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX_OR_DEFAULT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -458,29 +460,21 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     }
 
     private suspend fun launchHighBrushingRepeat(scope: CoroutineScope, count: Int, isTopOrLeft: Boolean, duration: Long) {
-
         if (isTopOrLeft) {
-            repeat(count) {
-                mHighBrushingJob?.join()
-                mHighBrushingJob = scope.launch {
-                    mTextAxisValue -= 1
-                    "--- $mTextAxisValue".debugLog()
+                repeat(count) {
+                    mTextAxisValue--
                     invalidate()
-                    delay(duration)
+                    mHighBrushingJob = scope.launch{ delay(duration) }
+                    mHighBrushingJob?.join()
+                }
+            } else {
+                repeat(count) {
+                    mTextAxisValue ++
+                    invalidate()
+                    mHighBrushingJob = scope.launch{ delay(duration) }
+                    mHighBrushingJob?.join()
                 }
             }
-        } else {
-            "LAUNCH".debugLog()
-            repeat(count) {
-                mHighBrushingJob?.join()
-                mHighBrushingJob = scope.launch {
-                    mTextAxisValue += 1
-                    if (tag.toString().toInt() == 0) { "+++ $mTextAxisValue \t $it".debugLog() }
-                    invalidate()
-                    delay(Long.MAX_VALUE)
-                }
-            }
-        }
     }
 
     /**
@@ -541,7 +535,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                     (screenHeightHalf - (textHeightWithMargin * if(validRow < TEXT_HEIGHT_VALID_ROW) 0 else halfCount)) + baseLineOffsetY - ROW_DEVIATION
                 }
             )
-//            mTextY = onInitializaTextY(mTextY)
             repeat(validRow) {
                 if (listStartPos < textListSize) {
                     val currentText = mList[listStartPos]
