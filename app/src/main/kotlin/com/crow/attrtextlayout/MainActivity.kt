@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.w3c.dom.Attr
 import java.io.File
 
 @Suppress("SpellCheckingInspection")
@@ -92,6 +93,7 @@ class MainActivity : AppCompatActivity() {
         layout.mTextSize = 14f
         layout.mTextGravity = AttrTextLayout.GRAVITY_CENTER
         layout.mTextGradientDirection = AttrTextLayout.GRADIENT_VERTICAL
+        layout.mTextSizeUnitStrategy = AttrTextLayout.STRATEGY_DIMENSION_PX_OR_DEFAULT
         layout.mSingleTextAnimationEnable = true
         layout.mTextMultipleLineEnable = false
         layout.mTextResidenceTime = 3000
@@ -101,6 +103,7 @@ class MainActivity : AppCompatActivity() {
         layout.mTextMonoSpaceEnable = false
         layout.mTextBoldEnable = false
         layout.mTextFakeBoldEnable = false
+        layout.mTextFakeItalicEnable = false
         layout.mTextAntiAliasEnable = false
         layout.mTextItalicEnable = false
         layout.mTextSizeUnitStrategy
