@@ -22,6 +22,7 @@ import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_END
@@ -414,6 +415,18 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                         onNext = {
                             val dx = if (mTextAnimationLeftEnable) mAnimationTimeFraction * -width else mAnimationTimeFraction * width
                             canvas.translate(dx, 0f)
+                        }
+                    )
+                }
+                ANIMATION_MOVE_Y_DRAW -> {
+                    drawView(
+                        onCurrent = {
+                            val dy = if (mTextAnimationTopEnable) height - mAnimationTimeFraction * height else -height + mAnimationTimeFraction * height
+                            canvas.translate(0f, dy)
+                        },
+                        onNext = {
+                            val dy = if (mTextAnimationTopEnable) mAnimationTimeFraction * -height else mAnimationTimeFraction * height
+                            canvas.translate(0f, dy)
                         }
                     )
                 }

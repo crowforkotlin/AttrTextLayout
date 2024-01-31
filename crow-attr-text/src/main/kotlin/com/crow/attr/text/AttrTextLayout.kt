@@ -188,7 +188,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         const val ANIMATION_RHOMBUS: Short = 314
         const val ANIMATION_CONTINUATION_RHOMBUS: Short = 315
         const val ANIMATION_MOVE_X_DRAW: Short = 316
-        const val ANIMATION_MOVE_Y_DRAW: Short = 316
+        const val ANIMATION_MOVE_Y_DRAW: Short = 317
         const val ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW: Short = 318
         const val ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW: Short = 319
 
