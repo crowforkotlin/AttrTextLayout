@@ -36,6 +36,7 @@ import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
 import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX_OR_DEFAULT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -327,8 +328,20 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         }
 
         // 如果执行的是高刷新绘制动画那么需要取消任务
-        if (isDrawBrushingAnimation) { mHighBrushingJob?.cancel() }
+        if (isDrawBrushingAnimation) {
+            mHighBrushingJob?.cancel()
+            return
+            val time = System.currentTimeMillis() - mStartTime
+            if(time <3 ) {
+                scope.launch {
+                    delay(3 - time)
+                    mHighBrushingJob?.cancel()
+                }
+            } else {
+            }
+        }
     }
+    val scope = MainScope()
 
     /**
      * ● 绘制Canvas动画
@@ -420,6 +433,8 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         return false
     }
 
+    private var mStartTime = 0L
+
     /**
      * ● 启动高刷绘制动画
      *
@@ -433,6 +448,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             repeat(width) {
                 mHighBrushingJob = scope.launch {
                     if(isLeft) mTextAxisValue -- else mTextAxisValue ++
+                    mStartTime = System.currentTimeMillis()
                     invalidate()
                     delay(duration)
                 }

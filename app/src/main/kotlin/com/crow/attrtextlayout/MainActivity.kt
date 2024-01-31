@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 //        createAttrTextLayout(0f, 0f, 512, 256)
 //        val width = resources.displayMetrics.widthPixels / 2
 //        val height = resources.displayMetrics.heightPixels / 2
-        AttrTextLayout.mAwaitAnimationCount = 1
+        AttrTextLayout.mAwaitAnimationCount = 4
         lifecycleScope.launch {
             readFile()
             delay(4000)

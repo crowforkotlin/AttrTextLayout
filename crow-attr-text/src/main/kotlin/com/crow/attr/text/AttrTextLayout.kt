@@ -1139,7 +1139,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         viewNextB.mIsCurrentView = true
         updateViewPosition()
         updateTextListPosition()
-        val duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1)  16L else 16L + (4 * this) }
+        var duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1)  16L else 16L + (4 * this) }
         mViewScope.launch { viewCurrentA.launchHighBrushingDrawAnimation(mViewScope,isX, duration) }
         mViewScope.async { viewNextB.launchHighBrushingDrawAnimation(mViewScope,isX, duration) }.await()
         viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
