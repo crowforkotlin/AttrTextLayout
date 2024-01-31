@@ -1142,8 +1142,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
         updateViewPosition()
         updateTextListPosition()
         var duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1)  16L else 16L + (4 * this) }
-        mViewScope.launch { viewCurrentA.launchHighBrushingDrawAnimation(mViewScope,isX, duration) }
-        mViewScope.async { viewNextB.launchHighBrushingDrawAnimation(mViewScope,isX, duration) }.await()
+        mViewScope.launch { viewCurrentA.launchHighBrushingDrawAnimation(this, isX, duration) }
+        mViewScope.async { viewNextB.launchHighBrushingDrawAnimation(this, isX, duration) }.await()
         viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
         viewNextB.setLayerType(LAYER_TYPE_NONE, null)
         tryReduceAniamtionTaskCount()

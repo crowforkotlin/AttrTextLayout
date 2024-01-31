@@ -28,7 +28,7 @@
         app:textResidenceTime="3000"
         app:textAnimationMode="move_x_high_brushing_draw"
         app:textSizeUnitStrategy="defaultOrSp"
-        app:textUpdateStrategy="update_all"
+        app:textUpdateStrategy="all"
         app:textAnimationStrategy="continua"
         app:textRowMargin="1px"
         app:textCharSpacing="1px"

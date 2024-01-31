@@ -21,7 +21,7 @@
             <enum name="right" value="1" />
         </attr>
         <attr name="textUpdateStrategy" fokrmat="enum">
-            <enum name="update_all" value="900" />
+            <enum name="all" value="900" />
             <enum name="lazy" value="901" />
             <enum name="current" value="902" />
         </attr>

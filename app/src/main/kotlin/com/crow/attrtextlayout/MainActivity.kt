@@ -41,15 +41,13 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             readFile()
             // mBinding.attrTextLayout.mTextAnimationLeftEnable = false
-            /*.also { layout ->
-                val text = layout.mText + "456"
                 lifecycleScope.launch {
                     repeat(Int.MAX_VALUE) {
-                        delay(2000)
-                        layout.mText = text
+                        delay(20)
+                        mBinding.attrTextLayout.mText = it.toString()
                     }
-                }*/
-            mBinding.attrTextLayout.mText = mContent
+                }
+//            mBinding.attrTextLayout.mText = mContent
             repeat(4) {
                 // createAttrTextLayout(0f, it * 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
             }

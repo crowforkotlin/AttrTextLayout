@@ -35,10 +35,13 @@ import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_END
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
 import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX_OR_DEFAULT
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.properties.Delegates
@@ -328,7 +331,9 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         if (mTextAnimationMode == ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW) {
             drawView(
                 onCurrent = { mTextX = (if(mTextAnimationLeftEnable) width + originX else -(width - originX)) + mTextAxisValue },
-                onNext = { mTextX =  originX + mTextAxisValue }
+                onNext = {
+                    mTextX =  originX + mTextAxisValue
+                }
             )
         }
         else mTextX = originX
@@ -446,21 +451,34 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     internal suspend fun launchHighBrushingDrawAnimation(scope: CoroutineScope, isX: Boolean, duration: Long = IAttrText.DRAW_VIEW_MIN_DURATION) {
         mTextAxisValue = 0f
         if (isX) {
-            launchHighBrushingRepeat(width, mTextAnimationLeftEnable, duration)
+            launchHighBrushingRepeat(scope, width, mTextAnimationLeftEnable, duration)
         } else {
-            launchHighBrushingRepeat(height, mTextAnimationTopEnable, duration)
+            launchHighBrushingRepeat(scope, height, mTextAnimationTopEnable, duration)
         }
     }
 
-    private suspend fun launchHighBrushingRepeat(count: Int, isTopOrLeft: Boolean, duration: Long) {
-        coroutineScope {
+    private suspend fun launchHighBrushingRepeat(scope: CoroutineScope, count: Int, isTopOrLeft: Boolean, duration: Long) {
+
+        if (isTopOrLeft) {
             repeat(count) {
-                mHighBrushingJob = launch {
-                    if (isTopOrLeft) mTextAxisValue-- else mTextAxisValue++
+                mHighBrushingJob?.join()
+                mHighBrushingJob = scope.launch {
+                    mTextAxisValue -= 1
+                    "--- $mTextAxisValue".debugLog()
                     invalidate()
                     delay(duration)
                 }
+            }
+        } else {
+            "LAUNCH".debugLog()
+            repeat(count) {
                 mHighBrushingJob?.join()
+                mHighBrushingJob = scope.launch {
+                    mTextAxisValue += 1
+                    if (tag.toString().toInt() == 0) { "+++ $mTextAxisValue \t $it".debugLog() }
+                    invalidate()
+                    delay(Long.MAX_VALUE)
+                }
             }
         }
     }
