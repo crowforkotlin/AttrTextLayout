@@ -118,7 +118,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 else -> error("AttrTextLayout Get Unknow SizeUnitStrategy Value $value!")
             }
             mTextAnimationMode = when(val value = getInt(R.styleable.AttrTextLayout_textAnimationMode, ANIMATION_DEFAULT.toInt())) {
-                in ANIMATION_DEFAULT..ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> value.toShort()
+                in ANIMATION_DEFAULT..ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW -> value.toShort()
                 else -> error("AttrTextLayout Get Unknow AnimationMode Value $value!")
             }
             mTextAnimationStrategy = when(val value = getInt(R.styleable.AttrTextLayout_textAnimationStrategy, STRATEGY_ANIMATION_UPDATE_CONTINUA.toInt())) {
@@ -189,8 +189,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
         const val ANIMATION_CONTINUATION_RHOMBUS: Short = 315
         const val ANIMATION_MOVE_X_DRAW: Short = 316
         const val ANIMATION_MOVE_Y_DRAW: Short = 317
-        const val ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW: Short = 318
-        const val ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW: Short = 319
+        const val ANIMATION_MOVE_X_HIGH_BRUSH_DRAW: Short = 318
+        const val ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW: Short = 319
 
         /**
          * ● 重新加载更新策略：当重新绘制的时候是否重新执行动画
@@ -1111,8 +1111,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     ANIMATION_CONTINUATION_RHOMBUS -> launchContinuousDrawAnimation(isDelay= delay)
                     ANIMATION_MOVE_X_DRAW -> launchContinuousDrawAnimation(isDelay = delay)
                     ANIMATION_MOVE_Y_DRAW -> launchContinuousDrawAnimation(isDelay = delay)
-                    ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW -> launchHighBrushingDrawAnimation(isX = true)
-                    ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> launchHighBrushingDrawAnimation(isX = false)
+                    ANIMATION_MOVE_X_HIGH_BRUSH_DRAW -> launchHighBrushDrawAnimation(isX = true)
+                    ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW -> launchHighBrushDrawAnimation(isX = false)
                 }
                 delay = true
             }
@@ -1125,7 +1125,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ● 2024-01-29 17:00:36 周一 下午
      * @author crowforkotlin
      */
-    private suspend fun launchHighBrushingDrawAnimation(isX: Boolean) {
+    private suspend fun launchHighBrushDrawAnimation(isX: Boolean) {
         delay(mAnimationDuration)
         tryAwaitAnimationTask()
         val viewCurrentA = mCacheViews[mCurrentViewPos]
@@ -1141,8 +1141,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
         updateViewPosition()
         updateTextListPosition()
         val duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1) 0L else 1L + (4L * this) }
-        mViewScope.launch { viewCurrentA.launchHighBrushingDrawAnimation(this, isX, duration) }
-        mViewScope.async { viewNextB.launchHighBrushingDrawAnimation(this, isX, duration) }.await()
+        mViewScope.launch { viewCurrentA.launchHighBrushDrawAnimation(this, isX, duration) }
+        mViewScope.async { viewNextB.launchHighBrushDrawAnimation(this, isX, duration) }.await()
         viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
         viewNextB.setLayerType(LAYER_TYPE_NONE, null)
         tryReduceAniamtionTaskCount()
@@ -1595,6 +1595,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     private fun onInitAttrTextViewValue(view: AttrTextView) {
         mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+        view.mScope = mViewScope
         view.mTextSizeUnitStrategy = mTextSizeUnitStrategy
         view.mTextAnimationTopEnable = mTextAnimationTopEnable
         view.mTextAnimationLeftEnable = mTextAnimationLeftEnable

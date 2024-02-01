@@ -21,9 +21,9 @@ import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_DRAW
-import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_HIGH_BRUSH_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_DRAW
-import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_END
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_START
@@ -36,7 +36,6 @@ import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
 import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX_OR_DEFAULT
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.abs
@@ -97,7 +96,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2024-02-01 11:16:58 周四 上午
      * @author crowforkotlin
      */
-    private var mHighBrushingDelayDuration = 0L
+    private var mHighBrushDuration = 0L
 
     /**
      * ● 高刷方向 是否为 Top和Left
@@ -105,7 +104,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2024-02-01 11:14:08 周四 上午
      * @author crowforkotlin
      */
-    private var mHighBrushingTopOrLeft = false
+    private var mHighBrushTopOrLeft = false
 
     /**
      * ● 高刷PX像素个数
@@ -113,7 +112,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2024-02-01 11:14:36 周四 上午
      * @author crowforkotlin
      */
-    private var mHighBrushingPixelCount = 0
+    private var mHighBrushPixelCount = 0
 
     /**
      * ● 高刷新绘制任务
@@ -121,7 +120,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2024-01-30 15:40:31 周二 下午
      * @author crowforkotlin
      */
-    private var mHighBrushingJob: Job?= null
+    private var mHighBrushJob: Job?= null
 
     /**
      * ● 文本X坐标
@@ -279,68 +278,68 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         val text = if (mListPosition !in 0..< textListSize) { mList.last() } else mList[mListPosition]
 
         // 执行动画
-        val isDrawBrushingAnimation = drawAnimation(canvas)
+        val isDrawBrushAnimation = drawAnimation(canvas)
 
         // 设置X和Y的坐标 ，Paint绘制的文本在descent位置 进行相对应的计算即可
         when(mGravity) {
             GRAVITY_TOP_START -> {
                 drawTopText(canvas, text, textListSize,
-                    onInitializaTextY = { layoutHighBrushingY(it) },
-                    onInitializaTextX = { layoutHighBrushingX(0f) }
+                    onInitializaTextY = { layoutHighBrushY(it) },
+                    onInitializaTextX = { layoutHighBrushX(0f) }
                 )
             }
             GRAVITY_TOP_CENTER -> {
                 drawTopText(canvas, text, textListSize,
-                    onInitializaTextY = {  layoutHighBrushingY(it) },
-                    onInitializaTextX = { layoutHighBrushingX((width shr 1) - it / 2f) }
+                    onInitializaTextY = {  layoutHighBrushY(it) },
+                    onInitializaTextX = { layoutHighBrushX((width shr 1) - it / 2f) }
                 )
             }
             GRAVITY_TOP_END -> {
                 drawTopText(canvas, text, textListSize,
-                    onInitializaTextY = {  layoutHighBrushingY(it) },
-                    onInitializaTextX = { layoutHighBrushingX(width - it) }
+                    onInitializaTextY = {  layoutHighBrushY(it) },
+                    onInitializaTextX = { layoutHighBrushX(width - it) }
                 )
             }
             GRAVITY_CENTER_START -> {
                 drawCenterText(canvas, text, textListSize,
-                    onInitializaTextY = { layoutHighBrushingY(it) },
-                    onInitializaTextX = { layoutHighBrushingX(0f) }
+                    onInitializaTextY = { layoutHighBrushY(it) },
+                    onInitializaTextX = { layoutHighBrushX(0f) }
                 )
             }
             GRAVITY_CENTER -> {
                 drawCenterText(canvas, text, textListSize,
-                    onInitializaTextY = { layoutHighBrushingY(it) },
-                    onInitializaTextX = { layoutHighBrushingX((width shr 1) - it / 2f) }
+                    onInitializaTextY = { layoutHighBrushY(it) },
+                    onInitializaTextX = { layoutHighBrushX((width shr 1) - it / 2f) }
                 )
             }
             GRAVITY_CENTER_END -> {
                 drawCenterText(canvas, text, textListSize,
-                    onInitializaTextY = { layoutHighBrushingY(it) },
-                    onInitializaTextX = { layoutHighBrushingX(width - it) }
+                    onInitializaTextY = { layoutHighBrushY(it) },
+                    onInitializaTextX = { layoutHighBrushX(width - it) }
                 )
             }
             GRAVITY_BOTTOM_START -> {
                 drawBottomText(canvas, text, textListSize,
-                    onInitializaTextY = { layoutHighBrushingY(it) },
-                    onInitializaTextX = { layoutHighBrushingX(0f) }
+                    onInitializaTextY = { layoutHighBrushY(it) },
+                    onInitializaTextX = { layoutHighBrushX(0f) }
                 )
             }
             GRAVITY_BOTTOM_CENTER -> {
                 drawBottomText(canvas, text, textListSize,
-                    onInitializaTextY = { layoutHighBrushingY(it) },
-                    onInitializaTextX = { layoutHighBrushingX((width shr 1) - it /  2f) }
+                    onInitializaTextY = { layoutHighBrushY(it) },
+                    onInitializaTextX = { layoutHighBrushX((width shr 1) - it /  2f) }
                 )
             }
             GRAVITY_BOTTOM_END -> {
                 drawBottomText(canvas, text, textListSize,
-                    onInitializaTextY = { layoutHighBrushingY(it) },
-                    onInitializaTextX = { layoutHighBrushingX(width - it) }
+                    onInitializaTextY = { layoutHighBrushY(it) },
+                    onInitializaTextX = { layoutHighBrushX(width - it) }
                 )
             }
         }
 
         // 如果执行的是高刷新绘制动画并且任务正在阻塞中
-        if (isDrawBrushingAnimation && mHighBrushingJob?.isCompleted == false) invalidateHighBrushingAnimation(mHighBrushingDelayDuration )
+        if (isDrawBrushAnimation && mHighBrushJob?.isCompleted == false) invalidateHighBrushAnimation(mHighBrushDuration )
     }
 
     /**
@@ -349,9 +348,9 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2024-02-01 11:15:21 周四 上午
      * @author crowforkotlin
      */
-    private fun layoutHighBrushingY(originY: Float) : Float {
+    private fun layoutHighBrushY(originY: Float) : Float {
         var y = originY
-        if (mTextAnimationMode == ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW) {
+        if (mTextAnimationMode == ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW) {
             drawView(
                 onCurrent = { y +=((if(mTextAnimationTopEnable) height.toFloat() else -height.toFloat())) + mTextAxisValue },
                 onNext = { y += mTextAxisValue }
@@ -366,8 +365,8 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2024-02-01 11:15:40 周四 上午
      * @author crowforkotlin
      */
-    private fun layoutHighBrushingX(originX: Float)  {
-        if (mTextAnimationMode == ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW) {
+    private fun layoutHighBrushX(originX: Float)  {
+        if (mTextAnimationMode == ANIMATION_MOVE_X_HIGH_BRUSH_DRAW) {
             drawView(
                 onCurrent = { mTextX = (if(mTextAnimationLeftEnable) width + originX else -(width - originX)) + mTextAxisValue },
                 onNext = {
@@ -475,7 +474,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                         }
                     )
                 }
-                ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW, ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> return true
+                ANIMATION_MOVE_X_HIGH_BRUSH_DRAW, ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW -> return true
             }
         }
         return false
@@ -487,12 +486,12 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2024-01-30 15:41:27 周二 下午
      * @author crowforkotlin
      */
-    internal suspend fun launchHighBrushingDrawAnimation(scope: CoroutineScope, isX: Boolean, duration: Long = IAttrText.DRAW_VIEW_MIN_DURATION) {
+    internal suspend fun launchHighBrushDrawAnimation(scope: CoroutineScope, isX: Boolean, duration: Long = IAttrText.DRAW_VIEW_MIN_DURATION) {
         mTextAxisValue = 0f
         if (isX) {
-            launchHighBrushingSuspendAnimation(scope, width, mTextAnimationLeftEnable, duration)
+            launchHighBrushSuspendAnimation(scope, width, mTextAnimationLeftEnable, duration)
         } else {
-            launchHighBrushingSuspendAnimation(scope, height, mTextAnimationTopEnable, duration)
+            launchHighBrushSuspendAnimation(scope, height, mTextAnimationTopEnable, duration)
         }
     }
 
@@ -502,7 +501,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2024-02-01 11:17:55 周四 上午
      * @author crowforkotlin
      */
-    private suspend fun launchHighBrushingSuspendAnimation(scope: CoroutineScope, count: Int, isTopOrLeft: Boolean, duration: Long) {
+    private suspend fun launchHighBrushSuspendAnimation(scope: CoroutineScope, count: Int, isTopOrLeft: Boolean, duration: Long) {
 
         /*if (isTopOrLeft) {
             repeat(count) {
@@ -519,12 +518,12 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                 mHighBrushingJob?.join()
             }
         }*/
-        mHighBrushingPixelCount = count
-        mHighBrushingTopOrLeft = isTopOrLeft
-        mHighBrushingDelayDuration = duration
-        invalidateHighBrushingAnimation(duration = 0)
-        mHighBrushingJob =  scope.launch { delay(Long.MAX_VALUE) }
-        mHighBrushingJob?.join()
+        mHighBrushPixelCount = count
+        mHighBrushTopOrLeft = isTopOrLeft
+        mHighBrushDuration = duration
+        invalidateHighBrushAnimation(duration = 0)
+        mHighBrushJob =  scope.launch { delay(Long.MAX_VALUE) }
+        mHighBrushJob?.join()
     }
 
     /**
@@ -533,20 +532,20 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ● 2024-02-01 14:15:20 周四 下午
      * @author crowforkotlin
      */
-    private fun invalidateHighBrushingAnimation(duration: Long) {
-        if (mHighBrushingTopOrLeft) {
+    private fun invalidateHighBrushAnimation(duration: Long) {
+        if (mHighBrushTopOrLeft) {
             mTextAxisValue --
-            if (mTextAxisValue > -mHighBrushingPixelCount) {
+            if (mTextAxisValue > -mHighBrushPixelCount) {
                 if (duration == 0L) invalidate() else mScope?.scope(duration) { invalidate() }
             } else {
-                mHighBrushingJob?.cancel()
+                mHighBrushJob?.cancel()
             }
         } else {
             mTextAxisValue ++
-            if (mTextAxisValue < mHighBrushingPixelCount) {
+            if (mTextAxisValue < mHighBrushPixelCount) {
                 if (duration == 0L) invalidate() else mScope?.scope(duration) { invalidate() }
             } else {
-                mHighBrushingJob?.cancel()
+                mHighBrushJob?.cancel()
             }
         }
     }
