@@ -27,49 +27,53 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 - 用的GIF进行录制会很卡顿，实际效果非常顺畅
 - 高刷的移动速度较慢，但在像素级视图中做到了和OpenGL ES同等的效果，在像素级视图中非常顺畅，可参考[关于高刷动画说明](#about_high_brush)
 
-| ![](docs/img/1.6/move_x_high_brush.gif) | ![](docs/img/1.6/erase_x_continuation_debug.gif) |
-|:------------------------------------------:|:------------------------------------------------:|
-|        MoveX-HighBrushing - X轴高刷移动         |       MoveX-HighBrushing - X轴高刷移动 - DEBUG        |
+| ![](docs/img/1.6/move_x_high_brush.gif) | ![](docs/img/1.6/move_x_high)brush_debug.gif) |
+|:---------------------------------------:|:---------------------------------------------:|
+|       MoveX-HighBrushing - X轴高刷移动       |      MoveX-HighBrushing - X轴高刷移动 - DEBUG      |
+
+| ![](docs/img/1.6/move_y_high_brush.gif) | ![](docs/img/1.6/move_y_high)brush_debug.gif) |
+|:---------------------------------------:|:---------------------------------------------:|
+|       MoveY-HighBrushing - Y轴高刷移动       |      MoveY-HighBrushing - Y轴高刷移动 - DEBUG      |
 
 | ![](docs/img/1.6/erase_x_continuation.gif) | ![](docs/img/1.6/erase_x_continuation_debug.gif) |
-|:---:|:---:|
-| Continuation-EraseX - X轴向左连续擦除 | Continuation-EraseX - X轴向左连续擦除 - DEBUG |
+|:------------------------------------------:|:------------------------------------------------:|
+|       Continuation-EraseX - X轴向左连续擦除       |      Continuation-EraseX - X轴向左连续擦除 - DEBUG      |
 
 | ![](docs/img/1.6/erase_y_continuation.gif) | ![](docs/img/1.6/erase_y_continuation_debug.gif) |
-|:---:|:---:|
-| Continuation-EraseYTop - Y轴向上连续擦除 | Continuation-EraseYTop - Y轴向上连续擦除 - DEBUG |
+|:------------------------------------------:|:------------------------------------------------:|
+|     Continuation-EraseYTop - Y轴向上连续擦除      |    Continuation-EraseYTop - Y轴向上连续擦除 - DEBUG     |
 
 | ![](docs/img/1.6/oval_continuation.gif) | ![](docs/img/1.6/oval_continuation_debug.gif) |
-|:---:|:---:|
-| Continuation-Oval - 连续圆形时钟 | Continuation-Oval - 连续圆形时钟 - DEBUG |
+|:---------------------------------------:|:---------------------------------------------:|
+|       Continuation-Oval - 连续圆形时钟        |      Continuation-Oval - 连续圆形时钟 - DEBUG       |
 
 | ![](docs/img/1.6/rhombus_continuation.gif) | ![](docs/img/1.6/rhombus_continuation_debug.gif) |
-|:---:|:---:|
-| Continuation-Rhombus - 连续菱形 | Continuation-Rhombus - 连续菱形 - DEBUG |
+|:------------------------------------------:|:------------------------------------------------:|
+|        Continuation-Rhombus - 连续菱形         |       Continuation-Rhombus - 连续菱形 - DEBUG        |
 
 | ![](docs/img/1.6/cross_extension_continuation.gif) | ![](docs/img/1.6/cross_extension_continuation_debug.gif) |
-|:---:|:---:|
-| Continuation-Oval - 连续十字扩展 | Continuation-Oval - 连续十字扩展 - DEBUG |
+|:--------------------------------------------------:|:--------------------------------------------------------:|
+|             Continuation-Oval - 连续十字扩展             |            Continuation-Oval - 连续十字扩展 - DEBUG            |
 
 | ![](docs/img/1.6/center.gif) | ![](docs/img/1.6/center_debug.gif) |
-|:---:|:---:|
-| Center - 中心缩放 | Center - 中心缩放 - DEBUG |
+|:----------------------------:|:----------------------------------:|
+|        Center - 中心缩放         |       Center - 中心缩放 - DEBUG        |
 
 | ![](docs/img/1.6/move_x_left.gif) | ![](docs/img/1.6/move_x_left_debug.gif) |
-|:---:|:---:|
-| Move X - X轴左向移动 | Move X - X轴左向移动 - DEBUG |
+|:---------------------------------:|:---------------------------------------:|
+|          Move X - X轴左向移动          |         Move X - X轴左向移动 - DEBUG         |
 
 | ![](docs/img/1.6/move_y_top.gif) | ![](docs/img/1.6/move_y_top_debug.gif) |
-|:---:|:---:|
-| Move Y - Y轴向上移动 | Move Y - Y轴向上移动 - DEBUG |
+|:--------------------------------:|:--------------------------------------:|
+|         Move Y - Y轴向上移动          |        Move Y - Y轴向上移动 - DEBUG         |
 
 | ![](docs/img/1.6/fade.gif) | ![](docs/img/1.6/fade_debug.gif) |
-|:---:|:---:|
-| Fade - 淡入淡出 - 异步 | Fade - 淡入淡出 - 异步 - DEBUG |
+|:--------------------------:|:--------------------------------:|
+|      Fade - 淡入淡出 - 异步      |     Fade - 淡入淡出 - 异步 - DEBUG     |
 
 | ![](docs/img/1.6/fade_sync.gif) | ![](docs/img/1.6/fade_sync_debug.gif) |
-|:---:|:---:|
-| Fade-Sync - 淡入淡出 - 同步 | Fade-Sync - 淡入淡出 - 同步 - DEBUG |
+|:-------------------------------:|:-------------------------------------:|
+|      Fade-Sync - 淡入淡出 - 同步      |     Fade-Sync - 淡入淡出 - 同步 - DEBUG     |
 
 - ## 代码示例 动态创建
 ```kotlin
