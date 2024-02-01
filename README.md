@@ -1,17 +1,8 @@
-# AttrTextLayout
+- # AttrTextLayout
 
 ![Kotlin Support Verison](https://img.shields.io/badge/Kotlin_Version-1.3.0+-blue) ![Android Support Version](https://img.shields.io/badge/Android_Version-4.4+-blue) ![Compat](https://img.shields.io/badge/Compat-AndroidX_&_Support_Library-blue)
 
-```text
-1.5版本引入了X轴高刷新率动画。在Android中，动画ValueAnimator用于完成数值A-B的匀速插值(假设0-1024)，
-以实现对View的动画表现。但是，如果动画时间较快，就会导致在这个期间内0-1024不能以+1+1的形式表示，
-在像素级视图中就会出现丢帧的情况。 为了实现高刷新率，可以考虑使用OpenGL ES绘制的文本，
-但是性能开销十分明显。因此，采用了协程机制为自定义View的高刷新进行了对应的处理，
-也确保视图能在16MS内绘制完成而不会造成卡顿，从而实现和OpenGLEs一样的效果，即不会出现丢帧。
-但是，这种方法的缺点是牺牲丢帧换来卡顿（这种情况只有在视图界面资源占用高的情况出现），
-性能开销也很大，并且视图多也会卡，这点没法优化。 如果想在像素级视图中使用高刷新获得顺畅的体验，
-那么可以考虑使用高刷新率动画特效，在日常使用中默认的即可。
-```
+- ## 配置
 
 ```kotlin
 
@@ -22,92 +13,64 @@ repository { mavenCentral() }
 implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 ```
 
+- ## 功能
 - [x] 支持配置文本策略、样式、换行、特效(擦除、移动、圆形、连续、非连续) 动画
 - [x] 支持XML和动态创建
-- [x] 优化绘制速度 < 3MS 
+- [x] 优化绘制速度 < 3MS
 - [x] 增加渐变色
 - [x] 增加高刷新率动画(仅支持左右移动、上下移动)
 - [ ] 配置渐变色RGB
 - [ ] 配置字体类型
 
 
-<table>
-	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/erase_x_continuation.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/erase_x_continuation_debug.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/erase_y_continuation.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/erase_y_continuation_debug.gif"></td>
-	</tr>
-    <tr>
-		<td align="center" style="padding: 10px;">Continuation-EraseX - X轴向左连续擦除</td>
-		<td align="center" style="padding: 10px;">Continuation-EraseX - X轴向左连续擦除 - DEBUG</td>
-		<td align="center" style="padding: 10px;">Continuation-EraseYTop - Y轴向上连续擦除</td>
-		<td align="center" style="padding: 10px;">Continuation-EraseYTop - Y轴向上连续擦除 - DEBUG</td>
-	</tr>
-</table>
+- ## 效果
+- 高刷的移动速度较慢，但在像素级视图中做到了和OpenGL ES同等的效果，在像素级视图中非常顺畅，可参考[关于高刷动画说明](#about_high_brush)
 
-<table>
-	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/oval_continuation.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/oval_continuation_debug.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/rhombus_continuation.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/rhombus_continuation_debug.gif"></td>
-	</tr>
-    <tr>
-		<td align="center" style="padding: 10px;">Continuation-Oval - 连续圆形时钟</td>
-		<td align="center" style="padding: 10px;">Continuation-Oval - 连续圆形时钟 - DEBUG</td>
-		<td align="center" style="padding: 10px;">Continuation-Rhombus - 连续菱形</td>
-		<td align="center" style="padding: 10px;">Continuation-Rhombus - 连续菱形 - DEBUG</td>
-	</tr>
-</table>
+| ![](docs/img/1.6/move_x_high_brushing.gif) | ![](docs/img/1.6/erase_x_continuation_debug.gif) |
+|:------------------------------------------:|:------------------------------------------------:|
+|        MoveX-HighBrushing - X轴高刷移动         |       MoveX-HighBrushing - X轴高刷移动 - DEBUG        |
 
-<table>
-	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/cross_extension_continuation.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/cross_extension_continuation_debug.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/center.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/center_debug.gif"></td>
-	</tr>
-    <tr>
-		<td align="center" style="padding: 10px;">Continuation-Oval - 连续十字扩展</td>
-		<td align="center" style="padding: 10px;">Continuation-Oval - 连续十字扩展 - DEBUG</td>
-		<td align="center" style="padding: 10px;">Center - 中心缩放</td>
-		<td align="center" style="padding: 10px;">Center - 中心缩放 - DEBUG</td>
-	</tr>
-</table>
+| ![](docs/img/1.6/erase_x_continuation.gif) | ![](docs/img/1.6/erase_x_continuation_debug.gif) |
+|:---:|:---:|
+| Continuation-EraseX - X轴向左连续擦除 | Continuation-EraseX - X轴向左连续擦除 - DEBUG |
 
-<table>
-	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/move_x_left.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/move_x_left_debug.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/move_y_top.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/move_y_top_debug.gif"></td>
-	</tr>
-    <tr>
-		<td align="center" style="padding: 10px;">Move X - X轴左向移动</td>
-		<td align="center" style="padding: 10px;">Move X - X轴左向移动 - DEBUG</td>
-		<td align="center" style="padding: 10px;">Move Y - Y轴向上移动</td>
-		<td align="center" style="padding: 10px;">Move Y - Y轴向上移动 - DEBUG</td>
-	</tr>
-</table>
+| ![](docs/img/1.6/erase_y_continuation.gif) | ![](docs/img/1.6/erase_y_continuation_debug.gif) |
+|:---:|:---:|
+| Continuation-EraseYTop - Y轴向上连续擦除 | Continuation-EraseYTop - Y轴向上连续擦除 - DEBUG |
 
-<table>
-	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/fade.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/fade_debug.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/fade_sync.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/fade_sync_debug.gif"></td>
-	</tr>
-    <tr>
-		<td align="center" style="padding: 10px;">Fade - 淡入淡出 - 异步</td>
-		<td align="center" style="padding: 10px;">Fade - 淡入淡出 - 异步 - DEBUG</td>
-		<td align="center" style="padding: 10px;">Fade-Sync - 淡入淡出 - 同步</td>
-		<td align="center" style="padding: 10px;">Fade-Sync - 淡入淡出 - 同步 - DEBUG</td>
-	</tr>
-</table>
+| ![](docs/img/1.6/oval_continuation.gif) | ![](docs/img/1.6/oval_continuation_debug.gif) |
+|:---:|:---:|
+| Continuation-Oval - 连续圆形时钟 | Continuation-Oval - 连续圆形时钟 - DEBUG |
 
----
+| ![](docs/img/1.6/rhombus_continuation.gif) | ![](docs/img/1.6/rhombus_continuation_debug.gif) |
+|:---:|:---:|
+| Continuation-Rhombus - 连续菱形 | Continuation-Rhombus - 连续菱形 - DEBUG |
 
+| ![](docs/img/1.6/cross_extension_continuation.gif) | ![](docs/img/1.6/cross_extension_continuation_debug.gif) |
+|:---:|:---:|
+| Continuation-Oval - 连续十字扩展 | Continuation-Oval - 连续十字扩展 - DEBUG |
+
+| ![](docs/img/1.6/center.gif) | ![](docs/img/1.6/center_debug.gif) |
+|:---:|:---:|
+| Center - 中心缩放 | Center - 中心缩放 - DEBUG |
+
+| ![](docs/img/1.6/move_x_left.gif) | ![](docs/img/1.6/move_x_left_debug.gif) |
+|:---:|:---:|
+| Move X - X轴左向移动 | Move X - X轴左向移动 - DEBUG |
+
+| ![](docs/img/1.6/move_y_top.gif) | ![](docs/img/1.6/move_y_top_debug.gif) |
+|:---:|:---:|
+| Move Y - Y轴向上移动 | Move Y - Y轴向上移动 - DEBUG |
+
+| ![](docs/img/1.6/fade.gif) | ![](docs/img/1.6/fade_debug.gif) |
+|:---:|:---:|
+| Fade - 淡入淡出 - 异步 | Fade - 淡入淡出 - 异步 - DEBUG |
+
+| ![](docs/img/1.6/fade_sync.gif) | ![](docs/img/1.6/fade_sync_debug.gif) |
+|:---:|:---:|
+| Fade-Sync - 淡入淡出 - 同步 | Fade-Sync - 淡入淡出 - 同步 - DEBUG |
+
+- ## 代码示例 动态创建
 ```kotlin
 // 设置和AttrTextLayout有关的类执行动画个数 限制5个 设置0或者不设置默认不限制（防止过多视图同时执行特效卡顿）
 AttrTextLayout.mAwaitAnimationCount = 5
@@ -218,31 +181,43 @@ const val STRATEGY_TEXT_UPDATE_LAZY: Short = 901
 const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
 ```
 
+- ## 代码示例 XML
 ```xml
 <com.crow.attr.text.AttrTextLayout
-        android:id="@+id/attrTextLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:textSize="14sp"
-        app:textAnimationX="left"
-        app:textAnimationY="bottom"
-        app:textMonoSpaceEnable="false"
-        app:textBoldEnable="false"
-        app:textFakeBoldEnable="false"
-        app:textAntiAliasEnable="false"
-        app:textColor="@color/white"
-        app:textItalicEnable="false"
-        app:singleTextAnimationEnable="true"
-        app:textMultipleLineEnable="false"
-        app:textGravity="center"
-        app:textGradientDirection="vertical"
-        app:textResidenceTime="3000"
-        app:textAnimationMode="move_x_high_brushing_draw"
-        app:textSizeUnitStrategy="defaultOrSp"
-        app:textUpdateStrategy="update_all"
-        app:textAnimationStrategy="continua"
-        app:textRowMargin="1px"
-        app:textCharSpacing="1px"
-        app:textScrollSpeed="13"
-        app:text="com.crow.attr.text.AttrTextLayout -- Manually implemented by Crow" />
+    android:id="@+id/attrTextLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:textSize="14sp"
+    app:textAnimationX="left"
+    app:textAnimationY="bottom"
+    app:textMonoSpaceEnable="false"
+    app:textBoldEnable="false"
+    app:textFakeBoldEnable="false"
+    app:textAntiAliasEnable="false"
+    app:textColor="@color/white"
+    app:textItalicEnable="false"
+    app:singleTextAnimationEnable="true"
+    app:textMultipleLineEnable="false"
+    app:textGravity="center"
+    app:textGradientDirection="vertical"
+    app:textResidenceTime="3000"
+    app:textAnimationMode="move_x_high_brushing_draw"
+    app:textSizeUnitStrategy="defaultOrSp"
+    app:textUpdateStrategy="update_all"
+    app:textAnimationStrategy="continua"
+    app:textRowMargin="1px"
+    app:textCharSpacing="1px"
+    app:textScrollSpeed="13"
+    app:text="com.crow.attr.text.AttrTextLayout -- Manually implemented by Crow" />
 ```
+
+- ## <a id="about_high_brush"></a>关于高刷动画
+```text
+1.5版本引入了X轴高刷新率动画。在Android中，动画ValueAnimator用于完成数值A-B的匀速插值(假设0-1024)，
+以实现对View的动画表现。但是，如果动画时间较快，就会导致在这个期间内0-1024不能以+1+1的形式表示，
+在像素级视图中就会出现丢帧的情况。 为了实现高刷新率，可以考虑使用OpenGL ES绘制的文本，
+但是性能开销十分明显。因此，采用了协程机制为自定义View的高刷新进行了对应的处理，
+也确保视图能在16MS内绘制完成而不会造成卡顿，从而实现和OpenGLEs一样的效果，即不会出现丢帧。
+但是，这种方法的缺点是牺牲丢帧换来卡顿（这种情况只有在视图界面资源占用高的情况出现），
+性能开销也很大，并且视图多也会卡，这点没法优化。 如果想在像素级视图中使用高刷新获得顺畅的体验，
+那么可以考虑使用高刷新率动画特效，在日常使用中默认的即可。
