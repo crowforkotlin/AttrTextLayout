@@ -1656,15 +1656,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private fun drawAnimation(canvas: Canvas) {
         if (mAnimationStartTime > 0) {
             when(mTextAnimationMode) {
-                ANIMATION_ERASE_X -> {
-                    canvas.drawEraseX(width.toFloat(), height.toFloat(), width * mAnimationTimeFraction)
-                }
-                ANIMATION_ERASE_Y -> {
-                    canvas.drawEraseY(width.toFloat(), height.toFloat(), height * mAnimationTimeFraction)
-                }
-                ANIMATION_CROSS_EXTENSION -> {
-                    canvas.drawCrossExtension(width, height, mAnimationTimeFraction)
-                }
+                ANIMATION_ERASE_X -> { canvas.drawEraseX(width.toFloat(), height.toFloat(), width * mAnimationTimeFraction) }
+                ANIMATION_ERASE_Y -> { canvas.drawEraseY(width.toFloat(), height.toFloat(), height * mAnimationTimeFraction) }
+                ANIMATION_CROSS_EXTENSION -> { canvas.drawCrossExtension(width, height, mAnimationTimeFraction) }
                 ANIMATION_OVAL -> {
                     withPath(mPath) {
                         canvas.drawOval(this, width, height, mAnimationTimeFraction)

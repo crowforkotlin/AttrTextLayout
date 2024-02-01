@@ -290,13 +290,13 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             }
             GRAVITY_TOP_CENTER -> {
                 drawTopText(canvas, text, textListSize,
-                    onInitializaTextY = {  layoutHighBrushY(it) },
+                    onInitializaTextY = { layoutHighBrushY(it) },
                     onInitializaTextX = { layoutHighBrushX((width shr 1) - it / 2f) }
                 )
             }
             GRAVITY_TOP_END -> {
                 drawTopText(canvas, text, textListSize,
-                    onInitializaTextY = {  layoutHighBrushY(it) },
+                    onInitializaTextY = { layoutHighBrushY(it) },
                     onInitializaTextX = { layoutHighBrushX(width - it) }
                 )
             }

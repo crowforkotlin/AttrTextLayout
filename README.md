@@ -45,7 +45,7 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 
 | ![](docs/img/1.6/erase_y_continuation.gif) | ![](docs/img/1.6/erase_y_continuation_debug.gif) |
 |:------------------------------------------:|:------------------------------------------------:|
-|     Continuation-EraseYTop - Y轴向上连续擦除      |    Continuation-EraseYTop - Y轴向上连续擦除 - DEBUG     |
+|     Continuation-EraseYTop - Y轴向下连续擦除      |    Continuation-EraseYTop - Y轴向下连续擦除 - DEBUG     |
 
 | ![](docs/img/1.6/oval_continuation.gif) | ![](docs/img/1.6/oval_continuation_debug.gif) |
 |:---------------------------------------:|:---------------------------------------------:|
