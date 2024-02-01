@@ -35,15 +35,10 @@ import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_END
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
 import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX_OR_DEFAULT
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.properties.Delegates
@@ -95,6 +90,30 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * @author crowforkotlin
      */
     lateinit var mTextPaint : TextPaint
+
+    /**
+     * ● 高刷延时时间
+     *
+     * ● 2024-02-01 11:16:58 周四 上午
+     * @author crowforkotlin
+     */
+    private var mHighBrushingDelayDuration = 0L
+
+    /**
+     * ● 高刷方向 是否为 Top和Left
+     *
+     * ● 2024-02-01 11:14:08 周四 上午
+     * @author crowforkotlin
+     */
+    private var mHighBrushingTopOrLeft = false
+
+    /**
+     * ● 高刷PX像素个数
+     *
+     * ● 2024-02-01 11:14:36 周四 上午
+     * @author crowforkotlin
+     */
+    private var mHighBrushingPixelCount = 0
 
     /**
      * ● 高刷新绘制任务
@@ -192,6 +211,14 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * @author crowforkotlin
      */
     var mIsCurrentView: Boolean = false
+
+    /**
+     * ● UI SCOPE
+     *
+     * ● 2024-02-01 14:11:58 周四 下午
+     * @author crowforkotlin
+     */
+    var mScope: CoroutineScope? = null
 
     /**
      * ● 动画模式
@@ -312,12 +339,16 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             }
         }
 
-        // 如果执行的是高刷新绘制动画那么需要取消任务
-        if (isDrawBrushingAnimation && mHighBrushingJob?.isCompleted == false) {
-            mHighBrushingJob?.cancel()
-        }
+        // 如果执行的是高刷新绘制动画并且任务正在阻塞中
+        if (isDrawBrushingAnimation && mHighBrushingJob?.isCompleted == false) invalidateHighBrushingAnimation(mHighBrushingDelayDuration )
     }
 
+    /**
+     * ● 布局高刷Y轴位置
+     *
+     * ● 2024-02-01 11:15:21 周四 上午
+     * @author crowforkotlin
+     */
     private fun layoutHighBrushingY(originY: Float) : Float {
         var y = originY
         if (mTextAnimationMode == ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW) {
@@ -329,6 +360,12 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         return y
     }
 
+    /**
+     * ● 布局高刷X轴位置
+     *
+     * ● 2024-02-01 11:15:40 周四 上午
+     * @author crowforkotlin
+     */
     private fun layoutHighBrushingX(originX: Float)  {
         if (mTextAnimationMode == ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW) {
             drawView(
@@ -453,28 +490,65 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     internal suspend fun launchHighBrushingDrawAnimation(scope: CoroutineScope, isX: Boolean, duration: Long = IAttrText.DRAW_VIEW_MIN_DURATION) {
         mTextAxisValue = 0f
         if (isX) {
-            launchHighBrushingRepeat(scope, width, mTextAnimationLeftEnable, duration)
+            launchHighBrushingSuspendAnimation(scope, width, mTextAnimationLeftEnable, duration)
         } else {
-            launchHighBrushingRepeat(scope, height, mTextAnimationTopEnable, duration)
+            launchHighBrushingSuspendAnimation(scope, height, mTextAnimationTopEnable, duration)
         }
     }
 
-    private suspend fun launchHighBrushingRepeat(scope: CoroutineScope, count: Int, isTopOrLeft: Boolean, duration: Long) {
-        if (isTopOrLeft) {
-                repeat(count) {
-                    mTextAxisValue--
-                    invalidate()
-                    mHighBrushingJob = scope.launch{ delay(duration) }
-                    mHighBrushingJob?.join()
-                }
-            } else {
-                repeat(count) {
-                    mTextAxisValue ++
-                    invalidate()
-                    mHighBrushingJob = scope.launch{ delay(duration) }
-                    mHighBrushingJob?.join()
-                }
+    /**
+     * ● 高刷动画 挂起任务
+     *
+     * ● 2024-02-01 11:17:55 周四 上午
+     * @author crowforkotlin
+     */
+    private suspend fun launchHighBrushingSuspendAnimation(scope: CoroutineScope, count: Int, isTopOrLeft: Boolean, duration: Long) {
+
+        /*if (isTopOrLeft) {
+            repeat(count) {
+                mTextAxisValue--
+                invalidate()
+                mHighBrushingJob = scope.launch{ delay(duration) }
+                mHighBrushingJob?.join()
             }
+        } else {
+            repeat(count) {
+                mTextAxisValue ++
+                invalidate()
+                mHighBrushingJob = scope.launch{ delay(duration) }
+                mHighBrushingJob?.join()
+            }
+        }*/
+        mHighBrushingPixelCount = count
+        mHighBrushingTopOrLeft = isTopOrLeft
+        mHighBrushingDelayDuration = duration
+        invalidateHighBrushingAnimation(duration = 0)
+        mHighBrushingJob =  scope.launch { delay(Long.MAX_VALUE) }
+        mHighBrushingJob?.join()
+    }
+
+    /**
+     * ● 更新高刷动画
+     *
+     * ● 2024-02-01 14:15:20 周四 下午
+     * @author crowforkotlin
+     */
+    private fun invalidateHighBrushingAnimation(duration: Long) {
+        if (mHighBrushingTopOrLeft) {
+            mTextAxisValue --
+            if (mTextAxisValue > -mHighBrushingPixelCount) {
+                if (duration == 0L) invalidate() else mScope?.scope(duration) { invalidate() }
+            } else {
+                mHighBrushingJob?.cancel()
+            }
+        } else {
+            mTextAxisValue ++
+            if (mTextAxisValue < mHighBrushingPixelCount) {
+                if (duration == 0L) invalidate() else mScope?.scope(duration) { invalidate() }
+            } else {
+                mHighBrushingJob?.cancel()
+            }
+        }
     }
 
     /**
@@ -503,7 +577,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                 } else return
             }
         } else {
-            mTextY = abs(mTextPaint.fontMetrics.ascent)
+            mTextY = onInitializaTextY(abs(mTextPaint.fontMetrics.ascent))
             onInitializaTextX(text.second)
             canvas.drawText(text.first)
         }
@@ -581,7 +655,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                 } else return
             }
         } else {
-            mTextY = height - calculateBaselineOffsetY(mTextPaint.fontMetrics)
+            mTextY = onInitializaTextY(height - calculateBaselineOffsetY(mTextPaint.fontMetrics))
             onInitializaTextX(text.second)
             canvas.drawText(text.first)
         }

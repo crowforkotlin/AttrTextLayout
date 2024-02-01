@@ -1128,7 +1128,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private suspend fun launchHighBrushingDrawAnimation(isX: Boolean) {
         delay(mAnimationDuration)
         tryAwaitAnimationTask()
-
         val viewCurrentA = mCacheViews[mCurrentViewPos]
         val viewNextB = getNextView(mCurrentViewPos)
         viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
@@ -1141,7 +1140,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         viewNextB.mIsCurrentView = true
         updateViewPosition()
         updateTextListPosition()
-        var duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1)  16L else 16L + (4 * this) }
+        val duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1) 0L else 1L + (4L * this) }
         mViewScope.launch { viewCurrentA.launchHighBrushingDrawAnimation(this, isX, duration) }
         mViewScope.async { viewNextB.launchHighBrushingDrawAnimation(this, isX, duration) }.await()
         viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)

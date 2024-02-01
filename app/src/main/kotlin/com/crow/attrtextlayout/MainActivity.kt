@@ -41,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             readFile()
             // mBinding.attrTextLayout.mTextAnimationLeftEnable = false
+            mBinding.attrTextLayout.mText = "Hello,World! Welcom To My ................"
                 /*lifecycleScope.launch {
                     repeat(Int.MAX_VALUE) {
                         delay(20)
@@ -62,6 +63,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun onCreate() {
+        lifecycleScope
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(Color.WHITE, Color.WHITE),
             navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)

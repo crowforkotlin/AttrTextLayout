@@ -26,7 +26,7 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 - [x] 支持XML和动态创建
 - [x] 优化绘制速度 < 3MS 
 - [x] 增加渐变色
-- [x] 增加高刷新率动画(仅支持左右移动、上下移动后续跟进)
+- [x] 增加高刷新率动画(仅支持左右移动、上下移动)
 - [ ] 配置渐变色RGB
 - [ ] 配置字体类型
 
