@@ -63,34 +63,46 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 
 <table>
 	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-Cross.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Center.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/cross_extension_continuation.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/cross_extension_continuation_debug.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/center.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/center_debug.gif"></td>
 	</tr>
     <tr>
 		<td align="center" style="padding: 10px;">Continuation-Oval - 连续十字扩展</td>
+		<td align="center" style="padding: 10px;">Continuation-Oval - 连续十字扩展 - DEBUG</td>
 		<td align="center" style="padding: 10px;">Center - 中心缩放</td>
+		<td align="center" style="padding: 10px;">Center - 中心缩放 - DEBUG</td>
 	</tr>
 </table>
 
 <table>
 	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Move_XRight.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Move_YBottom.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/move_x_left.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/move_x_left_debug.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/move_y_top.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/move_y_top_debug.gif"></td>
 	</tr>
     <tr>
-		<td align="center" style="padding: 10px;">Move Right - X轴向右移动</td>
-		<td align="center" style="padding: 10px;">Move Bottom - Y轴向下移动</td>
+		<td align="center" style="padding: 10px;">Move X - X轴左向移动</td>
+		<td align="center" style="padding: 10px;">Move X - X轴左向移动 - DEBUG</td>
+		<td align="center" style="padding: 10px;">Move Y - Y轴向上移动</td>
+		<td align="center" style="padding: 10px;">Move Y - Y轴向上移动 - DEBUG</td>
 	</tr>
 </table>
 
 <table>
 	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Fade.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Fade_Sync.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/fade.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/fade_debug.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/fade_sync.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/fade_sync_debug.gif"></td>
 	</tr>
     <tr>
-		<td align="center" style="padding: 10px;">Fade - 淡入淡出_异步</td>
-		<td align="center" style="padding: 10px;">Fade-Sync - 淡入淡出_同步</td>
+		<td align="center" style="padding: 10px;">Fade - 淡入淡出 - 异步</td>
+		<td align="center" style="padding: 10px;">Fade - 淡入淡出 - 异步 - DEBUG</td>
+		<td align="center" style="padding: 10px;">Fade-Sync - 淡入淡出 - 同步</td>
+		<td align="center" style="padding: 10px;">Fade-Sync - 淡入淡出 - 同步 - DEBUG</td>
 	</tr>
 </table>
 
