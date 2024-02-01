@@ -24,6 +24,7 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 
 
 - ## 效果
+- 用的GIF进行录制会很卡顿，实际效果非常顺畅
 - 高刷的移动速度较慢，但在像素级视图中做到了和OpenGL ES同等的效果，在像素级视图中非常顺畅，可参考[关于高刷动画说明](#about_high_brush)
 
 | ![](docs/img/1.6/move_x_high_brushing.gif) | ![](docs/img/1.6/erase_x_continuation_debug.gif) |
