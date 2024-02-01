@@ -1434,6 +1434,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         mAnimationStartTime = System.currentTimeMillis()
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
+                        onNotifyViewVisibility(mCurrentViewPos)
                     }
 
                     override fun onAnimationEnd(animation: Animator) {

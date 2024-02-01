@@ -673,7 +673,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         val paint = TextPaint()
         paint.color = Color.GREEN
         paint.strokeWidth = IAttrText.DEBUG_STROKE_WIDTH
-        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.DST_ATOP)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
         canvas.drawLine(0f, (height / 2).toFloat(), width.toFloat(), (height / 2).toFloat(), paint)
         canvas.drawLine(width / 2f, 0f, width / 2f, height.toFloat(), paint)
 

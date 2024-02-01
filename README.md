@@ -33,23 +33,31 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 
 <table>
 	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-EraseXLeft.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-EraseYTop.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/erase_x_continuation.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/erase_x_continuation_debug.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/erase_y_continuation.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/erase_y_continuation_debug.gif"></td>
 	</tr>
     <tr>
 		<td align="center" style="padding: 10px;">Continuation-EraseX - X轴向左连续擦除</td>
+		<td align="center" style="padding: 10px;">Continuation-EraseX - X轴向左连续擦除 - DEBUG</td>
 		<td align="center" style="padding: 10px;">Continuation-EraseYTop - Y轴向上连续擦除</td>
+		<td align="center" style="padding: 10px;">Continuation-EraseYTop - Y轴向上连续擦除 - DEBUG</td>
 	</tr>
 </table>
 
 <table>
 	<tr>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-Oval.gif"></td>
-		<td align="center" style="padding: 10px;"><img src="docs/img/Continuation-Rhombus.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/oval_continuation.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/oval_continuation_debug.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/rhombus_continuation.gif"></td>
+		<td align="center" style="padding: 10px;"><img src="docs/img/1.6/rhombus_continuation_debug.gif"></td>
 	</tr>
     <tr>
 		<td align="center" style="padding: 10px;">Continuation-Oval - 连续圆形时钟</td>
+		<td align="center" style="padding: 10px;">Continuation-Oval - 连续圆形时钟 - DEBUG</td>
 		<td align="center" style="padding: 10px;">Continuation-Rhombus - 连续菱形</td>
+		<td align="center" style="padding: 10px;">Continuation-Rhombus - 连续菱形 - DEBUG</td>
 	</tr>
 </table>
 
