@@ -150,11 +150,15 @@ layout.mTextRowMargin = 4f
 // 设置字符间距
 layout.mTextCharSpacing = 1f
 
-// 设置滚动速度
+// 设置滚动速度 最大15 最小1
 layout.mTextScrollSpeed = 13
+
+// 设置字体类型
+layout.mTextFontPath = "/data/data/com.crow.attrtextlayout/files/font/comic.ttf"
 
 // 设置文本内容（设置后会自动更新，前提你得吧这个layout添加到您的视图里面，直到您添加完成mText也会自动生效，除非不设置）
 layout.mText = "Hello World!"
+
 ```
 
 ```kotlin 策略类别
