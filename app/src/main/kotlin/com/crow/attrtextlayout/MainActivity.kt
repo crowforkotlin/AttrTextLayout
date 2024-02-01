@@ -40,14 +40,16 @@ class MainActivity : AppCompatActivity() {
         AttrTextLayout.mAwaitAnimationCount = 4
         lifecycleScope.launch {
             readFile()
+
             // mBinding.attrTextLayout.mTextAnimationLeftEnable = false
 //            mBinding.attrTextLayout.mText = "Hello,World! Welcom To My ................"
-                lifecycleScope.launch {
-                    repeat(Int.MAX_VALUE) {
-                        delay(20)
-                        mBinding.attrTextLayout.mText = it.toString()
-                    }
+//            mBinding.attrTextLayout.mTextFontPath = File(filesDir, "font/comic.ttf").absolutePath
+            lifecycleScope.launch {
+                repeat(Int.MAX_VALUE) {
+                    delay(20)
+                    mBinding.attrTextLayout.mText = it.toString()
                 }
+            }
 //            mBinding.attrTextLayout.mText = mContent
             repeat(4) {
                 // createAttrTextLayout(0f, it * 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
@@ -58,6 +60,7 @@ class MainActivity : AppCompatActivity() {
     private suspend fun readFile() {
         withContext(Dispatchers.IO) {
             copyFolder("content")
+            copyFolder("font")
             mContent = File(filesDir, "content/Content.txt").readText()
         }
     }

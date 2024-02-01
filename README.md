@@ -19,8 +19,8 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 - [x] 优化绘制速度 < 3MS
 - [x] 增加渐变色
 - [x] 增加高刷新率动画(仅支持左右移动、上下移动)
+- [x] 配置字体类型
 - [ ] 配置渐变色RGB
-- [ ] 配置字体类型
 
 
 - ## 效果
@@ -195,29 +195,30 @@ const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
 <com.crow.attr.text.AttrTextLayout
     android:id="@+id/attrTextLayout"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    app:textSize="14sp"
-    app:textAnimationX="left"
-    app:textAnimationY="bottom"
-    app:textMonoSpaceEnable="false"
-    app:textBoldEnable="false"
-    app:textFakeBoldEnable="false"
-    app:textAntiAliasEnable="false"
-    app:textColor="@color/white"
-    app:textItalicEnable="false"
+    android:layout_height="320dp"
+    android:layout_gravity="center"
     app:singleTextAnimationEnable="true"
-    app:textMultipleLineEnable="false"
-    app:textGravity="center"
-    app:textGradientDirection="vertical"
-    app:textResidenceTime="3000"
-    app:textAnimationMode="move_x_high_brushing_draw"
-    app:textSizeUnitStrategy="defaultOrSp"
-    app:textUpdateStrategy="update_all"
+    app:textAnimationMode="move_x"
     app:textAnimationStrategy="continua"
+    app:textAnimationX="left"
+    app:textAnimationY="top"
+    app:textAntiAliasEnable="true"
+    app:textBoldEnable="false"
+    app:textFontPath="/data/data/com.crow.attrtextlayout/files/font/comic.ttf"
+    app:textFakeBoldEnable="false"
+    app:textItalicEnable="false"
+    app:textCharSpacing="20dp"
+    app:textColor="@color/white"
+    app:textGradientDirection="vertical"
+    app:textGravity="center"
+    app:textMonoSpaceEnable="true"
+    app:textMultipleLineEnable="true"
+    app:textResidenceTime="3000"
     app:textRowMargin="1px"
-    app:textCharSpacing="1px"
-    app:textScrollSpeed="13"
-    app:text="com.crow.attr.text.AttrTextLayout -- Manually implemented by Crow" />
+    app:textScrollSpeed="15"
+    app:textSize="40sp"
+    app:textSizeUnitStrategy="defaultOrSp"
+    app:textUpdateStrategy="all" />
 ```
 
 - ## <a id="about_high_brush"></a>关于高刷动画

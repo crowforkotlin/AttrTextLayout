@@ -83,10 +83,12 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private fun initAttr(context: Context, attributeSet: AttributeSet) {
         context.obtainStyledAttributes(attributeSet, R.styleable.AttrTextLayout).apply {
             val defaultValue = 0
+            mTextFontPath = getString(R.styleable.AttrTextLayout_textFontPath)
             mTextSize = getDimension(R.styleable.AttrTextLayout_textSize, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, context.resources.displayMetrics))
             mTextBoldEnable = getBoolean(R.styleable.AttrTextLayout_textBoldEnable, false)
             mTextFakeBoldEnable = getBoolean(R.styleable.AttrTextLayout_textFakeBoldEnable, false)
             mTextItalicEnable = getBoolean(R.styleable.AttrTextLayout_textItalicEnable, false)
+            mTextFakeItalicEnable = getBoolean(R.styleable.AttrTextLayout_textFakeItalicEnable, false)
             mTextAntiAliasEnable = getBoolean(R.styleable.AttrTextLayout_textAntiAliasEnable, false)
             mTextMonoSpaceEnable = getBoolean(R.styleable.AttrTextLayout_textMonoSpaceEnable, false)
             mTextMultipleLineEnable = getBoolean(R.styleable.AttrTextLayout_textMultipleLineEnable, false)
@@ -439,6 +441,17 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private var mAnimationUpdateListener: Animator.AnimatorListener? = null
+
+    private var mTypeface: Typeface? = null
+    private var mLastFontPath: String? = null
+    /**
+     * ● 字体类型路径
+     *
+     * ● 2024-02-01 17:50:05 周四 下午
+     * @author crowforkotlin
+     */
+    var mTextFontPath: String? = null
+
 
     /**
      * ● 滚动速度 --- 设置滚动速度实际上是对动画持续时间进行设置 重写SET函数，实现滚动速度设置 对动画时间进行相对的设置，设置后会触发重新绘制 IntRange(from = 1, to = 15)
@@ -1643,8 +1656,27 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 textPaint.typeface = if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT
                 null
             }
-        } ?: return
-        textPaint.typeface = Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value)
+        }
+        if (mTextFontPath != null) {
+            runCatching {
+                val typeface = if (mTypeface == null) {
+                    if(value == null) Typeface.createFromFile(mTextFontPath) else Typeface.create(Typeface.createFromFile(mTextFontPath), value)
+                } else if(mLastFontPath != mTextFontPath) {
+                    if(value == null) Typeface.createFromFile(mTextFontPath) else Typeface.create(Typeface.createFromFile(mTextFontPath), value)
+                } else {
+                    if(value == null) mTypeface else Typeface.create(mTypeface, value)
+                }
+                mTypeface = typeface
+                mTextPaint.typeface = typeface
+                mLastFontPath = mTextFontPath
+            }
+                .onFailure { cause ->
+                    cause.stackTraceToString().debugLog(level = Log.ERROR)
+                    textPaint.typeface = Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value ?: return)
+                }
+        } else {
+            textPaint.typeface = Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value ?: return)
+        }
     }
 
     /**
