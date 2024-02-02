@@ -27,9 +27,9 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 - 用的GIF进行录制会很卡顿，实际效果非常顺畅
 - 高刷的移动速度较慢，但在像素级视图中做到了和OpenGL ES同等的效果，非常顺畅，可参考[关于高刷动画说明](#about_high_brush)
 
-| ![](docs/img/1.6/move_x_high_brush.gif) | ![](docs/img/1.6/move_x_update.gif)  |
-|:---------------------------------------:|:---------------------------------------------:|
-|       MoveX-HighBrushing - X轴高刷移动       |      Update-MoveX - X轴方向移动时更新文本      |
+| ![](docs/img/1.6/move_x_high_brush.gif) | ![](docs/img/1.6/move_x_update.gif) |
+|:---------------------------------------:|:-----------------------------------:|
+|       MoveX-HighBrushing - X轴高刷移动       |     Update-MoveX - X轴方向移动时更新文本      |
 
 | ![](docs/img/1.6/move_y_high_brush.gif) | ![](docs/img/1.6/move_y_high_brush_debug.gif) |
 |:---------------------------------------:|:---------------------------------------------:|
@@ -149,8 +149,11 @@ layout.mTextCharSpacing = 1f
 // 设置滚动速度 最大15 最小1
 layout.mTextScrollSpeed = 13
 
-// 设置字体类型
-layout.mTextFontPath = "/data/data/com.crow.attrtextlayout/files/font/comic.ttf"
+// 设置字体类型  Assets目录下的字体文件（mTextFontAssetsPath 的优先级大于 mTextFontAbsolutePath）
+layout.mTextFontAssetsPath = "comic.ttf"
+
+// 存储中字体文件的绝对路径
+layout.mTextFontAbsolutePath = "/data/data/com.crow.attrtextlayout/files/font/calibri.ttf"
 
 // 设置文本内容（设置后会自动更新，前提你得吧这个layout添加到您的视图里面，直到您添加完成mText也会自动生效，除非不设置）
 layout.mText = "Hello World!"
@@ -192,6 +195,7 @@ const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
 
 - ## 代码示例 XML
 ```xml
+<!-- textFontAssetsPath 的优先级大于 textFontAbsolutePath -->
 <com.crow.attr.text.AttrTextLayout
     android:id="@+id/attrTextLayout"
     android:layout_width="match_parent"
@@ -204,7 +208,8 @@ const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
     app:textAnimationY="top"
     app:textAntiAliasEnable="true"
     app:textBoldEnable="false"
-    app:textFontPath="/data/data/com.crow.attrtextlayout/files/font/comic.ttf"
+    app:textFontAssetsPath="comic.ttf"
+    app:textFontAbsolutePath="/data/data/com.crow.attrtextlayout/files/font/calibri.ttf"
     app:textFakeBoldEnable="false"
     app:textItalicEnable="false"
     app:textCharSpacing="20dp"

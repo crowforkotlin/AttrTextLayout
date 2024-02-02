@@ -29,12 +29,14 @@
         app:textAnimationY="top"
         app:textAntiAliasEnable="true"
         app:textBoldEnable="false"
-        app:textFontPath="/data/data/com.crow.attrtextlayout/files/font/comic.ttf"
+        app:text="123456"
         app:textFakeBoldEnable="false"
         app:textItalicEnable="false"
         app:textCharSpacing="20dp"
         app:textColor="@color/white"
         app:textGradientDirection="vertical"
+        app:textFontAssetsPath="comic.ttf"
+        app:textFontAbsolutePath="/data/data/com.crow.attrtextlayout/files/font/calibri.ttf"
         app:textGravity="center"
         app:textMonoSpaceEnable="true"
         app:textMultipleLineEnable="true"
@@ -45,6 +47,11 @@
         app:textSizeUnitStrategy="defaultOrSp"
         app:textUpdateStrategy="all" />
 
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/comic"/>
 
     <!--   <com.crow.attr.text.AttrTextLayout
            android:layout_width="128px"

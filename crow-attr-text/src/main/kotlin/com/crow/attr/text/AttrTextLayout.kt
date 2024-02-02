@@ -83,7 +83,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private fun initAttr(context: Context, attributeSet: AttributeSet) {
         context.obtainStyledAttributes(attributeSet, R.styleable.AttrTextLayout).apply {
             val defaultValue = 0
-            mTextFontPath = getString(R.styleable.AttrTextLayout_textFontPath)
+            mTextFontAbsolutePath = getString(R.styleable.AttrTextLayout_textFontAbsolutePath)
+            mTextFontAssetsPath = getString(R.styleable.AttrTextLayout_textFontAssetsPath)
             mTextSize = getDimension(R.styleable.AttrTextLayout_textSize, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, context.resources.displayMetrics))
             mTextBoldEnable = getBoolean(R.styleable.AttrTextLayout_textBoldEnable, false)
             mTextFakeBoldEnable = getBoolean(R.styleable.AttrTextLayout_textFakeBoldEnable, false)
@@ -443,14 +444,15 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private var mAnimationUpdateListener: Animator.AnimatorListener? = null
 
     private var mTypeface: Typeface? = null
-    private var mLastFontPath: String? = null
+
     /**
      * ● 字体类型路径
      *
      * ● 2024-02-01 17:50:05 周四 下午
      * @author crowforkotlin
      */
-    var mTextFontPath: String? = null
+    var mTextFontAbsolutePath: String? = null
+    var mTextFontAssetsPath: String? = null
 
 
     /**
@@ -1647,9 +1649,15 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
     }
 
+    /**
+     * ● 初始化字体类型样式
+     *
+     * ● 2024-02-02 11:35:59 周五 上午
+     * @author crowforkotlin
+     */
     private fun initPaintTypeFace(textPaint: TextPaint) {
         val value = when {
-            mTextBoldEnable && mTextItalicEnable -> { Typeface.BOLD_ITALIC }
+            mTextBoldEnable && mTextItalicEnable -> Typeface.BOLD_ITALIC
             mTextBoldEnable -> Typeface.BOLD
             mTextItalicEnable -> Typeface.ITALIC
             else -> {
@@ -1657,26 +1665,28 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 null
             }
         }
-        if (mTextFontPath != null) {
-            runCatching {
-                val typeface = if (mTypeface == null) {
-                    if(value == null) Typeface.createFromFile(mTextFontPath) else Typeface.create(Typeface.createFromFile(mTextFontPath), value)
-                } else if(mLastFontPath != mTextFontPath) {
-                    if(value == null) Typeface.createFromFile(mTextFontPath) else Typeface.create(Typeface.createFromFile(mTextFontPath), value)
-                } else {
-                    if(value == null) mTypeface else Typeface.create(mTypeface, value)
-                }
-                mTypeface = typeface
-                mTextPaint.typeface = typeface
-                mLastFontPath = mTextFontPath
+
+        val typeface = runCatching {
+            when {
+                mTextFontAssetsPath != null -> createTypefaceFromAssets(value)
+                mTextFontAbsolutePath != null -> createTypefaceFromFile(value)
+                else -> if (value == null) mTypeface else Typeface.create(mTypeface, value)
             }
-                .onFailure { cause ->
-                    cause.stackTraceToString().debugLog(level = Log.ERROR)
-                    textPaint.typeface = Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value ?: return)
-                }
-        } else {
-            textPaint.typeface = Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value ?: return)
+        }.getOrElse { cause ->
+            cause.stackTraceToString().debugLog(level = Log.ERROR)
+            Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value ?: return)
         }
+
+        mTypeface = typeface
+        mTextPaint.typeface = typeface
+    }
+    private fun createTypefaceFromAssets(value: Int?): Typeface {
+        val baseTypeface = Typeface.createFromAsset(context.assets, mTextFontAssetsPath)
+        return if (value == null) baseTypeface else Typeface.create(baseTypeface, value)
+    }
+    private fun createTypefaceFromFile(value: Int?): Typeface {
+        val baseTypeface = Typeface.createFromFile(mTextFontAbsolutePath)
+        return if (value == null) baseTypeface else Typeface.create(baseTypeface, value)
     }
 
     /**
