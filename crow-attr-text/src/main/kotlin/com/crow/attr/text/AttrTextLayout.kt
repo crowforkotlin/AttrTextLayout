@@ -136,20 +136,12 @@ class AttrTextLayout : FrameLayout, IAttrText {
 
     companion object {
 
-        internal const val ENABLE_AUTO_UPDATE = false
         private const val NEWLINE_CHAR_FLAG = '\n'
         private const val NEWLINE_CHAR_FLAG_SLASH = '/'
         private const val NEWLINE_CHAR_FLAG_N = 'n'
         private const val MAX_SCROLL_SPEED: Short = 16
         private const val MIN_ANIMATION_DURATION = 1000L
         private const val ANIMATION_DURATION_FIXED_INCREMEN = 500
-
-        /**
-         * ● 缓存VIEW个数 勿动改了后会出问题
-         *
-         * ● 2023-11-02 15:20:10 周四 下午
-         * @author crowforkotlin
-         */
         private const val REQUIRED_CACHE_SIZE = 2
         private const val MAX_STRING_LENGTH = 1 shl 10
 
@@ -291,20 +283,20 @@ class AttrTextLayout : FrameLayout, IAttrText {
     }
 
     /**
-     * ● 是否更新全部View
-     *
-     * ● 2023-12-25 19:18:11 周一 下午
-     * @author crowforkotlin
-     */
-    private var mUpdateAll: Boolean = false
-
-    /**
      * ● Path -- 用于绘制动画
      *
      * ● 2023-12-21 19:15:44 周四 下午
      * @author crowforkotlin
      */
     private val mPath = Path()
+
+    /**
+     * ● 是否更新全部View
+     *
+     * ● 2023-12-25 19:18:11 周一 下午
+     * @author crowforkotlin
+     */
+    private var mUpdateAll: Boolean = false
 
     /**
      * ● 动画时间比率
@@ -442,7 +434,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private var mAnimationUpdateListener: Animator.AnimatorListener? = null
-
     private var mTypeface: Typeface? = null
 
     /**
@@ -1524,6 +1515,12 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
     }
 
+    /**
+     * ● 设置动画等待个数时 尝试等待阻塞动画执行
+     *
+     * ● 2024-02-02 14:57:46 周五 下午
+     * @author crowforkotlin
+     */
     private suspend fun tryAwaitAnimationTask() {
         if (mAwaitAnimationCount > 0) {
             if (mAnimationTaskCount >= mAwaitAnimationCount) {
@@ -1738,7 +1735,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
             onUpdateIfResetAnimation()
         }
     }
-
     fun setOnAnimationUpdateListener(listener: Animator.AnimatorListener) { mAnimationUpdateListener = listener }
     fun removeOnAnimationUpdateListener() { mAnimationUpdateListener = null }
 }
