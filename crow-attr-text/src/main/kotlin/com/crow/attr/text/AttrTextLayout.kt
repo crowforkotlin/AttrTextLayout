@@ -661,7 +661,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         * 这里一定要设置xfermode（在源图像中显示目标图像，目标图像仅在源图像上显示）
         * 否则使用Canvas绘制的动画例如子View实现的 就会导致clipRect的时候文字出现边角出现缺失
         * */
-        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
+        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.OVERLAY)
         mTextPaint.color = mTextColor
         mTextPaint.textSize = mTextSize
         mTextPaint.typeface = if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT

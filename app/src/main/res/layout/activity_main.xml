@@ -19,11 +19,10 @@
 
     <com.crow.attr.text.AttrTextLayout
         android:id="@+id/attrTextLayout"
-        android:layout_width="match_parent"
-        android:layout_height="320dp"
-        android:layout_gravity="center"
+        android:layout_width="128px"
+        android:layout_height="64px"
         app:singleTextAnimationEnable="true"
-        app:textAnimationMode="move_x"
+        app:textAnimationMode="move_x_high_brushing_draw"
         app:textAnimationStrategy="continua"
         app:textAnimationX="left"
         app:textAnimationY="top"
@@ -43,15 +42,9 @@
         app:textRowMargin="10dp"
         app:layoutBackGroundColor="@color/white"
         app:textScrollSpeed="15"
-        app:textSize="40sp"
+        app:textSize="14sp"
         app:textSizeUnitStrategy="defaultOrSp"
         app:textUpdateStrategy="all" />
-
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/comic"/>
 
     <!--   <com.crow.attr.text.AttrTextLayout
            android:layout_width="128px"
