@@ -40,11 +40,11 @@
         app:textMultipleLineEnable="true"
         app:textResidenceTime="3000"
         app:textRowMargin="10dp"
-        app:layoutBackGroundColor="@color/white"
+        app:layoutBackGroundColor="@color/black"
         app:textScrollSpeed="15"
         app:textSize="14sp"
         app:textSizeUnitStrategy="defaultOrSp"
-        app:textUpdateStrategy="all" />
+        app:textUpdateStrategy="lazy" />
 
     <!--   <com.crow.attr.text.AttrTextLayout
            android:layout_width="128px"

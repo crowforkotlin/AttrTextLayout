@@ -820,6 +820,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
             mTextUpdateStrategy == STRATEGY_TEXT_UPDATE_CURRENT -> {
                 onNotifyViewUpdate(updateAll = false)
             }
+            mTextUpdateStrategy == STRATEGY_TEXT_UPDATE_LAZY && mTextAnimationMode in ANIMATION_MOVE_X_HIGH_BRUSH_DRAW..ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW -> {
+                onNotifyViewUpdate(updateAll = false)
+            }
             mTextUpdateStrategy == STRATEGY_TEXT_UPDATE_LAZY && (mViewAnimatorSet == null || mViewAnimatorSet?.isRunning == false) -> {
                 onNotifyViewUpdate(updateAll = true)
             }
@@ -1149,8 +1152,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
         val duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1) 0L else 1L + (4L * this) }
         mViewScope.launch { viewCurrentA.launchHighBrushDrawAnimation(this, isX, duration) }
         mViewScope.async { viewNextB.launchHighBrushDrawAnimation(this, isX, duration) }.await()
-        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
         tryReduceAniamtionTaskCount()
         delay(IAttrText.DRAW_VIEW_MIN_DURATION)
     }
@@ -1167,7 +1170,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         if(isDelay) delay(if (mTextResidenceTime < 500) 500 else mTextResidenceTime)
         updateViewPosition()
         updateTextListPosition()
-        setLayerType(LAYER_TYPE_NONE, null)
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
     }
 
     /**
@@ -1209,14 +1212,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1281,14 +1284,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1339,22 +1342,22 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
                         if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1397,14 +1400,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1444,13 +1447,13 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
-                        setLayerType(LAYER_TYPE_NONE, null)
+                        setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
 
                     override fun onAnimationCancel(animation: Animator) {
-                        setLayerType(LAYER_TYPE_NONE, null)
+                        setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1499,14 +1502,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1612,8 +1615,10 @@ class AttrTextLayout : FrameLayout, IAttrText {
         view.mTextAnimationTopEnable = mTextAnimationTopEnable
         view.mTextAnimationLeftEnable = mTextAnimationLeftEnable
         view.mTextAnimationMode = mTextAnimationMode
+        if (mTextAnimationMode !in ANIMATION_ERASE_X..ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW) {
+            view.mAnimationStartTime = 0
+        }
         view.mTextRowMargin = withSizeUnit(this::mTextRowMargin, dpOrSp = { context.px2dp(mTextRowMargin) })
-        view.mAnimationStartTime = 0
         view.mTextPaint = mTextPaint
     }
 
