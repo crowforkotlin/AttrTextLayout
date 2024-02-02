@@ -34,40 +34,18 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onCreate()
-        requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//        createAttrTextLayout(0f, 0f, 512, 256)
-//        val width = resources.displayMetrics.widthPixels / 2
-//        val height = resources.displayMetrics.heightPixels / 2
-        AttrTextLayout.mAwaitAnimationCount = 4
         lifecycleScope.launch {
-            readFile()
-
-            // mBinding.attrTextLayout.mTextAnimationLeftEnable = false
-//            mBinding.attrTextLayout.mText = "Hello,World! Welcom To My ................"
-//            mBinding.attrTextLayout.mTextFontPath = File(filesDir, "font/comic.ttf").absolutePath
-            /*lifecycleScope.launch {
-                repeat(Int.MAX_VALUE) {
-                    delay(20)
-                    mBinding.attrTextLayout.mText = it.toString()
-                }
-            }*/
-//            mBinding.attrTextLayout.mText = mContent
-            repeat(4) {
-                // createAttrTextLayout(0f, it * 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+            withContext(Dispatchers.IO) {
+                copyFolder("content")
+                copyFolder("font")
+                mContent = File(filesDir, "content/Content.txt").readText()
             }
+            mBinding.attrTextLayout.mText = mContent
         }
-    }
-
-    private suspend fun readFile() {
-        withContext(Dispatchers.IO) {
-            copyFolder("content")
-            copyFolder("font")
-            mContent = File(filesDir, "content/Content.txt").readText()
-        }
+        AttrTextLayout.mAwaitAnimationCount = 4
     }
 
     private fun onCreate() {
-        lifecycleScope
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.auto(Color.WHITE, Color.WHITE),
             navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
@@ -82,6 +60,7 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
     }
 
     private fun createAttrTextLayout(x: Float, y: Float, width: Int, height: Int, animationStrategy: Short): AttrTextLayout {
