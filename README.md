@@ -21,7 +21,6 @@ repository { mavenCentral() }
 // 引入远程依赖
 implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
 ```
-
 - [x] 支持配置文本策略、样式、换行、特效(擦除、移动、圆形、连续、非连续) 动画
 - [x] 支持XML和动态创建
 - [x] 优化绘制速度 < 3MS 
