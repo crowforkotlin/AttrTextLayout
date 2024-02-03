@@ -9,11 +9,14 @@
         <attr name="textMultipleLineEnable" format="boolean" />
         <attr name="singleTextAnimationEnable" format="boolean" />
         <attr name="textItalicEnable" format="boolean" />
+        <attr name="textFakeItalicEnable" format="boolean" />
         <attr name="textSize" format="dimension" />
         <attr name="textRowMargin" format="dimension" />
         <attr name="textCharSpacing" format="dimension" />
         <attr name="textScrollSpeed" format="integer" />
         <attr name="textResidenceTime" format="integer" />
+        <attr name="textFontAssetsPath" format="string"/>
+        <attr name="textFontAbsolutePath" format="string"/>
         <attr name="textColor" format="color"/>
         <attr name="layoutBackGroundColor" format="color" />
         <attr name="textAnimationX" format="enum">
@@ -21,7 +24,7 @@
             <enum name="right" value="1" />
         </attr>
         <attr name="textUpdateStrategy" fokrmat="enum">
-            <enum name="update_all" value="900" />
+            <enum name="all" value="900" />
             <enum name="lazy" value="901" />
             <enum name="current" value="902" />
         </attr>

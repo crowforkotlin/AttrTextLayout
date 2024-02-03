@@ -5,6 +5,9 @@ package com.crow.attr.text
 import android.graphics.Path
 import android.os.Build
 import android.util.Log
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 internal inline fun IAttrText.drawY(onTop: () -> Unit, onBottom: () -> Unit) {
@@ -49,4 +52,11 @@ internal inline fun IAttrText.withSizeUnit(pxOrDefault: () -> Float, dpOrSp: () 
  */
 internal fun Any?.errorLog(tag: String = IAttrText.TAG) {
     Log.e(tag, this.toString())
+}
+
+internal fun CoroutineScope.scope(duration: Long = 0L, block: suspend () -> Unit) {
+   launch {
+       if(duration != 0L) delay(duration)
+       block()
+   }
 }

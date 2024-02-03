@@ -5,6 +5,7 @@ package com.crow.attrtextlayout
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.FrameLayout
+import android.widget.TextView
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -33,39 +34,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         onCreate()
-        requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
-//        createAttrTextLayout(0f, 0f, 512, 256)
-//        val width = resources.displayMetrics.widthPixels / 2
-//        val height = resources.displayMetrics.heightPixels / 2
-        AttrTextLayout.mAwaitAnimationCount = 1
         lifecycleScope.launch {
-            readFile()
-            delay(4000)
-            mBinding.attrTextLayout.mTextAnimationLeftEnable = false
-            /*.also { layout ->
-                val text = layout.mText + "456"
-                lifecycleScope.launch {
-                    repeat(Int.MAX_VALUE) {
-                        delay(2000)
-                        layout.mText = text
-                    }
-                }*/
-            repeat(4) {
-                // createAttrTextLayout(0f, it * 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
-//                createAttrTextLayout(0f, 16f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
-//                createAttrTextLayout(0f, 32f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
-//                createAttrTextLayout(0f, 48f, 128, 16, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
+            withContext(Dispatchers.IO) {
+                copyFolder("content")
+                copyFolder("font")
+                mContent = File(filesDir, "content/Content.txt").readText()
             }
-//            createAttrTextLayout(0f, 32f, 128, 32, AttrTextLayout.ANIMATION_MOVE_X_DRAW)
-//            createAttrTextLayout(0f, 0f, width, height)
+            mBinding.attrTextLayout.mText = mContent
         }
-    }
-
-    private suspend fun readFile() {
-        withContext(Dispatchers.IO) {
-            copyFolder("content")
-            mContent = File(filesDir, "content/Content.txt").readText()
+        lifecycleScope.launch {
+            delay(2500)
+            mBinding.attrTextLayout.mTextGradientDirection = null
+            mBinding.attrTextLayout.applyOption()
         }
+        AttrTextLayout.mAwaitAnimationCount = 4
     }
 
     private fun onCreate() {
@@ -74,12 +56,16 @@ class MainActivity : AppCompatActivity() {
             navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT)
         )
         setContentView(mBinding.root)
-        WindowCompat.getInsetsController(window, mBinding.root).isAppearanceLightStatusBars = false
+        WindowCompat.getInsetsController(window, mBinding.root).apply {
+            isAppearanceLightStatusBars = false
+            hide(WindowInsetsCompat.Type.systemBars())
+        }
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+        requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
     }
 
     private fun createAttrTextLayout(x: Float, y: Float, width: Int, height: Int, animationStrategy: Short): AttrTextLayout {

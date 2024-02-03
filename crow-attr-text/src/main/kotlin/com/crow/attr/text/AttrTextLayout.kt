@@ -83,10 +83,13 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private fun initAttr(context: Context, attributeSet: AttributeSet) {
         context.obtainStyledAttributes(attributeSet, R.styleable.AttrTextLayout).apply {
             val defaultValue = 0
+            mTextFontAbsolutePath = getString(R.styleable.AttrTextLayout_textFontAbsolutePath)
+            mTextFontAssetsPath = getString(R.styleable.AttrTextLayout_textFontAssetsPath)
             mTextSize = getDimension(R.styleable.AttrTextLayout_textSize, TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12f, context.resources.displayMetrics))
             mTextBoldEnable = getBoolean(R.styleable.AttrTextLayout_textBoldEnable, false)
             mTextFakeBoldEnable = getBoolean(R.styleable.AttrTextLayout_textFakeBoldEnable, false)
             mTextItalicEnable = getBoolean(R.styleable.AttrTextLayout_textItalicEnable, false)
+            mTextFakeItalicEnable = getBoolean(R.styleable.AttrTextLayout_textFakeItalicEnable, false)
             mTextAntiAliasEnable = getBoolean(R.styleable.AttrTextLayout_textAntiAliasEnable, false)
             mTextMonoSpaceEnable = getBoolean(R.styleable.AttrTextLayout_textMonoSpaceEnable, false)
             mTextMultipleLineEnable = getBoolean(R.styleable.AttrTextLayout_textMultipleLineEnable, false)
@@ -94,7 +97,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
             mTextScrollSpeed = getInt(R.styleable.AttrTextLayout_textScrollSpeed, defaultValue).toShort()
             mTextRowMargin = getDimensionPixelOffset(R.styleable.AttrTextLayout_textRowMargin, defaultValue).toFloat()
             mTextCharSpacing = getDimensionPixelOffset(R.styleable.AttrTextLayout_textCharSpacing, defaultValue).toFloat()
-            mTextCharSpacing.debugLog()
             mTextResidenceTime = getInt(R.styleable.AttrTextLayout_textResidenceTime, defaultValue).toLong()
             mTextAnimationLeftEnable = getInt(R.styleable.AttrTextLayout_textAnimationX, defaultValue) == defaultValue
             mTextAnimationTopEnable = getInt(R.styleable.AttrTextLayout_textAnimationY, defaultValue) == defaultValue
@@ -119,7 +121,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 else -> error("AttrTextLayout Get Unknow SizeUnitStrategy Value $value!")
             }
             mTextAnimationMode = when(val value = getInt(R.styleable.AttrTextLayout_textAnimationMode, ANIMATION_DEFAULT.toInt())) {
-                in ANIMATION_DEFAULT..ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> value.toShort()
+                in ANIMATION_DEFAULT..ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW -> value.toShort()
                 else -> error("AttrTextLayout Get Unknow AnimationMode Value $value!")
             }
             mTextAnimationStrategy = when(val value = getInt(R.styleable.AttrTextLayout_textAnimationStrategy, STRATEGY_ANIMATION_UPDATE_CONTINUA.toInt())) {
@@ -134,20 +136,12 @@ class AttrTextLayout : FrameLayout, IAttrText {
 
     companion object {
 
-        internal const val ENABLE_AUTO_UPDATE = false
         private const val NEWLINE_CHAR_FLAG = '\n'
         private const val NEWLINE_CHAR_FLAG_SLASH = '/'
         private const val NEWLINE_CHAR_FLAG_N = 'n'
         private const val MAX_SCROLL_SPEED: Short = 16
         private const val MIN_ANIMATION_DURATION = 1000L
         private const val ANIMATION_DURATION_FIXED_INCREMEN = 500
-
-        /**
-         * ● 缓存VIEW个数 勿动改了后会出问题
-         *
-         * ● 2023-11-02 15:20:10 周四 下午
-         * @author crowforkotlin
-         */
         private const val REQUIRED_CACHE_SIZE = 2
         private const val MAX_STRING_LENGTH = 1 shl 10
 
@@ -189,9 +183,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
         const val ANIMATION_RHOMBUS: Short = 314
         const val ANIMATION_CONTINUATION_RHOMBUS: Short = 315
         const val ANIMATION_MOVE_X_DRAW: Short = 316
-        const val ANIMATION_MOVE_Y_DRAW: Short = 316
-        const val ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW: Short = 318
-        const val ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW: Short = 319
+        const val ANIMATION_MOVE_Y_DRAW: Short = 317
+        const val ANIMATION_MOVE_X_HIGH_BRUSH_DRAW: Short = 318
+        const val ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW: Short = 319
 
         /**
          * ● 重新加载更新策略：当重新绘制的时候是否重新执行动画
@@ -289,20 +283,20 @@ class AttrTextLayout : FrameLayout, IAttrText {
     }
 
     /**
-     * ● 是否更新全部View
-     *
-     * ● 2023-12-25 19:18:11 周一 下午
-     * @author crowforkotlin
-     */
-    private var mUpdateAll: Boolean = false
-
-    /**
      * ● Path -- 用于绘制动画
      *
      * ● 2023-12-21 19:15:44 周四 下午
      * @author crowforkotlin
      */
     private val mPath = Path()
+
+    /**
+     * ● 是否更新全部View
+     *
+     * ● 2023-12-25 19:18:11 周一 下午
+     * @author crowforkotlin
+     */
+    private var mUpdateAll: Boolean = false
 
     /**
      * ● 动画时间比率
@@ -440,6 +434,17 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private var mAnimationUpdateListener: Animator.AnimatorListener? = null
+    private var mTypeface: Typeface? = null
+
+    /**
+     * ● 字体类型路径
+     *
+     * ● 2024-02-01 17:50:05 周四 下午
+     * @author crowforkotlin
+     */
+    var mTextFontAbsolutePath: String? = null
+    var mTextFontAssetsPath: String? = null
+
 
     /**
      * ● 滚动速度 --- 设置滚动速度实际上是对动画持续时间进行设置 重写SET函数，实现滚动速度设置 对动画时间进行相对的设置，设置后会触发重新绘制 IntRange(from = 1, to = 15)
@@ -656,7 +661,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         * 这里一定要设置xfermode（在源图像中显示目标图像，目标图像仅在源图像上显示）
         * 否则使用Canvas绘制的动画例如子View实现的 就会导致clipRect的时候文字出现边角出现缺失
         * */
-        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
+        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.OVERLAY)
         mTextPaint.color = mTextColor
         mTextPaint.textSize = mTextSize
         mTextPaint.typeface = if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT
@@ -732,26 +737,28 @@ class AttrTextLayout : FrameLayout, IAttrText {
             FLAG_LAYOUT_REFRESH -> { onNotifyLayoutUpdate() }
             FLAG_CHILD_REFRESH -> { onNotifyViewUpdate() }
             FLAG_TEXT -> {
-                val text = if (mText.length > MAX_STRING_LENGTH) { mText.substring(0, MAX_STRING_LENGTH) } else mText
-                var firstInit = false
-                mList = getTextLists(text)
-                // 如果缓存View < 2个 则初始化缓存View
-                val currentCacheViewSize = mCacheViews.size
-                if (currentCacheViewSize < REQUIRED_CACHE_SIZE) {
-                    val viewsToAdd = REQUIRED_CACHE_SIZE - currentCacheViewSize
-                    onInitTextPaint()
-                    for (index in 0 until  viewsToAdd) {
-                        mCacheViews.add(creatAttrTextView())
-                    }
-                    firstInit = true
-                    debug {
-                        mCacheViews.forEachIndexed { index, baseAttrTextView ->
-                            baseAttrTextView.tag = index
+                mViewScope.launch {
+                    val text = if (mText.length > MAX_STRING_LENGTH) { mText.substring(0, MAX_STRING_LENGTH) } else mText
+                    var firstInit = false
+                    mList = mTaskScope.async { getTextLists(text) }.await()
+                    // 如果缓存View < 2个 则初始化缓存View
+                    val currentCacheViewSize = mCacheViews.size
+                    if (currentCacheViewSize < REQUIRED_CACHE_SIZE) {
+                        val viewsToAdd = REQUIRED_CACHE_SIZE - currentCacheViewSize
+                        onInitTextPaint()
+                        for (index in 0 until  viewsToAdd) {
+                            mCacheViews.add(creatAttrTextView())
+                        }
+                        firstInit = true
+                        debug {
+                            mCacheViews.forEachIndexed { index, baseAttrTextView ->
+                                baseAttrTextView.tag = index
+                            }
                         }
                     }
+                    onUpdatePosOrView(forceUpdate = firstInit)
+                    onNotifyLayoutUpdate()
                 }
-                onUpdatePosOrView(forceUpdate = firstInit)
-                onNotifyLayoutUpdate()
             }
             FLAG_SCROLL_SPEED -> {
                 // 根据 mScrollSpeed 动态调整 mAnimationDuration
@@ -811,6 +818,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
             }
             forceUpdate -> onNotifyViewUpdate(updateAll = updateAll)
             mTextUpdateStrategy == STRATEGY_TEXT_UPDATE_CURRENT -> {
+                onNotifyViewUpdate(updateAll = false)
+            }
+            mTextUpdateStrategy == STRATEGY_TEXT_UPDATE_LAZY && mTextAnimationMode in ANIMATION_MOVE_X_HIGH_BRUSH_DRAW..ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW -> {
                 onNotifyViewUpdate(updateAll = false)
             }
             mTextUpdateStrategy == STRATEGY_TEXT_UPDATE_LAZY && (mViewAnimatorSet == null || mViewAnimatorSet?.isRunning == false) -> {
@@ -912,8 +922,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
         val textStringBuilder = StringBuilder()
         val textList: MutableList<Pair<String, Float>> = mutableListOf()
         val textMaxIndex = originText.length - 1
-        mTextPaint.textSize = withSizeUnit(this@AttrTextLayout::mTextSize, dpOrSp = { context.px2sp(mTextSize) } )
-        mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+//        mTextPaint.textSize = withSizeUnit(this@AttrTextLayout::mTextSize, dpOrSp = { context.px2sp(mTextSize) } )
+//        mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+        onInitTextPaint()
         originText.forEachIndexed { index, char ->
             val textWidth = mTextPaint.measureText(char.toString(), 0, 1)
             textStringWidth += textWidth
@@ -1109,8 +1120,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     ANIMATION_CONTINUATION_RHOMBUS -> launchContinuousDrawAnimation(isDelay= delay)
                     ANIMATION_MOVE_X_DRAW -> launchContinuousDrawAnimation(isDelay = delay)
                     ANIMATION_MOVE_Y_DRAW -> launchContinuousDrawAnimation(isDelay = delay)
-                    ANIMATION_MOVE_X_HIGH_BRUSHING_DRAW -> launchHighBrushingDrawAnimation(isX = true)
-                    ANIMATION_MOVE_Y_HIGH_BRUSHING_DRAW -> launchHighBrushingDrawAnimation(isX = false)
+                    ANIMATION_MOVE_X_HIGH_BRUSH_DRAW -> launchHighBrushDrawAnimation(isX = true)
+                    ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW -> launchHighBrushDrawAnimation(isX = false)
                 }
                 delay = true
             }
@@ -1123,10 +1134,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ● 2024-01-29 17:00:36 周一 下午
      * @author crowforkotlin
      */
-    private suspend fun launchHighBrushingDrawAnimation(isX: Boolean) {
+    private suspend fun launchHighBrushDrawAnimation(isX: Boolean) {
         delay(mAnimationDuration)
         tryAwaitAnimationTask()
-
         val viewCurrentA = mCacheViews[mCurrentViewPos]
         val viewNextB = getNextView(mCurrentViewPos)
         viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
@@ -1139,11 +1149,11 @@ class AttrTextLayout : FrameLayout, IAttrText {
         viewNextB.mIsCurrentView = true
         updateViewPosition()
         updateTextListPosition()
-        val duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1)  16L else 16L + (4 * this) }
-        mViewScope.launch { viewCurrentA.launchHighBrushingDrawAnimation(mViewScope,isX, duration) }
-        mViewScope.async { viewNextB.launchHighBrushingDrawAnimation(mViewScope,isX, duration) }.await()
-        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+        val duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this <= 1) 0L else 1L + (4L * this) }
+        mViewScope.launch { viewCurrentA.launchHighBrushDrawAnimation(this, isX, duration) }
+        mViewScope.async { viewNextB.launchHighBrushDrawAnimation(this, isX, duration) }.await()
+        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
         tryReduceAniamtionTaskCount()
         delay(IAttrText.DRAW_VIEW_MIN_DURATION)
     }
@@ -1160,7 +1170,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         if(isDelay) delay(if (mTextResidenceTime < 500) 500 else mTextResidenceTime)
         updateViewPosition()
         updateTextListPosition()
-        setLayerType(LAYER_TYPE_NONE, null)
+        setLayerType(LAYER_TYPE_SOFTWARE, null)
     }
 
     /**
@@ -1202,14 +1212,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1274,14 +1284,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1332,22 +1342,22 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
                         if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1390,14 +1400,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1433,16 +1443,17 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         mAnimationStartTime = System.currentTimeMillis()
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
+                        onNotifyViewVisibility(mCurrentViewPos)
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
-                        setLayerType(LAYER_TYPE_NONE, null)
+                        setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
 
                     override fun onAnimationCancel(animation: Animator) {
-                        setLayerType(LAYER_TYPE_NONE, null)
+                        setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1491,14 +1502,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         if (!continuation.isCompleted) continuation.resume(Unit)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_NONE, null)
+                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1507,6 +1518,12 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
     }
 
+    /**
+     * ● 设置动画等待个数时 尝试等待阻塞动画执行
+     *
+     * ● 2024-02-02 14:57:46 周五 下午
+     * @author crowforkotlin
+     */
     private suspend fun tryAwaitAnimationTask() {
         if (mAwaitAnimationCount > 0) {
             if (mAnimationTaskCount >= mAwaitAnimationCount) {
@@ -1593,12 +1610,15 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     private fun onInitAttrTextViewValue(view: AttrTextView) {
         mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+        view.mScope = mViewScope
         view.mTextSizeUnitStrategy = mTextSizeUnitStrategy
         view.mTextAnimationTopEnable = mTextAnimationTopEnable
         view.mTextAnimationLeftEnable = mTextAnimationLeftEnable
         view.mTextAnimationMode = mTextAnimationMode
+        if (mTextAnimationMode !in ANIMATION_ERASE_X..ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW) {
+            view.mAnimationStartTime = 0
+        }
         view.mTextRowMargin = withSizeUnit(this::mTextRowMargin, dpOrSp = { context.px2dp(mTextRowMargin) })
-        view.mAnimationStartTime = 0
         view.mTextPaint = mTextPaint
     }
 
@@ -1626,17 +1646,49 @@ class AttrTextLayout : FrameLayout, IAttrText {
             textSize = withSizeUnit(this@AttrTextLayout::mTextSize, dpOrSp = { context.px2sp(mTextSize) } )
             isFakeBoldText = mTextFakeBoldEnable
             textSkewX = if (mTextFakeItalicEnable) -0.25f else 0f
-            val value = when {
-                mTextBoldEnable && mTextItalicEnable -> { Typeface.BOLD_ITALIC }
-                mTextBoldEnable -> Typeface.BOLD
-                mTextItalicEnable -> Typeface.ITALIC
-                else -> {
-                    typeface = if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT
-                    null
-                }
-            } ?: return
-            typeface = Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value)
+            letterSpacing = mTextCharSpacing / mTextPaint.textSize
+            initPaintTypeFace(this)
         }
+    }
+
+    /**
+     * ● 初始化字体类型样式
+     *
+     * ● 2024-02-02 11:35:59 周五 上午
+     * @author crowforkotlin
+     */
+    private fun initPaintTypeFace(textPaint: TextPaint) {
+        val value = when {
+            mTextBoldEnable && mTextItalicEnable -> Typeface.BOLD_ITALIC
+            mTextBoldEnable -> Typeface.BOLD
+            mTextItalicEnable -> Typeface.ITALIC
+            else -> {
+                textPaint.typeface = if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT
+                null
+            }
+        }
+
+        val typeface = runCatching {
+            when {
+                mTextFontAssetsPath != null -> createTypefaceFromAssets(value)
+                mTextFontAbsolutePath != null -> createTypefaceFromFile(value)
+                else -> if (value == null) mTypeface else Typeface.create(mTypeface, value)
+            }
+        }.getOrElse { cause ->
+            cause.stackTraceToString().debugLog(level = Log.ERROR)
+            Typeface.create(if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT, value ?: return)
+        }
+
+        mTypeface = typeface
+        mTextPaint.typeface = typeface
+    }
+    private fun createTypefaceFromAssets(value: Int?): Typeface {
+        val baseTypeface = Typeface.createFromAsset(context.assets, mTextFontAssetsPath)
+        return if (value == null) baseTypeface else Typeface.create(baseTypeface, value)
+    }
+    private fun createTypefaceFromFile(value: Int?): Typeface {
+        val baseTypeface = Typeface.createFromFile(mTextFontAbsolutePath)
+        return if (value == null) baseTypeface else Typeface.create(baseTypeface, value)
     }
 
     /**
@@ -1648,15 +1700,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private fun drawAnimation(canvas: Canvas) {
         if (mAnimationStartTime > 0) {
             when(mTextAnimationMode) {
-                ANIMATION_ERASE_X -> {
-                    canvas.drawEraseX(width.toFloat(), height.toFloat(), width * mAnimationTimeFraction)
-                }
-                ANIMATION_ERASE_Y -> {
-                    canvas.drawEraseY(width.toFloat(), height.toFloat(), height * mAnimationTimeFraction)
-                }
-                ANIMATION_CROSS_EXTENSION -> {
-                    canvas.drawCrossExtension(width, height, mAnimationTimeFraction)
-                }
+                ANIMATION_ERASE_X -> { canvas.drawEraseX(width.toFloat(), height.toFloat(), width * mAnimationTimeFraction) }
+                ANIMATION_ERASE_Y -> { canvas.drawEraseY(width.toFloat(), height.toFloat(), height * mAnimationTimeFraction) }
+                ANIMATION_CROSS_EXTENSION -> { canvas.drawCrossExtension(width, height, mAnimationTimeFraction) }
                 ANIMATION_OVAL -> {
                     withPath(mPath) {
                         canvas.drawOval(this, width, height, mAnimationTimeFraction)
@@ -1694,7 +1740,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
             onUpdateIfResetAnimation()
         }
     }
-
     fun setOnAnimationUpdateListener(listener: Animator.AnimatorListener) { mAnimationUpdateListener = listener }
     fun removeOnAnimationUpdateListener() { mAnimationUpdateListener = null }
 }

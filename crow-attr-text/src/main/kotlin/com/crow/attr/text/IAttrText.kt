@@ -21,12 +21,12 @@ internal interface IAttrText {
          * ● 2023-12-22 15:13:15 周五 下午
          * @author crowforkotlin
          */
-        internal const val DEBUG = true
+        internal const val DEBUG = false
         internal const val DEBUG_TEXT = false
         internal const val DEBUG_ANIMATION = false
 
         internal const val TAG = "IAttrTextExt-Crow"
-        internal const val DEBUG_STROKE_WIDTH = 1f
+        internal const val DEBUG_STROKE_WIDTH = 8f
         internal val mDebugYelloPaint by lazy { Paint().also { it.strokeWidth = DEBUG_STROKE_WIDTH; it.color = Color.YELLOW } }
         internal val mDebugBluePaint by lazy { Paint().also { it.strokeWidth = DEBUG_STROKE_WIDTH; it.color = Color.BLUE } }
 
