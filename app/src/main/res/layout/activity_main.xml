@@ -17,7 +17,7 @@
         app:cornerRadius="10dp"
         tools:visibility="visible" />
 
-    <com.crow.attr.text.AttrTextLayout
+    <com.crow.attr.text.AttrTextLayout_Copy
         android:id="@+id/attrTextLayout"
         android:layout_width="128px"
         android:layout_height="64px"
@@ -38,7 +38,7 @@
         app:textGravity="top_start"
         app:textMonoSpaceEnable="true"
         app:textMultipleLineEnable="true"
-        app:textResidenceTime="3000"
+        app:textResidenceTime="1500"
         app:textRowMargin="10dp"
         app:layoutBackGroundColor="@color/black"
         app:textScrollSpeed="15"

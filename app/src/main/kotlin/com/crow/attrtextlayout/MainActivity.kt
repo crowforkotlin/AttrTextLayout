@@ -43,8 +43,9 @@ class MainActivity : AppCompatActivity() {
             mBinding.attrTextLayout.mText = mContent
         }
         lifecycleScope.launch {
-            delay(2500)
+            return@launch
             mBinding.attrTextLayout.mTextGradientDirection = null
+            mBinding.attrTextLayout.mTextAnimationMode = AttrTextLayout.ANIMATION_MOVE_Y
             mBinding.attrTextLayout.applyOption()
         }
         AttrTextLayout.mAwaitAnimationCount = 4
