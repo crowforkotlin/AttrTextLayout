@@ -4,6 +4,8 @@ package com.crow.attr.text
 
 import android.graphics.Path
 import android.os.Build
+import android.os.Handler
+import android.os.Message
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -59,4 +61,12 @@ internal fun CoroutineScope.scope(duration: Long = 0L, block: suspend () -> Unit
        if(duration != 0L) delay(duration)
        block()
    }
+}
+
+internal fun Handler.asyncMessage(delay: Long, runnable: Runnable) {
+    sendMessageDelayed(Message.obtain(this, runnable).also { it.isAsynchronous = true }, delay)
+}
+
+internal fun Handler.asyncMessage(runnable: Runnable) {
+    sendMessage(Message.obtain(this, runnable).also { it.isAsynchronous = true })
 }

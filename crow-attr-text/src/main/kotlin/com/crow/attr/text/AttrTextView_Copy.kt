@@ -15,6 +15,7 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Region
 import android.os.Handler
 import android.os.HandlerThread
+import android.os.Message
 import android.text.TextPaint
 import android.view.View
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
@@ -36,8 +37,11 @@ import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_CENTER
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_END
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
 import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX_OR_DEFAULT
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.asCoroutineDispatcher
 import java.util.Timer
 import java.util.TimerTask
+import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.properties.Delegates
@@ -524,7 +528,6 @@ internal class AttrTextView_Copy internal constructor(context: Context) : View(c
     internal fun launchHighBrushDrawAnimation(isX: Boolean, duration: Long = IAttrText.DRAW_VIEW_MIN_DURATION) {
         mTextAxisValue = 0f
         mHighBrushJobRunning = true
-        duration.debugLog()
         if (isX) {
             launchHighBrushSuspendAnimation(width, mTextAnimationLeftEnable, duration)
         } else {
@@ -574,7 +577,7 @@ internal class AttrTextView_Copy internal constructor(context: Context) : View(c
                            delay(3L)
                         }
                     }*/
-                    mHighBrushTimer.schedule(object : TimerTask() {
+                    /*mHighBrushTimer.schedule(object : TimerTask() {
                         override fun run() {
                             if (mTextAxisValue > -mHighBrushPixelCount) invalidate()
                             else {
@@ -584,7 +587,28 @@ internal class AttrTextView_Copy internal constructor(context: Context) : View(c
                             }
                             mTextAxisValue--
                         }
-                    }.also { mTimerTaskDecrement = it }, 0L, 6L)
+                    }.also { mTimerTaskDecrement = it }, 0L, 6L)*/
+                    val refreshWhat = FLAG_REFRESH.toInt()
+                    val handler = handler
+                    val any = Any()
+                    val highBrushRunnable = object : Runnable {
+                        override fun run() {
+                            post {
+                                if (mTextAxisValue > -mHighBrushPixelCount) invalidate()
+                                else {
+                                    handler.removeCallbacks(this)
+                                    mHighBrushJobRunning = false
+                                    mHighBrushSuccessListener?.run()
+                                    return@post
+                                }
+                                mTextAxisValue--
+                            }
+                            handler.sendMessageDelayed(Message.obtain(handler, this).also {
+                                it.isAsynchronous = true
+                            } ?: return, duration)
+                        }
+                    }
+                    post(highBrushRunnable)
                 }
             } else {
                 mHighBrushJobRunning = false
@@ -604,6 +628,7 @@ internal class AttrTextView_Copy internal constructor(context: Context) : View(c
                     }
                 }.also { mTimerTaskIncrement = it }, 0L, 3L)
             } else {
+
                 mHighBrushJobRunning = false
                 mHighBrushSuccessListener?.run()
             }
