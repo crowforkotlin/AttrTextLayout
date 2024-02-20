@@ -21,7 +21,7 @@ internal interface IAttrText {
          * ● 2023-12-22 15:13:15 周五 下午
          * @author crowforkotlin
          */
-        internal const val DEBUG =true
+        internal const val DEBUG = true
         internal const val DEBUG_TEXT = false
         internal const val DEBUG_ANIMATION = false
 
@@ -53,6 +53,10 @@ internal interface IAttrText {
      */
     fun getTextHeight(fontMetrics: Paint.FontMetrics) : Float {
         return fontMetrics.descent -fontMetrics.ascent
+    }
+
+    fun Context.getExactlyTextHeight(fontMetrics: Paint.FontMetrics): Float {
+        return (fontMetrics.descent -fontMetrics.ascent) + withSizeUnit(::mTextRowMargin, dpOrSp = { px2dp(mTextRowMargin) })
     }
 
     /**

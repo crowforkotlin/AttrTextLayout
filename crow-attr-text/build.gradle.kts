@@ -48,7 +48,7 @@ dependencies {
 //    implementation(app.androidx.material)
 //    implementation(app.androidx.activity)
 //    implementation(app.androidx.constraintlayout)
-    implementation(libs.kotlin.coroutines.core)
+//    implementation(libs.kotlin.coroutines.core)
 }
 
 mavenPublishing {

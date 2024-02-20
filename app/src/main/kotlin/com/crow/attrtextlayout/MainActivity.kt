@@ -5,7 +5,6 @@ package com.crow.attrtextlayout
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.FrameLayout
-import android.widget.TextView
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +19,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.w3c.dom.Attr
 import java.io.File
 
 @Suppress("SpellCheckingInspection")
@@ -41,6 +39,12 @@ class MainActivity : AppCompatActivity() {
                 mContent = File(filesDir, "content/Content.txt").readText()
             }
             mBinding.attrTextLayout.mText = mContent
+            withContext(Dispatchers.IO) {
+                repeat(Int.MAX_VALUE) {
+                    mBinding.attrTextLayout.mText = "$it $mContent"
+                    delay(1000)
+                }
+            }
         }
         AttrTextLayout.mAwaitAnimationCount = 4
     }
