@@ -920,10 +920,10 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun onNotifyViewVisibility(pos: Int) {
-        val viewCurrentA = mCacheViews[pos]
-        val viewNextB = getNextView(pos)
-        viewCurrentA.visibility = VISIBLE
-        viewNextB.visibility = INVISIBLE
+        val viewA = mCacheViews[pos]
+        val viewB = getNextView(pos)
+        viewA.visibility = VISIBLE
+        viewB.visibility = INVISIBLE
     }
 
     /**
@@ -948,27 +948,27 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     private fun onNotifyViewUpdate(updateAll: Boolean = mUpdateAll) {
         if (mList.isEmpty() || mCacheViews.isEmpty() || mCurrentViewPos > mCacheViews.size - 1) return
-        val viewCurrentA = mCacheViews[mCurrentViewPos]
+        val viewA = mCacheViews[mCurrentViewPos]
         val list : MutableList<Pair<String, Float>> = mList.toMutableList()
-        viewCurrentA.mList = list
+        viewA.mList = list
         if (mText.isEmpty()) {
-            val viewNextB = getNextView(mCurrentViewPos)
-            viewNextB.mList = list
+            val viewB = getNextView(mCurrentViewPos)
+            viewB.mList = list
             if (mTextMultipleLineEnable) {
-                viewCurrentA.mListPosition = mMultipleLinePos
-                viewNextB.mListPosition = mMultipleLinePos
+                viewA.mListPosition = mMultipleLinePos
+                viewB.mListPosition = mMultipleLinePos
             } else {
-                viewCurrentA.mListPosition = mListPosition
-                viewNextB.mListPosition = mListPosition
+                viewA.mListPosition = mListPosition
+                viewB.mListPosition = mListPosition
             }
         } else {
             val pos = if (mTextMultipleLineEnable) mMultipleLinePos else mListPosition
-            viewCurrentA.mListPosition = pos
+            viewA.mListPosition = pos
             if (updateAll) {
                 mUpdateAll = false
-                val viewNextB = getNextView(mCurrentViewPos)
-                viewNextB.mList = mList
-                viewNextB.mListPosition = pos
+                val viewB = getNextView(mCurrentViewPos)
+                viewB.mList = mList
+                viewB.mListPosition = pos
             }
         }
     }
@@ -1147,25 +1147,25 @@ class AttrTextLayout : FrameLayout, IAttrText {
 
         cancelAnimator()
         removeAnimationRunnable()
-        val viewCurrentA = mCacheViews[mCurrentViewPos]
-        val viewNextB = getNextView(mCurrentViewPos)
+        val viewA = mCacheViews[mCurrentViewPos]
+        val viewB = getNextView(mCurrentViewPos)
 
         // 哪怕if逻辑即使再多也不要直接赋值 避免造成重绘影响性能
-        if (viewCurrentA.alpha != 1f) viewCurrentA.alpha = 1f
-        if (viewCurrentA.scaleX != 1f) viewCurrentA.scaleX = 1f
-        if (viewCurrentA.scaleY != 1f) viewCurrentA.scaleY = 1f
-        if (viewCurrentA.translationX != 0f) viewCurrentA.translationX = 0f
-        if (viewCurrentA.translationY != 0f) viewCurrentA.translationY = 0f
-        if (viewNextB.alpha != 1f) viewNextB.alpha = 1f
-        if (viewNextB.scaleX != 1f) viewNextB.scaleX = 1f
-        if (viewNextB.scaleY != 1f) viewNextB.scaleY = 1f
-        if (viewNextB.translationX != 0f) viewNextB.translationX = 0f
-        if (viewNextB.translationY != 0f) viewNextB.translationY = 0f
-        viewCurrentA.mTextAnimationMode = mTextAnimationMode
-        viewNextB.mTextAnimationMode = mTextAnimationMode
-        viewCurrentA.mTextLines = mTextLines
-        viewNextB.mTextLines = mTextLines
-        onLayoutAnimation(animationMode, isDelay, viewCurrentA, viewNextB)
+        if (viewA.alpha != 1f) viewA.alpha = 1f
+        if (viewA.scaleX != 1f) viewA.scaleX = 1f
+        if (viewA.scaleY != 1f) viewA.scaleY = 1f
+        if (viewA.translationX != 0f) viewA.translationX = 0f
+        if (viewA.translationY != 0f) viewA.translationY = 0f
+        if (viewB.alpha != 1f) viewB.alpha = 1f
+        if (viewB.scaleX != 1f) viewB.scaleX = 1f
+        if (viewB.scaleY != 1f) viewB.scaleY = 1f
+        if (viewB.translationX != 0f) viewB.translationX = 0f
+        if (viewB.translationY != 0f) viewB.translationY = 0f
+        viewA.mTextAnimationMode = mTextAnimationMode
+        viewB.mTextAnimationMode = mTextAnimationMode
+        viewA.mTextLines = mTextLines
+        viewB.mTextLines = mTextLines
+        onLayoutAnimation(animationMode, isDelay, viewA, viewB)
     }
 
     /**
@@ -1174,33 +1174,33 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ● 2024-02-21 09:40:58 周三 上午
      * @author crowforkotlin
      */
-    private fun onLayoutAnimation(animationMode: Short, delay: Boolean, viewCurrentA: AttrTextView, viewNextB: AttrTextView) {
+    private fun onLayoutAnimation(animationMode: Short, delay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
         if (isListSizeFitPage() && !mSingleTextAnimationEnable) return run {
-            if (viewNextB.visibility == VISIBLE) viewNextB.visibility = INVISIBLE
-            viewCurrentA.translationX = 0f
-            viewCurrentA.translationY = 0f
-            viewNextB.translationX = 0f
-            viewNextB.translationY = 0f
+            if (viewB.visibility == VISIBLE) viewB.visibility = INVISIBLE
+            viewA.translationX = 0f
+            viewA.translationY = 0f
+            viewB.translationX = 0f
+            viewB.translationY = 0f
             cancelAnimator()
             removeAnimationRunnable()
         }
         // 实时同步AB的 四个方向
-        viewCurrentA.mTextAnimationLeftEnable = mTextAnimationLeftEnable
-        viewNextB.mTextAnimationLeftEnable = mTextAnimationLeftEnable
-        viewCurrentA.mTextAnimationTopEnable = mTextAnimationTopEnable
-        viewNextB.mTextAnimationTopEnable = mTextAnimationTopEnable
+        viewA.mTextAnimationLeftEnable = mTextAnimationLeftEnable
+        viewB.mTextAnimationLeftEnable = mTextAnimationLeftEnable
+        viewA.mTextAnimationTopEnable = mTextAnimationTopEnable
+        viewB.mTextAnimationTopEnable = mTextAnimationTopEnable
         when(animationMode) {
-            ANIMATION_DEFAULT -> launchDefaultAnimation(animationMode, isDelay = delay, viewCurrentA, viewNextB)
+            ANIMATION_DEFAULT -> launchDefaultAnimation(animationMode, isDelay = delay, viewA, viewB)
             ANIMATION_MOVE_X -> launchMoveXAnimation(animationMode, isDelay = delay)
             ANIMATION_MOVE_Y -> launchMoveYAnimation(animationMode, isDelay = delay)
             ANIMATION_FADE -> launchFadeAnimation(animationMode, isDelay = delay, isSync = false)
             ANIMATION_FADE_SYNC -> launchFadeAnimation(animationMode, isDelay = delay, isSync = true)
             ANIMATION_CENTER -> launchCenterAnimation(animationMode, isDelay = delay)
-            ANIMATION_ERASE_Y -> launchDrawAnimation(animationMode, isDelay = delay, viewCurrentA, viewNextB)
-            ANIMATION_ERASE_X -> launchDrawAnimation(animationMode, isDelay = delay, viewCurrentA, viewNextB)
-            ANIMATION_OVAL -> launchDrawAnimation(animationMode, isDelay = delay, viewCurrentA, viewNextB)
-            ANIMATION_CROSS_EXTENSION -> launchDrawAnimation(animationMode, isDelay = delay, viewCurrentA, viewNextB)
-            ANIMATION_RHOMBUS -> launchDrawAnimation(animationMode, isDelay = delay, viewCurrentA, viewNextB)
+            ANIMATION_ERASE_Y -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
+            ANIMATION_ERASE_X -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
+            ANIMATION_OVAL -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
+            ANIMATION_CROSS_EXTENSION -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
+            ANIMATION_RHOMBUS -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
             ANIMATION_CONTINUATION_OVAL -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
             ANIMATION_CONTINUATION_CROSS_EXTENSION -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
             ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
@@ -1222,33 +1222,33 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private fun launchHighBrushDrawAnimation(animationMode: Short, delay: Boolean, isX: Boolean) {
         mViewAnimationRunnable?.let { removeCallbacks(it) }
         mHandler?.postDelayed(Runnable {
-            val viewCurrentA = mCacheViews[mCurrentViewPos]
-            val viewNextB = getNextView(mCurrentViewPos)
-            viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
-            viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
+            val viewA = mCacheViews[mCurrentViewPos]
+            val viewB = getNextView(mCurrentViewPos)
+            viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
+            viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
             mAnimationStartTime = System.currentTimeMillis()
             mCurrentDuration = mAnimationDuration
-            viewCurrentA.mAnimationStartTime = mAnimationStartTime
-            viewNextB.mAnimationStartTime = mAnimationStartTime
-            viewCurrentA.mIsCurrentView = false
-            viewNextB.mIsCurrentView = true
+            viewA.mAnimationStartTime = mAnimationStartTime
+            viewB.mAnimationStartTime = mAnimationStartTime
+            viewA.mIsCurrentView = false
+            viewB.mIsCurrentView = true
             updateViewPosition()
             updateTextListPosition()
             val duration: Long = with(MAX_SCROLL_SPEED - mTextAnimationSpeed) { if (this == 8) 0L else if (this == 1) 1L else toLong() shl 1 }
             var count = 0
-            viewCurrentA.launchHighBrushDrawAnimation(isX, duration)
-            viewNextB.launchHighBrushDrawAnimation(isX, duration)
-            viewCurrentA.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, delay, viewCurrentA, viewNextB) }
-            viewNextB.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, delay, viewCurrentA, viewNextB) }
+            viewA.launchHighBrushDrawAnimation(isX, duration)
+            viewB.launchHighBrushDrawAnimation(isX, duration)
+            viewA.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, delay, viewA, viewB) }
+            viewB.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, delay, viewA, viewB) }
         }.also { mViewAnimationRunnable = it },  mAnimationDuration)
     }
-    private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewCurrentA: AttrTextView, viewNextB: AttrTextView) {
+    private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
         if (count == 2) {
-            viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-            viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+            viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+            viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
             tryReduceAniamtionTaskCount()
             mViewAnimationRunnable?.let { removeCallbacks(it) }
-            mHandler?.post(Runnable { onLayoutAnimation(animationMode, delay, viewCurrentA, viewNextB) }.also { mViewAnimationRunnable = it })
+            mHandler?.post(Runnable { onLayoutAnimation(animationMode, delay, viewA, viewB) }.also { mViewAnimationRunnable = it })
         }
     }
 
@@ -1258,7 +1258,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ● 2023-11-01 09:51:05 周三 上午
      * @author crowforkotlin
      */
-    private fun launchDefaultAnimation(animationMode: Short, isDelay: Boolean, viewCurrentA: AttrTextView, viewNextB: AttrTextView) {
+    private fun launchDefaultAnimation(animationMode: Short, isDelay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
         setLayerType(LAYER_TYPE_HARDWARE, null)
         onNotifyViewVisibility(mCurrentViewPos)
         if (isDelay) {
@@ -1267,14 +1267,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 updateViewPosition()
                 updateTextListPosition()
                 setLayerType(LAYER_TYPE_SOFTWARE, null)
-                onLayoutAnimation(animationMode, true, viewCurrentA, viewNextB)
+                onLayoutAnimation(animationMode, true, viewA, viewB)
             }
             mHandler?.postDelayed(mViewAnimationRunnable!!, if (mTextResidenceTime < 500) 500 else mTextResidenceTime)
         } else {
             updateViewPosition()
             updateTextListPosition()
             setLayerType(LAYER_TYPE_SOFTWARE, null)
-            onLayoutAnimation(animationMode, true, viewCurrentA, viewNextB)
+            onLayoutAnimation(animationMode, true, viewA, viewB)
         }
     }
 
@@ -1292,15 +1292,15 @@ class AttrTextLayout : FrameLayout, IAttrText {
         } else {
             mViewAnimatorSet?.cancel()
             mViewAnimatorSet = AnimatorSet()
-            val viewCurrentA = mCacheViews[mCurrentViewPos]
-            val viewNextB = getNextView(mCurrentViewPos)
+            val viewA = mCacheViews[mCurrentViewPos]
+            val viewB = getNextView(mCurrentViewPos)
             val viewAnimationA = ObjectAnimator.ofPropertyValuesHolder(
-                viewCurrentA,
+                viewA,
                 PropertyValuesHolder.ofFloat("scaleX", 1.0f, 0.0f), // X轴方向的缩放
                 PropertyValuesHolder.ofFloat("scaleY", 1.0f, 0.0f)  // Y轴方向的缩放
             )
             val viewAnimationB = ObjectAnimator.ofPropertyValuesHolder(
-                viewNextB,
+                viewB,
                 PropertyValuesHolder.ofFloat("scaleX", 0.0f, 1.0f), // X轴方向的缩放
                 PropertyValuesHolder.ofFloat("scaleY", 0.0f, 1.0f)  // Y轴方向的缩放
             )
@@ -1310,24 +1310,24 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.playSequentially(viewAnimationA, viewAnimationB)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
-                        if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
-                        viewNextB.scaleX = 0f
-                        viewNextB.scaleY = 0f
+                        viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
+                        if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
+                        viewB.scaleX = 0f
+                        viewB.scaleY = 0f
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        onLayoutAnimation(animationMode, true, viewCurrentA, viewNextB)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1350,8 +1350,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
         } else {
             mViewAnimatorSet?.cancel()
             mViewAnimatorSet = AnimatorSet()
-            val viewCurrentA = mCacheViews[mCurrentViewPos]
-            val viewNextB = getNextView(mCurrentViewPos)
+            val viewA = mCacheViews[mCurrentViewPos]
+            val viewB = getNextView(mCurrentViewPos)
             val viewAEnd : Float
             val viewBStart : Float
             val viewX = measuredWidth.toFloat()
@@ -1359,50 +1359,50 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 true -> {
                     viewAEnd = -viewX
                     viewBStart = viewX
-                    if (viewNextB.translationX <= 0f && mTextAnimationStrategy == STRATEGY_ANIMATION_UPDATE_CONTINUA) {
-                        viewCurrentA.translationX = 0f
-                        viewNextB.translationX = viewBStart
+                    if (viewB.translationX <= 0f && mTextAnimationStrategy == STRATEGY_ANIMATION_UPDATE_CONTINUA) {
+                        viewA.translationX = 0f
+                        viewB.translationX = viewBStart
                     } else {
-                        viewCurrentA.translationX = 0f
-                        viewNextB.translationX = viewBStart
+                        viewA.translationX = 0f
+                        viewB.translationX = viewBStart
                     }
                 }
                 false -> {
                     viewAEnd = viewX
                     viewBStart = -viewX
-                    if (viewNextB.translationX >= 0f && mTextAnimationStrategy == STRATEGY_ANIMATION_UPDATE_CONTINUA) {
-                        viewCurrentA.translationX = 0f
-                        viewNextB.translationX = viewBStart
+                    if (viewB.translationX >= 0f && mTextAnimationStrategy == STRATEGY_ANIMATION_UPDATE_CONTINUA) {
+                        viewA.translationX = 0f
+                        viewB.translationX = viewBStart
                     } else {
-                        viewCurrentA.translationX = 0f
-                        viewNextB.translationX = viewBStart
+                        viewA.translationX = 0f
+                        viewB.translationX = viewBStart
                     }
                 }
             }
-            val viewAnimationA = ObjectAnimator.ofFloat(viewCurrentA, "translationX", viewCurrentA.translationX , viewAEnd)
-            val viewAnimationB = ObjectAnimator.ofFloat(viewNextB, "translationX", viewNextB.translationX, 0f)
+            val viewAnimationA = ObjectAnimator.ofFloat(viewA, "translationX", viewA.translationX , viewAEnd)
+            val viewAnimationB = ObjectAnimator.ofFloat(viewB, "translationX", viewB.translationX, 0f)
             mViewAnimatorSet?.let { animatorSet ->
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
-                        if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
+                        viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
+                        if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        onLayoutAnimation(animationMode, true, viewCurrentA, viewNextB)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1426,8 +1426,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
         else {
             mViewAnimatorSet?.cancel()
             mViewAnimatorSet = AnimatorSet()
-            val viewCurrentA = mCacheViews[mCurrentViewPos]
-            val viewNextB = getNextView(mCurrentViewPos)
+            val viewA = mCacheViews[mCurrentViewPos]
+            val viewB = getNextView(mCurrentViewPos)
             val viewAEnd: Float
             val viewBStart: Float
             val viewY = measuredHeight.toFloat()
@@ -1435,44 +1435,44 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 true -> {
                     viewAEnd = -viewY
                     viewBStart = viewY
-                    if (viewNextB.translationY <= 0f || viewNextB.translationY == viewAEnd) {
-                        viewCurrentA.translationY = 0f
-                        viewNextB.translationY = viewBStart
+                    if (viewB.translationY <= 0f || viewB.translationY == viewAEnd) {
+                        viewA.translationY = 0f
+                        viewB.translationY = viewBStart
                     }
                 }
                 false -> {
                     viewAEnd = viewY
                     viewBStart = -viewY
-                    if (viewNextB.translationY >= 0f || viewNextB.translationY == viewAEnd) {
-                        viewCurrentA.translationY = 0f
-                        viewNextB.translationY = viewBStart
+                    if (viewB.translationY >= 0f || viewB.translationY == viewAEnd) {
+                        viewA.translationY = 0f
+                        viewB.translationY = viewBStart
                     }
                 }
             }
-            val viewAnimationA = ObjectAnimator.ofFloat(viewCurrentA, "translationY", viewCurrentA.translationY, viewAEnd)
-            val viewAnimationB = ObjectAnimator.ofFloat(viewNextB, "translationY", viewNextB.translationY, 0f)
+            val viewAnimationA = ObjectAnimator.ofFloat(viewA, "translationY", viewA.translationY, viewAEnd)
+            val viewAnimationB = ObjectAnimator.ofFloat(viewB, "translationY", viewB.translationY, 0f)
             mViewAnimatorSet?.let { animatorSet ->
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
-                        if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
+                        if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        onLayoutAnimation(animationMode, true, viewCurrentA, viewNextB)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1496,10 +1496,10 @@ class AttrTextLayout : FrameLayout, IAttrText {
         } else {
             mViewAnimatorSet?.cancel()
             mViewAnimatorSet = AnimatorSet()
-            val viewCurrentA = mCacheViews[mCurrentViewPos]
-            val viewNextB = getNextView(mCurrentViewPos)
-            val viewAnimationA = ObjectAnimator.ofFloat(viewCurrentA, "alpha", 1f, 0f)
-            val viewAnimationB = ObjectAnimator.ofFloat(viewNextB, "alpha", 0f, 1f)
+            val viewA = mCacheViews[mCurrentViewPos]
+            val viewB = getNextView(mCurrentViewPos)
+            val viewAnimationA = ObjectAnimator.ofFloat(viewA, "alpha", 1f, 0f)
+            val viewAnimationB = ObjectAnimator.ofFloat(viewB, "alpha", 0f, 1f)
             mViewAnimatorSet?.let { animatorSet ->
                 animatorSet.duration = mAnimationDuration
                 animatorSet.interpolator = LinearInterpolator()
@@ -1510,22 +1510,22 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 }
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        if (viewCurrentA.visibility == INVISIBLE) viewCurrentA.visibility = VISIBLE
-                        if (viewNextB.visibility == INVISIBLE) viewNextB.visibility = VISIBLE
-                        viewNextB.alpha = 0f
+                        viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
+                        if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
+                        viewB.alpha = 0f
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        onLayoutAnimation(animationMode, true, viewCurrentA, viewNextB)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1540,10 +1540,10 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ● 2023-12-19 17:37:40 周二 下午
      * @author crowforkotlin
      */
-    private fun launchDrawAnimation(animationMode: Short, isDelay: Boolean, viewCurrentA: AttrTextView, viewNextB: AttrTextView) {
+    private fun launchDrawAnimation(animationMode: Short, isDelay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
         if (isDelay) {
             mViewAnimationRunnable?.let { removeCallbacks(it) }
-            mViewAnimationRunnable = Runnable { launchDrawAnimation(animationMode, false, viewCurrentA, viewNextB) }
+            mViewAnimationRunnable = Runnable { launchDrawAnimation(animationMode, false, viewA, viewB) }
             mHandler?.postDelayed(mViewAnimationRunnable!!, mTextResidenceTime)
         } else {
             mViewAnimatorSet?.cancel()
@@ -1569,7 +1569,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
 
                     override fun onAnimationEnd(animation: Animator) {
                         setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        onLayoutAnimation(animationMode, true, viewCurrentA, viewNextB)
+                        onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
 
@@ -1599,15 +1599,15 @@ class AttrTextLayout : FrameLayout, IAttrText {
         tryAwaitAnimationTask {
             mViewAnimatorSet?.cancel()
             mViewAnimatorSet = AnimatorSet()
-            val viewCurrentA = mCacheViews[mCurrentViewPos]
-            val viewNextB = getNextView(mCurrentViewPos)
+            val viewA = mCacheViews[mCurrentViewPos]
+            val viewB = getNextView(mCurrentViewPos)
             val valueAnimator = ValueAnimator.ofFloat(0f, 1f)
             valueAnimator.addUpdateListener {
                 mAnimationTimeFraction = it.animatedFraction
-                viewCurrentA.mAnimationTimeFraction = mAnimationTimeFraction
-                viewNextB.mAnimationTimeFraction = mAnimationTimeFraction
-                viewCurrentA.invalidate()
-                viewNextB.invalidate()
+                viewA.mAnimationTimeFraction = mAnimationTimeFraction
+                viewB.mAnimationTimeFraction = mAnimationTimeFraction
+                viewA.invalidate()
+                viewB.invalidate()
             }
             valueAnimator.duration = mCurrentDuration
             mViewAnimatorSet?.let { animatorSet ->
@@ -1616,25 +1616,25 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.play(valueAnimator)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
                         mAnimationStartTime = System.currentTimeMillis()
                         mCurrentDuration = mAnimationDuration
-                        viewCurrentA.mAnimationStartTime = mAnimationStartTime
-                        viewNextB.mAnimationStartTime = mAnimationStartTime
-                        viewCurrentA.mIsCurrentView = false
-                        viewNextB.mIsCurrentView = true
+                        viewA.mAnimationStartTime = mAnimationStartTime
+                        viewB.mAnimationStartTime = mAnimationStartTime
+                        viewA.mIsCurrentView = false
+                        viewB.mIsCurrentView = true
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        onLayoutAnimation(animationMode, true, viewCurrentA, viewNextB)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewNextB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
