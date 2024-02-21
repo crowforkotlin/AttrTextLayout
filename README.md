@@ -1,6 +1,6 @@
 - # AttrTextLayout
 
-- ![Kotlin Support Verison](https://img.shields.io/badge/Kotlin_Version-1.3.0+-blue) ![Android Support Version](https://img.shields.io/badge/Android_Version-4.4+-blue) ![Compat](https://img.shields.io/badge/Compat-AndroidX_&_Support_Library-blue)
+- ![Android Support Version](https://img.shields.io/badge/Android_Version-4.1.1+-blue) ![Compat](https://img.shields.io/badge/Compat-AndroidX_&_Support_Library-blue)
 
 - ## 配置
 
@@ -10,7 +10,7 @@
 repository { mavenCentral() }
 
 // 引入远程依赖
-implementation("com.kotlincrow.android.component:AttrTextLayout:1.5")
+implementation("com.kotlincrow.android.component:AttrTextLayout:1.6")
 ```
 
 - ## 功能
@@ -143,11 +143,17 @@ layout.mTextAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_CONTINU
 // 设置行间距
 layout.mTextRowMargin = 4f
 
-// 设置字符间距
+// 设置字符间距 (此功能只在Android 5.0 +（API 21 +） 才支持) 
 layout.mTextCharSpacing = 1f
 
-// 设置滚动速度 最大15 最小1
-layout.mTextScrollSpeed = 13
+// 设置滚动速度 最大15 最小1  -- 高刷动画 速度为8的时候 达到了高刷的最佳效果，甚至比OpenGL ES的效果看上去好了一点
+layout.mTextAnimationSpeed = 13
+
+/* 
+1. 当高度为 `wrap` 只显示三行。
+2. 当高度为 `match或固定高度` 并且文本刚好满足两行时，只显示两行。
+*/
+layout.mTextLines = 3
 
 // 设置字体类型  Assets目录下的字体文件（mTextFontAssetsPath 的优先级大于 mTextFontAbsolutePath）
 layout.mTextFontAssetsPath = "comic.ttf"
@@ -209,6 +215,7 @@ const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
     app:textAntiAliasEnable="true"
     app:textBoldEnable="false"
     app:textFontAssetsPath="comic.ttf"
+    app:textLines="3"
     app:textFontAbsolutePath="/data/data/com.crow.attrtextlayout/files/font/calibri.ttf"
     app:textFakeBoldEnable="false"
     app:textItalicEnable="false"
@@ -220,7 +227,7 @@ const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
     app:textMultipleLineEnable="true"
     app:textResidenceTime="3000"
     app:textRowMargin="1px"
-    app:textScrollSpeed="15"
+    app:textAnimationSpeed="15"
     app:textSize="40sp"
     app:textSizeUnitStrategy="defaultOrSp"
     app:textUpdateStrategy="all" />
@@ -228,12 +235,17 @@ const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
 
 - ## <a id="about_high_brush"></a>关于高刷动画
 ```text
-1.5版本引入了X轴高刷新率动画。在Android中，动画ValueAnimator用于完成数值A-B的匀速插值(假设0-1024)，
+（1.5）版本引入了X轴高刷新率动画。在Android中，动画ValueAnimator用于完成数值A-B的匀速插值(假设0-1024)，
 以实现对View的动画表现。但是，如果动画时间较快，就会导致在这个期间内0-1024不能以+1+1的形式表示，
 在像素级视图中就会出现丢帧的情况。 为了实现高刷新率，可以考虑使用OpenGL ES绘制的文本，
-但是性能开销十分明显。因此，采用了协程机制为自定义View的高刷新进行了对应的处理，
-也确保视图能在16MS内绘制完成而不会造成卡顿，从而实现和OpenGLES一样的效果，即不会出现丢帧。
-但是，这种方法的缺点是牺牲丢帧换来卡顿（这种情况只有在视图界面资源占用高的情况出现），
+但是性能开销十分明显。
+
+（1.5、1.6）版本采用了协程机制为自定义View的高刷新进行了对应的处理，
+也确保视图能在16MS内绘制完成而不会造成卡顿，从而实现和OpenGLES一样的效果，即不会出现丢帧。)
+
+（1.7）版本移除了三方协程库、纯View无三方依赖
+
+上述对纯View实现高刷的这两种实现的缺点是牺牲丢帧换来卡顿（这种情况只有在视图界面资源占用高的情况出现），
 性能开销也很大，并且视图多也会卡，这点没法优化。 如果想在像素级视图中使用高刷新获得顺畅的体验，
 那么可以考虑使用高刷新率动画特效，在日常使用中默认的即可。
 ```

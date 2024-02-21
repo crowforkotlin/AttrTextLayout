@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.Message
+import android.text.TextPaint
 import android.util.Log
 import java.lang.reflect.Constructor
 
@@ -82,9 +83,8 @@ internal fun Looper.asHandler(async: Boolean): Handler {
     if (!async || Build.VERSION.SDK_INT < 16) { return Handler(this) }
 
     if (Build.VERSION.SDK_INT >= 28) {
-        // TODO compile against API 28 so this can be invoked without reflection.
+//         TODO compile against API 28 so this can be invoked without reflection.
 //        val factoryMethod = Handler::class.java.getDeclaredMethod("createAsync", Looper::class.java)
-
 //        return factoryMethod.invoke(null, this) as Handler
         return Handler.createAsync(this)
     }

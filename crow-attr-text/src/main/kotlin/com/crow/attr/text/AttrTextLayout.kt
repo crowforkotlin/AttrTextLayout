@@ -1,4 +1,11 @@
-@file:Suppress("unused", "SpellCheckingInspection", "MemberVisibilityCanBePrivate", "NewApi", "SameParameterValue", "DEPRECATION")
+@file:Suppress(
+    "unused",
+    "SpellCheckingInspection",
+    "MemberVisibilityCanBePrivate",
+    "NewApi",
+    "SameParameterValue",
+    "DEPRECATION"
+)
 
 package com.crow.attr.text
 
@@ -17,7 +24,7 @@ import android.graphics.PorterDuffXfermode
 import android.graphics.Region
 import android.graphics.Shader
 import android.graphics.Typeface
-import android.os.Build.VERSION_CODES.O
+import android.os.Build
 import android.os.Handler
 import android.os.HandlerThread
 import android.os.Looper
@@ -35,9 +42,11 @@ import kotlin.properties.Delegates
  * ● 属性文本组件 -- 布局
  * 动画更新说明：视图A和视图B，当动画执行时A和B呼唤身份，此时当前的动画为B，A被设置为下一个视图，如此反复交换实现视图AB的多种动画效果
  * 文本更新说明：设置mText属性触发绘制更新文本、根据文本策略执行对应的效果
+ *
  * ● 2023/10/30 15:53
+ *
  * @author crowforkotlin
- * @formatter:on
+ * @formatter:off
  */
 class AttrTextLayout : FrameLayout, IAttrText {
 
@@ -47,12 +56,10 @@ class AttrTextLayout : FrameLayout, IAttrText {
             updateTextListPosition()
             mAnimationUpdateListener?.onAnimationStart(animation)
         }
-
         override fun onAnimationEnd(animation: Animator) {
             mAnimationUpdateListener?.onAnimationEnd(animation)
             tryReduceAniamtionTaskCount()
         }
-
         override fun onAnimationCancel(animation: Animator) {
             if (mTextAnimationStrategy == STRATEGY_ANIMATION_UPDATE_CONTINUA) {
                 mCurrentDuration = mAnimatorSet.duration - mAnimatorSet.currentPlayTime
@@ -60,7 +67,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
             whenAnimationCancel()
             mAnimationUpdateListener?.onAnimationCancel(animation)
         }
-
         override fun onAnimationRepeat(animation: Animator) {
             mAnimationUpdateListener?.onAnimationRepeat(animation)
         }
@@ -69,7 +75,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) { initAttr(context, attrs ?: return) }
     constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int = 0) : super(context, attrs, defStyleAttr) { initAttr( context, attrs ?: return) }
-
     private fun initAttr(context: Context, attributeSet: AttributeSet) {
         context.obtainStyledAttributes(attributeSet, R.styleable.AttrTextLayout).apply {
             val defaultValue = 0
@@ -84,7 +89,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
             mTextMonoSpaceEnable = getBoolean(R.styleable.AttrTextLayout_textMonoSpaceEnable, false)
             mTextMultipleLineEnable = getBoolean(R.styleable.AttrTextLayout_textMultipleLineEnable, false)
             mSingleTextAnimationEnable = getBoolean(R.styleable.AttrTextLayout_singleTextAnimationEnable, false)
-            mTextScrollSpeed = getInt(R.styleable.AttrTextLayout_textAnimationSpeed, defaultValue).toShort()
+            mTextAnimationSpeed = getInt(R.styleable.AttrTextLayout_textAnimationSpeed, defaultValue).toShort()
             mTextRowMargin = getDimensionPixelOffset(R.styleable.AttrTextLayout_textRowMargin, defaultValue).toFloat()
             mTextCharSpacing = getDimensionPixelOffset(R.styleable.AttrTextLayout_textCharSpacing, defaultValue).toFloat()
             mTextResidenceTime = getInt(R.styleable.AttrTextLayout_textResidenceTime, defaultValue).toLong()
@@ -125,7 +130,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
             mText = text ?: return
         }
     }
-
     companion object {
 
         private const val NEWLINE_CHAR_FLAG = '\n'
@@ -418,7 +422,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ● 2024-02-20 13:55:30 周二 下午
      * @author crowforkotlin
      */
-    private var mTextLines: Int = 1
+    var mTextLines: Int = 1
 
     /**
      * ● 动画更新监听器
@@ -446,14 +450,13 @@ class AttrTextLayout : FrameLayout, IAttrText {
     var mTextFontAbsolutePath: String? = null
     var mTextFontAssetsPath: String? = null
 
-
     /**
      * ● 滚动速度 --- 设置滚动速度实际上是对动画持续时间进行设置 重写SET函数，实现滚动速度设置 对动画时间进行相对的设置，设置后会触发重新绘制 IntRange(from = 1, to = 15)
      *
      * ● 2023-10-31 13:59:53 周二 下午
      * @author crowforkotlin
      */
-    var mTextScrollSpeed: Short by Delegates.observable(1) { _, _, _ -> onVariableChanged(FLAG_SCROLL_SPEED) }
+    var mTextAnimationSpeed: Short by Delegates.observable(1) { _, _, _ -> onVariableChanged(FLAG_SCROLL_SPEED) }
 
     /**
      * ● 文本内容 -- 设置后会触发重新绘制
@@ -685,50 +688,32 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
     }
 
+    /**
+     * ● 重写 `onMeasure` 方法以自定义视图的测量逻辑。
+     *
+     * ● 2024-02-21 09:37:34 周三 上午
+     * @author crowforkotlin
+     */
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        if (mText.isNotEmpty()) {
-            // 检查宽度和高度是否被设置为wrap_content
-            val widthIsWrapContent = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST
-            val heightIsWrapContent = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST
-            val width: Int
-            val height: Int
-            onInitTextPaint()
-            if (widthIsWrapContent) {
-                val screenWidth = resources.displayMetrics.widthPixels
-                width = with(mTextPaint.measureText(mText)) { if (this > screenWidth) screenWidth else ceil(this).toInt() }
-            } else {
-                width = measuredWidth
-            }
-            if (heightIsWrapContent) {
-                height = with(context.getExactlyTextHeight(mTextPaint.fontMetrics)) { ceil(if (mTextMultipleLineEnable) this * mTextLines else this).toInt() }
-            } else {
-                height = measuredHeight
-            }
-            updateTextAndSpec(width, height)
-            /*when {
-                widthIsWrapContent && heightIsWrapContent -> {
-                    val textHeightWithMargin = with(context.getExactlyTextHeight(mTextPaint.fontMetrics)) { ceil(if (mTextMultipleLineEnable) this * mTextLines else this) }
-                    val textWidth = mTextPaint.measureText(mText)
-                    val screenWidth = resources.displayMetrics.widthPixels
-                    if (textWidth > screenWidth) {
-                        width = screenWidth
-                        height = ceil(textHeightWithMargin).toInt()
-                    } else {
-                        width =ceil(textWidth).toInt()
-                        height = ceil(textHeightWithMargin).toInt()
-                    }
-                    updateTextAndSpec(measuredWidth, measuredHeight)
-                }
-                widthIsExactlyContent && heightIsExactlyContent -> {
-                    width = measuredWidth
-                    height = measuredHeight
-                }
-                else -> {
-
-                }
-            }*/
+        // 检查宽度和高度是否被设置为wrap_content
+        val widthIsWrapContent = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST
+        val heightIsWrapContent = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST
+        val width: Int
+        val height: Int
+        onInitTextPaint()
+        if (widthIsWrapContent) {
+            val screenWidth = resources.displayMetrics.widthPixels
+            width = with(mTextPaint.measureText(mText)) { if (this > screenWidth) screenWidth else ceil(this).toInt() }
+        } else {
+            width = measuredWidth
         }
+        if (heightIsWrapContent) {
+            height = with(context.getExactlyTextHeight(mTextPaint.fontMetrics)) { ceil(if (mTextMultipleLineEnable) this * mTextLines else this).toInt() }
+        } else {
+            height = measuredHeight
+        }
+        updateTextAndSpec(width, height)
     }
 
     /**
@@ -770,8 +755,15 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
     }
 
+    /**
+     * ● 更新文本以及测量间距
+     *
+     * ● 2024-02-21 09:41:50 周三 上午
+     * @author crowforkotlin
+     */
     private fun updateTextAndSpec(width: Int, height: Int) {
         setMeasuredDimension(width, height)
+        if (mCacheViews.size != REQUIRED_CACHE_SIZE) return
         getTextLists(mText) {
             mList = it
             onNotifyLayoutUpdate()
@@ -832,7 +824,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
             }
             FLAG_SCROLL_SPEED -> {
                 // 根据 mScrollSpeed 动态调整 mAnimationDuration
-                val baseDuration = MAX_SCROLL_SPEED - mTextScrollSpeed
+                val baseDuration = MAX_SCROLL_SPEED - mTextAnimationSpeed
                 mAnimationDuration = if (baseDuration <= 1) MIN_ANIMATION_DURATION else MIN_ANIMATION_DURATION + (ANIMATION_DURATION_FIXED_INCREMEN * baseDuration)
                 mCurrentDuration = mAnimationDuration
             }
@@ -989,102 +981,107 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     private fun getTextLists(originText: String, onComplete: (MutableList<Pair<String, Float>>) -> Unit) {
         mTaskHandler.sendMessage(object : Runnable {
-                override fun run() {
-                    val viewMeasureWidth = measuredWidth
-                    var textStringWidth = 0f
-                    val textStringBuilder = StringBuilder()
-                    val textList: MutableList<Pair<String, Float>> = mutableListOf()
-                    val textMaxIndex = originText.length - 1
-                    onInitTextPaint()
-                    originText.forEachIndexed { index, char ->
-                                                  val textWidth = mTextPaint.measureText(char.toString(), 0, 1)
-                                                  textStringWidth += textWidth
+            override fun run() {
+                val viewMeasureWidth = measuredWidth
+                var textStringWidth = 0f
+                val textStringBuilder = StringBuilder()
+                val textList: MutableList<Pair<String, Float>> = mutableListOf()
+                val textMaxIndex = originText.length - 1
+                onInitTextPaint()
+                originText.forEachIndexed { index, char ->
+                    val textWidth = mTextPaint.measureText(char.toString(), 0, 1)
+                    textStringWidth += textWidth
+                    // 字符串宽度 < 测量宽度 假设宽度是 128  那么范围在 0 - 127 故用小于号而不是小于等于
+                    if (textStringWidth < viewMeasureWidth) {
+                        when (char) {
+                            NEWLINE_CHAR_FLAG -> {
+                                textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
+                                textStringBuilder.clear()
+                                textStringWidth = 0f
+                            }
 
-                                                  // 字符串宽度 < 测量宽度 假设宽度是 128  那么范围在 0 - 127 故用小于号而不是小于等于
-                                                  if (textStringWidth < viewMeasureWidth) {
-                                                  when(char) {
-                                                  NEWLINE_CHAR_FLAG -> {
-                                                  textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                                  textStringBuilder.clear()
-                                                  textStringWidth = 0f
-                                                  }
-                                                  NEWLINE_CHAR_FLAG_SLASH -> {
-                                                  if (originText.getOrNull(index + 1) == NEWLINE_CHAR_FLAG_N) {
-                                                  textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                                  textStringBuilder.clear()
-                                                  textStringWidth = 0f
-                                                  }
-                                                  }
-                                                  NEWLINE_CHAR_FLAG_N -> {
-                                                  if (index == textMaxIndex) {
-                                                  textStringWidth = if (originText.getOrNull(index - 1) != NEWLINE_CHAR_FLAG_SLASH) {
-                                                  textStringBuilder.append(char)
-                                                  textList.add(textStringBuilder.toString() to textStringWidth)
-                                                  0f
-                                                  } else {
-                                                  0f
-                                                  }
-                                                  } else {
-                                                  if (originText.getOrNull(index - 1) != NEWLINE_CHAR_FLAG_SLASH) {
-                                                  textStringBuilder.append(char)
-                                                  } else {
-                                                  textStringWidth = 0f
-                                                  }
-                                                  }
-                                                  }
-                                                  else -> {
-                                                  if (index == textMaxIndex) {
-                                                  textStringBuilder.append(char)
-                                                  textList.add(textStringBuilder.toString() to textStringWidth)
-                                                  textStringWidth = 0f
-                                                  } else {
-                                                  textStringBuilder.append(char)
-                                                  }
-                                                  }
-                                                  }
-                                                  } else {
-                                                  when(char) {
-                                                  NEWLINE_CHAR_FLAG_SLASH -> {
-                                                  if (originText.getOrNull(index + 1) == NEWLINE_CHAR_FLAG_N) {
-                                                  textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                                  textStringBuilder.clear()
-                                                  textStringWidth = 0f
-                                                  }
-                                                  }
-                                                  NEWLINE_CHAR_FLAG_N -> {
-                                                  if (originText.getOrNull(index - 1) != NEWLINE_CHAR_FLAG_SLASH) {
-                                                  textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                                  textStringBuilder.clear()
-                                                  textStringBuilder.append(char)
-                                                  if (index == textMaxIndex) {
-                                                  textList.add(textStringBuilder.toString() to textWidth)
-                                                  } else {
-                                                  textStringWidth = textWidth
-                                                  }
-                                                  } else {
-                                                  textStringWidth = 0f
-                                                  }
-                                                  }
-                                                  else -> {
-                                                  if(mList.isEmpty()) {
-                                                  return@forEachIndexed
-                                                  }
-                                                  textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                                  textStringBuilder.clear()
-                                                  textStringBuilder.append(char)
-                                                  if (index == textMaxIndex) {
-                                                  textList.add(textStringBuilder.toString() to textWidth)
-                                                  } else {
-                                                  textStringWidth = textWidth
-                                                  }
-                                                  }
-                                                  }
-                                                  }
-                                                  }
-                    onComplete(textList)
-                    mTaskListRunnable.remove(this)
+                            NEWLINE_CHAR_FLAG_SLASH -> {
+                                if (originText.getOrNull(index + 1) == NEWLINE_CHAR_FLAG_N) {
+                                    textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
+                                    textStringBuilder.clear()
+                                    textStringWidth = 0f
+                                }
+                            }
+
+                            NEWLINE_CHAR_FLAG_N -> {
+                                if (index == textMaxIndex) {
+                                    textStringWidth =
+                                        if (originText.getOrNull(index - 1) != NEWLINE_CHAR_FLAG_SLASH) {
+                                            textStringBuilder.append(char)
+                                            textList.add(textStringBuilder.toString() to textStringWidth)
+                                            0f
+                                        } else {
+                                            0f
+                                        }
+                                } else {
+                                    if (originText.getOrNull(index - 1) != NEWLINE_CHAR_FLAG_SLASH) {
+                                        textStringBuilder.append(char)
+                                    } else {
+                                        textStringWidth = 0f
+                                    }
+                                }
+                            }
+
+                            else -> {
+                                if (index == textMaxIndex) {
+                                    textStringBuilder.append(char)
+                                    textList.add(textStringBuilder.toString() to textStringWidth)
+                                    textStringWidth = 0f
+                                } else {
+                                    textStringBuilder.append(char)
+                                }
+                            }
+                        }
+                    } else {
+                        when (char) {
+                            NEWLINE_CHAR_FLAG_SLASH -> {
+                                if (originText.getOrNull(index + 1) == NEWLINE_CHAR_FLAG_N) {
+                                    textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
+                                    textStringBuilder.clear()
+                                    textStringWidth = 0f
+                                }
+                            }
+
+                            NEWLINE_CHAR_FLAG_N -> {
+                                if (originText.getOrNull(index - 1) != NEWLINE_CHAR_FLAG_SLASH) {
+                                    textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
+                                    textStringBuilder.clear()
+                                    textStringBuilder.append(char)
+                                    if (index == textMaxIndex) {
+                                        textList.add(textStringBuilder.toString() to textWidth)
+                                    } else {
+                                        textStringWidth = textWidth
+                                    }
+                                } else {
+                                    textStringWidth = 0f
+                                }
+                            }
+
+                            else -> {
+                                if (mList.isEmpty()) {
+                                    return@forEachIndexed
+                                }
+                                textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
+                                textStringBuilder.clear()
+                                textStringBuilder.append(char)
+                                if (index == textMaxIndex) {
+                                    textList.add(textStringBuilder.toString() to textWidth)
+                                } else {
+                                    textStringWidth = textWidth
+                                }
+                            }
+                        }
+                    }
                 }
-            }. also { mTaskListRunnable.add(it) }) { what = this@AttrTextLayout.hashCode() + FLAG_TEXT }
+                onComplete(textList)
+                mTaskListRunnable.remove(this)
+            }
+        }.also { mTaskListRunnable.add(it) }) { what = this@AttrTextLayout.hashCode() + FLAG_TEXT }
     }
 
     /**
@@ -1109,7 +1106,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     private fun updateTextListPosition() {
         if (mList.isEmpty()) return
-        mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+        }
         when(mTextMultipleLineEnable) {
             true -> {
                 val textHeightWithMargin = context.getExactlyTextHeight(mTextPaint.fontMetrics)
@@ -1164,9 +1163,17 @@ class AttrTextLayout : FrameLayout, IAttrText {
         if (viewNextB.translationY != 0f) viewNextB.translationY = 0f
         viewCurrentA.mTextAnimationMode = mTextAnimationMode
         viewNextB.mTextAnimationMode = mTextAnimationMode
+        viewCurrentA.mTextLines = mTextLines
+        viewNextB.mTextLines = mTextLines
         onLayoutAnimation(animationMode, isDelay, viewCurrentA, viewNextB)
     }
 
+    /**
+     * ● 根据动画模式启动布局动画
+     *
+     * ● 2024-02-21 09:40:58 周三 上午
+     * @author crowforkotlin
+     */
     private fun onLayoutAnimation(animationMode: Short, delay: Boolean, viewCurrentA: AttrTextView, viewNextB: AttrTextView) {
         if (isListSizeFitPage() && !mSingleTextAnimationEnable) return run {
             if (viewNextB.visibility == VISIBLE) viewNextB.visibility = INVISIBLE
@@ -1227,7 +1234,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
             viewNextB.mIsCurrentView = true
             updateViewPosition()
             updateTextListPosition()
-            val duration: Long = with(MAX_SCROLL_SPEED - mTextScrollSpeed) { if (this == 8) 0L else if (this == 1) 1L else toLong() shl 1 }
+            val duration: Long = with(MAX_SCROLL_SPEED - mTextAnimationSpeed) { if (this == 8) 0L else if (this == 1) 1L else toLong() shl 1 }
             var count = 0
             viewCurrentA.launchHighBrushDrawAnimation(isX, duration)
             viewNextB.launchHighBrushDrawAnimation(isX, duration)
@@ -1235,7 +1242,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
             viewNextB.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, delay, viewCurrentA, viewNextB) }
         }.also { mViewAnimationRunnable = it },  mAnimationDuration)
     }
-
     private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewCurrentA: AttrTextView, viewNextB: AttrTextView) {
         if (count == 2) {
             viewCurrentA.setLayerType(LAYER_TYPE_SOFTWARE, null)
@@ -1330,6 +1336,12 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
     }
 
+    /**
+     * ● X轴移动动画
+     *
+     * ● 2024-02-21 09:38:55 周三 上午
+     * @author crowforkotlin
+     */
     private fun launchMoveXAnimation(animationMode: Short, isDelay: Boolean) {
         if (isDelay) {
             mViewAnimationRunnable?.let { removeCallbacks(it) }
@@ -1400,7 +1412,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
     }
 
     /**
-     * ● Y方向移动
+     * ● Y轴移动动画
      *
      * ● 2023-11-01 09:51:11 周三 上午
      * @author crowforkotlin
@@ -1723,7 +1735,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun onInitAttrTextViewValue(view: AttrTextView) {
-        mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
+        }
         view.mTextSizeUnitStrategy = mTextSizeUnitStrategy
         view.mTextAnimationTopEnable = mTextAnimationTopEnable
         view.mTextAnimationLeftEnable = mTextAnimationLeftEnable
@@ -1759,7 +1773,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
             textSize = withSizeUnit(this@AttrTextLayout::mTextSize, dpOrSp = { context.px2sp(mTextSize) } )
             isFakeBoldText = mTextFakeBoldEnable
             textSkewX = if (mTextFakeItalicEnable) -0.25f else 0f
-            letterSpacing = mTextCharSpacing / mTextPaint.textSize
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                letterSpacing = mTextCharSpacing / mTextPaint.textSize
+            }
             initPaintTypeFace(this)
         }
     }

@@ -90,13 +90,12 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     lateinit var mTextPaint : TextPaint
 
     /**
-     * ● TimeTask
+     * ● Async Handler
      *
-     * ● 2024-02-18 17:34:18 周日 下午
+     * ● 2024-02-20 16:15:35 周二 下午
      * @author crowforkotlin
      */
-    private var mTimerTaskIncrement: TimerTask? = null
-    private var mTimerTaskDecrement: TimerTask? = null
+    lateinit var mHandler: Handler
 
     /**
      * ● 高刷延时时间
@@ -155,14 +154,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     private var mTextY : Float = 0f
 
     /**
-     * ● Async Handler
-     *
-     * ● 2024-02-20 16:15:35 周二 下午
-     * @author crowforkotlin
-     */
-    lateinit var mHandler: Handler
-
-    /**
      * ● Path -- 用于绘制动画
      *
      * ● 2023-12-21 19:15:44 周四 下午
@@ -178,6 +169,14 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * @author crowforkotlin
      */
     var mList : MutableList<Pair<String, Float>> = mutableListOf()
+
+    /**
+     * ● 文本行数
+     *
+     * ● 2024-02-21 10:18:15 周三 上午
+     * @author crowforkotlin
+     */
+    var mTextLines: Int = 1
 
     /**
      * ● 文本列表位置 -- 设置后会触发重新绘制
@@ -275,12 +274,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      */
     override var mTextSizeUnitStrategy: Short = STRATEGY_DIMENSION_PX_OR_DEFAULT
 
-    override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        mTimerTaskIncrement?.cancel()
-        mTimerTaskDecrement?.cancel()
-    }
-
     /**
      * ● 绘制文本
      *
@@ -294,9 +287,9 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         val textListSize = mList.size
 
         // 列表为空
-        if (mList.isEmpty()) return
+        if (textListSize == 0) return
 
-        // 文本长度是否无效？
+        // 获取文本 -> 如果超出列表位置取最后一个
         val text = if (mListPosition !in 0..< textListSize) { mList.last() } else mList[mListPosition]
 
         // 执行动画
@@ -506,25 +499,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     }
 
     /**
-     * ● 启动高刷绘制动画
-     *
-     * ● 2024-01-30 15:41:27 周二 下午
-     * @author crowforkotlin
-     */
-    internal fun launchHighBrushDrawAnimation(isX: Boolean, duration: Long = IAttrText.DRAW_VIEW_MIN_DURATION) {
-        mTextAxisValue = 0f
-        mHighBrushJobRunning = true
-        if (isX) {
-            launchHighBrushSuspendAnimation(measuredWidth, mTextAnimationLeftEnable, duration)
-        } else {
-            launchHighBrushSuspendAnimation(measuredHeight, mTextAnimationTopEnable, duration)
-        }
-    }
-
-
-    fun setHighBrushSuccessListener(listener: Runnable) { mHighBrushSuccessListener = listener }
-
-    /**
      * ● 高刷动画 挂起任务
      *
      * ● 2024-02-01 11:17:55 周四 上午
@@ -548,12 +522,11 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             mTextAxisValue --
             if (mTextAxisValue > -mHighBrushPixelCount) {
                 if (duration == 0L) invalidate() else {
-                    val handler = handler
                     mHandler.post(object : Runnable {
                         override fun run() {
                             if (mTextAxisValue > -mHighBrushPixelCount) invalidate()
                             else {
-                                handler.removeCallbacks(this)
+                                mHandler.removeCallbacks(this)
                                 mHighBrushJobRunning = false
                                 mHighBrushSuccessListener?.run()
                                 return
@@ -571,12 +544,11 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             mTextAxisValue ++
             if (mTextAxisValue < mHighBrushPixelCount) {
                 if (duration == 0L) invalidate() else {
-                    val handler = handler
                     mHandler.post(object : Runnable {
                         override fun run() {
                             if (mTextAxisValue < mHighBrushPixelCount) invalidate()
                             else {
-                                handler.removeCallbacks(this)
+                                mHandler.removeCallbacks(this)
                                 mHighBrushJobRunning = false
                                 mHighBrushSuccessListener?.run()
                                 return
@@ -588,7 +560,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                 }
             } else {
                 mHighBrushJobRunning = false
-            mHighBrushSuccessListener?.run()
+                mHighBrushSuccessListener?.run()
             }
         }
     }
@@ -608,7 +580,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             val textMarginRow = if (mTextRowMargin >= heightHalf) heightHalf.toFloat() else mTextRowMargin
             val textYIncremenet = textHeight + textMarginRow
             val textHeightWithMargin = textHeight + textMarginRow
-            val textMaxLine =  if (measuredHeight < textHeightWithMargin) 1 else (measuredHeight / textHeightWithMargin).toInt()
+            val textMaxLine = min(if (measuredHeight < textHeightWithMargin) 1 else (measuredHeight / textHeightWithMargin).toInt(), mTextLines)
             var textStartPos = mListPosition * textMaxLine
             mTextY = onInitializaTextY(abs(fontMetrics.ascent))
             repeat(textMaxLine) {
@@ -788,4 +760,21 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             }
         )
     }
+
+    /**
+     * ● 启动高刷绘制动画
+     *
+     * ● 2024-01-30 15:41:27 周二 下午
+     * @author crowforkotlin
+     */
+    internal fun launchHighBrushDrawAnimation(isX: Boolean, duration: Long = IAttrText.DRAW_VIEW_MIN_DURATION) {
+        mTextAxisValue = 0f
+        mHighBrushJobRunning = true
+        if (isX) {
+            launchHighBrushSuspendAnimation(measuredWidth, mTextAnimationLeftEnable, duration)
+        } else {
+            launchHighBrushSuspendAnimation(measuredHeight, mTextAnimationTopEnable, duration)
+        }
+    }
+    internal fun setHighBrushSuccessListener(listener: Runnable) { mHighBrushSuccessListener = listener }
 }

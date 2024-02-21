@@ -4,7 +4,7 @@ package com.crow.attrtextlayout
 
 import android.graphics.Color
 import android.os.Bundle
-import android.widget.FrameLayout
+import android.widget.LinearLayout
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +16,6 @@ import com.crow.attr.text.AttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 import com.crow.base.tools.extensions.copyFolder
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -39,12 +38,16 @@ class MainActivity : AppCompatActivity() {
                 mContent = File(filesDir, "content/Content.txt").readText()
             }
             mBinding.attrTextLayout.mText = mContent
-            withContext(Dispatchers.IO) {
+            /*withContext(Dispatchers.IO) {
                 repeat(Int.MAX_VALUE) {
                     mBinding.attrTextLayout.mText = "$it $mContent"
                     delay(1000)
                 }
-            }
+            }*/
+            /*repeat(200) {
+               delay((100..700).random().toLong())
+                createAttrTextLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, AttrTextLayout.ANIMATION_MOVE_X)
+            }*/
         }
         AttrTextLayout.mAwaitAnimationCount = 4
     }
@@ -67,24 +70,22 @@ class MainActivity : AppCompatActivity() {
         requestedOrientation = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
     }
 
-    private fun createAttrTextLayout(x: Float, y: Float, width: Int, height: Int, animationStrategy: Short): AttrTextLayout {
+    private fun createAttrTextLayout(width: Int, height: Int, animationStrategy: Short): AttrTextLayout {
         val layout = AttrTextLayout(this)
-//        layout.background = ContextCompat.getDrawable(this, android.R.color.white)
-        layout.x = x
-        layout.y = y
-        val layoutParams = FrameLayout.LayoutParams(width, height)
-        mBinding.root.addView(layout)
+        val layoutParams = LinearLayout.LayoutParams(width, height)
+        mBinding.linear.addView(layout)
         layout.layoutParams = layoutParams
         layout.mTextSize = 14f
         layout.mTextGravity = AttrTextLayout.GRAVITY_CENTER
         layout.mTextGradientDirection = AttrTextLayout.GRADIENT_VERTICAL
         layout.mTextSizeUnitStrategy = AttrTextLayout.STRATEGY_DIMENSION_PX_OR_DEFAULT
         layout.mSingleTextAnimationEnable = true
-        layout.mTextMultipleLineEnable = false
-        layout.mTextResidenceTime = 3000
+        layout.mTextMultipleLineEnable = true
+        layout.mTextResidenceTime = 1000
         layout.mTextAnimationMode = animationStrategy
         layout.mTextAnimationLeftEnable = false
         layout.mTextAnimationTopEnable = false
+        layout.mTextLines = 3
         layout.mTextMonoSpaceEnable = false
         layout.mTextBoldEnable = false
         layout.mTextFakeBoldEnable = false
@@ -97,7 +98,7 @@ class MainActivity : AppCompatActivity() {
         layout.mTextAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_CONTINUA
         layout.mTextRowMargin = 4f
         layout.mTextCharSpacing = 1f
-        layout.mTextScrollSpeed = 13
+        layout.mTextAnimationSpeed = 12
         layout.mText = mContent
         return layout
     }

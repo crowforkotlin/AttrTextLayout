@@ -11,7 +11,7 @@ android {
     namespace = "com.crow.attr.text"
     compileSdk = 34
     defaultConfig {
-        minSdk = 21
+        minSdk = 16
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
         setProperty("archivesBaseName", "AttrTextLayout-${properties["VERSION_NAME"]}")

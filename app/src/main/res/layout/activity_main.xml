@@ -8,14 +8,16 @@
     tools:context=".MainActivity"
     tools:ignore="PxUsage">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="128px"
-        android:layout_height="64px">
+    <LinearLayout
+        android:id="@+id/linear"
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="match_parent">
 
         <com.crow.attr.text.AttrTextLayout
             android:id="@+id/attrTextLayout"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
+            android:layout_width="128px"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -33,9 +35,9 @@
             app:textFakeBoldEnable="false"
             app:textFontAbsolutePath="/data/data/com.crow.attrtextlayout/files/font/calibri.ttf"
             app:textFontAssetsPath="comic.ttf"
-            app:textGravity="center"
+            app:textGravity="top_start"
             app:textItalicEnable="false"
-            app:textLines="1"
+            app:textLines="3"
             app:textMonoSpaceEnable="true"
             app:textMultipleLineEnable="true"
             app:textResidenceTime="1500"
@@ -43,6 +45,7 @@
             app:textSize="12sp"
             app:textSizeUnitStrategy="defaultOrSp"
             app:textUpdateStrategy="lazy" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
 
 </FrameLayout>
