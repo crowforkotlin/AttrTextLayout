@@ -11,7 +11,7 @@ android {
     }
     defaultConfig {
         applicationId = "com.crow.attrtextlayout"
-        minSdk = 21
+        minSdk = 16
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"

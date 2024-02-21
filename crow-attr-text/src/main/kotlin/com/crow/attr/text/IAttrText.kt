@@ -55,6 +55,10 @@ internal interface IAttrText {
         return fontMetrics.descent -fontMetrics.ascent
     }
 
+    fun Context.getExactlyTextHeight(fontMetrics: Paint.FontMetrics): Float {
+        return (fontMetrics.descent -fontMetrics.ascent) + withSizeUnit(::mTextRowMargin, dpOrSp = { px2dp(mTextRowMargin) })
+    }
+
     /**
      * ● 绘制菱形
      *
