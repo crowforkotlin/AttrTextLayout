@@ -4,6 +4,7 @@ package com.crow.attrtextlayout
 
 import android.graphics.Color
 import android.os.Bundle
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
@@ -16,6 +17,7 @@ import com.crow.attr.text.AttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 import com.crow.base.tools.extensions.copyFolder
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -44,10 +46,10 @@ class MainActivity : AppCompatActivity() {
                     delay(1000)
                 }
             }*/
-            /*repeat(200) {
+            repeat(10) {
                delay((100..700).random().toLong())
-                createAttrTextLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, AttrTextLayout.ANIMATION_MOVE_X)
-            }*/
+                createAttrTextLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, AttrTextLayout.ANIMATION_MOVE_X_HIGH_BRUSH_DRAW)
+            }
         }
         AttrTextLayout.mAwaitAnimationCount = 4
     }
@@ -98,7 +100,7 @@ class MainActivity : AppCompatActivity() {
         layout.mTextAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_CONTINUA
         layout.mTextRowMargin = 4f
         layout.mTextCharSpacing = 1f
-        layout.mTextAnimationSpeed = 12
+        layout.mTextAnimationSpeed = 15
         layout.mText = mContent
         return layout
     }
