@@ -1244,11 +1244,13 @@ class AttrTextLayout : FrameLayout, IAttrText {
     }
     private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
         if (count == 2) {
-            viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-            viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
             tryReduceAniamtionTaskCount()
             mViewAnimationRunnable?.let { removeCallbacks(it) }
-            mHandler?.post(Runnable { onLayoutAnimation(animationMode, delay, viewA, viewB) }.also { mViewAnimationRunnable = it })
+            mHandler?.post(Runnable {
+                viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                onLayoutAnimation(animationMode, delay, viewA, viewB)
+            }.also { mViewAnimationRunnable = it })
         }
     }
 
