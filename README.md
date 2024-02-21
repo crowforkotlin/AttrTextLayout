@@ -14,11 +14,11 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.6")
 ```
 
 - ## 功能
-- [x] 支持配置文本策略、样式、换行、特效(擦除、移动、圆形、连续、非连续) 动画
+- [x] 支持配置文本策略、样式、换行（手动、自动）、特效(擦除、移动、圆形、连续、非连续) 动画
 - [x] 支持XML和动态创建
 - [x] 优化绘制速度 < 3MS
 - [x] 增加渐变色
-- [x] 增加高刷新率动画(仅支持左右移动、上下移动)
+- [x] 增加高刷新率动画(仅支持左右移动、上下移动、可控制速度、Speed为8时效果最佳)
 - [x] 配置字体类型
 - [ ] 配置渐变色RGB
 
@@ -249,3 +249,6 @@ const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
 性能开销也很大，并且视图多也会卡，这点没法优化。 如果想在像素级视图中使用高刷新获得顺畅的体验，
 那么可以考虑使用高刷新率动画特效，在日常使用中默认的即可。
 ```
+
+- ## 参考
+- [Send async messages to the Android main looper](https://github.com/Kotlin/kotlinx.coroutines/commit/8adbb70765226321bf7db485633007c6d8aba774)
