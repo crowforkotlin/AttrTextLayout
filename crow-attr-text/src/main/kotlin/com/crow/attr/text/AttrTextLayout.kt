@@ -1264,8 +1264,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
             tryReduceAniamtionTaskCount()
             mViewAnimationRunnable?.let { removeCallbacks(it) }
             mHandler?.post(Runnable {
-                viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                viewA.setLayerType(LAYER_TYPE_NONE, null)
+                viewB.setLayerType(LAYER_TYPE_NONE, null)
                 onLayoutAnimation(animationMode, delay, viewA, viewB)
             }.also { mViewAnimationRunnable = it })
         }
@@ -1285,14 +1285,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
             mViewAnimationRunnable = Runnable {
                 updateViewPosition()
                 updateTextListPosition()
-                setLayerType(LAYER_TYPE_SOFTWARE, null)
+                setLayerType(LAYER_TYPE_NONE, null)
                 onLayoutAnimation(animationMode, true, viewA, viewB)
             }
             mHandler?.postDelayed(mViewAnimationRunnable!!, if (mTextResidenceTime < 500) 500 else mTextResidenceTime)
         } else {
             updateViewPosition()
             updateTextListPosition()
-            setLayerType(LAYER_TYPE_SOFTWARE, null)
+            setLayerType(LAYER_TYPE_NONE, null)
             onLayoutAnimation(animationMode, true, viewA, viewB)
         }
     }
@@ -1339,14 +1339,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1414,14 +1414,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1476,22 +1476,22 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
                         if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1537,14 +1537,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1587,13 +1587,13 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
-                        setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
 
                     override fun onAnimationCancel(animation: Animator) {
-                        setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        setLayerType(LAYER_TYPE_NONE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1646,14 +1646,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_SOFTWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_SOFTWARE, null)
+                        viewA.setLayerType(LAYER_TYPE_NONE, null)
+                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
