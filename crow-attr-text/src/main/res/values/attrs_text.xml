@@ -10,6 +10,12 @@
         <attr name="singleTextAnimationEnable" format="boolean" />
         <attr name="textItalicEnable" format="boolean" />
         <attr name="textFakeItalicEnable" format="boolean" />
+        <attr name="textFrameLeft" format="boolean" />
+        <attr name="textFrameTop" format="boolean" />
+        <attr name="textFrameRight" format="boolean" />
+        <attr name="textFrameBottom" format="boolean" />
+        <attr name="textFrameColor" format="color" />
+        <attr name="textFrameLineWdith" format="dimension" />
         <attr name="textSize" format="dimension" />
         <attr name="textRowMargin" format="dimension" />
         <attr name="textCharSpacing" format="dimension" />

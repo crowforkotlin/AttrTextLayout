@@ -13,6 +13,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
+import com.crow.attr.text.AttrTextFrameConfig
 import com.crow.attr.text.AttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 import com.crow.base.tools.extensions.copyFolder
@@ -39,17 +40,25 @@ class MainActivity : AppCompatActivity() {
                 copyFolder("font")
                 mContent = File(filesDir, "content/Content.txt").readText()
             }
-            mBinding.attrTextLayout.mText = mContent
+//            mBinding.attrTextLayout.mText = mContent
             /*withContext(Dispatchers.IO) {
                 repeat(Int.MAX_VALUE) {
                     mBinding.attrTextLayout.mText = "$it $mContent"
                     delay(1000)
                 }
             }*/
-            repeat(10) {
+            /*repeat(10) {
                delay((100..700).random().toLong())
                 createAttrTextLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, AttrTextLayout.ANIMATION_MOVE_X_HIGH_BRUSH_DRAW)
-            }
+            }*/
+            /*repeat(Int.MAX_VALUE) {
+                delay(500)
+                mBinding.attrTextLayout.mTextFrameConfig = AttrTextFrameConfig(
+                    mLeft = true,
+                    mTop = true,
+                    mRight = true,
+                    mBottom = true, mLineWidth = (20..50).random().toFloat())
+            }*/
         }
         AttrTextLayout.mAwaitAnimationCount = 4
     }
@@ -101,6 +110,7 @@ class MainActivity : AppCompatActivity() {
         layout.mTextRowMargin = 4f
         layout.mTextCharSpacing = 1f
         layout.mTextAnimationSpeed = 15
+        layout.mTextFrameConfig = AttrTextFrameConfig(mLeft = true, mTop = true, mRight = true, mBottom = true)
         layout.mText = mContent
         return layout
     }

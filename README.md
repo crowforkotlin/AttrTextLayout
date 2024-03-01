@@ -24,7 +24,6 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.6")
 - [ ] 启用文字描边、阴影
 - [ ] 配置渐变色RGB
 
-
 - ## 效果
 - 用的GIF进行录制会很卡顿，实际效果非常顺畅
 - 高刷的移动速度较慢，但在像素级视图中做到了和OpenGL ES同等的效果，非常顺畅，可参考[关于高刷动画说明](#about_high_brush)
@@ -170,33 +169,33 @@ layout.mText = "Hello World!"
 
 ```kotlin 策略类别
 /**
- * ● 重新加载更新策略：当重新绘制的时候是否重新执行动画
+ * ⦁ 重新加载更新策略：当重新绘制的时候是否重新执行动画
  */
 const val STRATEGY_ANIMATION_UPDATE_RESTART: Short = 602
 
 /**
- * ● 默认更新策略：当重新绘制的时候继续执行已停止的动画
+ * ⦁ 默认更新策略：当重新绘制的时候继续执行已停止的动画
  */
 const val STRATEGY_ANIMATION_UPDATE_CONTINUA: Short = 603
 
 /**
- * ● PX策略 和 DP策略
+ * ⦁ PX策略 和 DP策略
  */
 const val STRATEGY_DIMENSION_PX_OR_DEFAULT: Short = 604
 const val STRATEGY_DIMENSION_DP_OR_SP: Short = 605
 
 /**
- * ● 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
+ * ⦁ 默认更新策略：当文本发生改变触发绘制需求时会直接更新绘制视图
  */
 const val STRATEGY_TEXT_UPDATE_ALL: Short = 900
 
 /**
- * ● 懒加载更新策略：当文本发生改变时 视图正在执行动画则不会更新，否则更新所有视图
+ * ⦁ 懒加载更新策略：当文本发生改变时 视图正在执行动画则不会更新，否则更新所有视图
  */
 const val STRATEGY_TEXT_UPDATE_LAZY: Short = 901
 
 /**
- * ● 文本更新策略：当文本发生改变时，只会更新当前视图的文本（不管动画是否停止执行都会进行更新）
+ * ⦁ 文本更新策略：当文本发生改变时，只会更新当前视图的文本（不管动画是否停止执行都会进行更新）
  */
 const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
 ```

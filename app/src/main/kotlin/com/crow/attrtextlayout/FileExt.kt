@@ -52,9 +52,9 @@ fun File.getUriCompat(context: Context): Uri {
 }
 
 /**
- * ● 拷贝文件到本地磁盘
+ * ⦁ 拷贝文件到本地磁盘
  *
- * ● 2023-12-14 01:28:47 周四 上午
+ * ⦁ 2023-12-14 01:28:47 周四 上午
  * @author crowforkotlin
  */
 fun Context.copyFolder(folderName: String) {
