@@ -13,22 +13,23 @@
         android:layout_height="100dp">
 
         <LinearLayout
+            android:id="@+id/linear"
             android:layout_width="match_parent"
             android:layout_height="500dp"
             android:orientation="vertical">
 
-
-            <com.crow.attr.text.AttrTextLayout
+<!--            <com.crow.attr.text.AttrTextLayout
                 android:id="@+id/attrTextLayout"
                 android:layout_width="128px"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 app:layoutBackGroundColor="#5D627E"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:singleTextAnimationEnable="true"
-                app:text="12345678910 11 12 13 14 15 16 17 18 19 20"
+                app:text="Gg静12345678910 11 12 13 14 15 16 17 18 19 20"
                 app:textAnimationMode="continuation_erase_x"
                 app:textAnimationSpeed="15"
                 app:textAnimationStrategy="continua"
@@ -43,7 +44,7 @@
                 app:textFontAssetsPath="comic.ttf"
                 app:textFrameBottom="true"
                 app:textFrameLeft="true"
-                app:textFrameLineWdith="5sp"
+                app:textFrameLineWdith="1sp"
                 app:textFrameRight="true"
                 app:textFrameTop="true"
                 app:textGravity="center"
@@ -53,9 +54,10 @@
                 app:textMultipleLineEnable="true"
                 app:textResidenceTime="1000"
                 app:textRowMargin="1sp"
-                app:textSize="16sp"
+                app:textSize="12sp"
                 app:textSizeUnitStrategy="defaultOrSp"
                 app:textUpdateStrategy="lazy" />
+
             <com.crow.attr.text.AttrTextLayout
                 android:layout_width="128px"
                 android:layout_height="wrap_content"
@@ -166,7 +168,7 @@
                 app:textRowMargin="1sp"
                 app:textSize="16sp"
                 app:textSizeUnitStrategy="defaultOrSp"
-                app:textUpdateStrategy="lazy" />
+                app:textUpdateStrategy="lazy" />-->
         </LinearLayout>
 
     </androidx.core.widget.NestedScrollView>

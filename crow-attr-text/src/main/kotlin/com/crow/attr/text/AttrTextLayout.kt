@@ -770,15 +770,25 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     private fun updateTextAndSpec(width: Int, height: Int) {
         if (mCacheViews.size != REQUIRED_CACHE_SIZE) return
-        val widhtSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
-        val heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
-        mCacheViews[0].measure(widhtSpec, heightSpec)
-        mCacheViews[1].measure(widhtSpec, heightSpec)
-        getTextLists(mText) {
+        val startXY = getChildStartXY()
+        val xy = startXY.toInt() * 2
+        val widhtSpec = MeasureSpec.makeMeasureSpec(width - xy , MeasureSpec.EXACTLY)
+        val heightSpec = MeasureSpec.makeMeasureSpec(height - xy, MeasureSpec.EXACTLY)
+        syncChildViewParms {
+            measure(widhtSpec, heightSpec)
+            x = startXY
+            y = startXY
+        }
+
+        getTextLists(if (mText.length > MAX_STRING_LENGTH) { mText.substring(0, MAX_STRING_LENGTH) } else mText) {
             mList = it
             onNotifyLayoutUpdate()
             onNotifyViewUpdate()
         }
+    }
+
+    private fun getChildStartXY(): Float {
+        return ceil((mTextFrameConfig?.mLineWidth ?: return 0f) / 2)
     }
 
     /**
@@ -810,6 +820,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
             FLAG_LAYOUT_REFRESH -> { onNotifyLayoutUpdate() }
             FLAG_CHILD_REFRESH -> { onNotifyViewUpdate() }
             FLAG_TEXT -> {
+                requestLayout()
+                return
                 getTextLists(if (mText.length > MAX_STRING_LENGTH) { mText.substring(0, MAX_STRING_LENGTH) } else mText) {it ->
                     mHandler?.post(object : Runnable {
                         override fun run() {
@@ -825,6 +837,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                             }*/
                             // if (mList.isEmpty() && firstInit) return
                             if (mList.isEmpty()) return
+
                             onUpdatePosOrView()
                             onNotifyLayoutUpdate()
                             mTaskListRunnable.remove(this)
@@ -936,6 +949,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
         viewB.visibility = INVISIBLE
     }
 
+    private inline fun syncChildViewParms(view: AttrTextView.() -> Unit) {
+        mCacheViews.forEach {
+            view(it)
+            it.mMultiLineEnable = mTextMultipleLineEnable
+            it.mGravity = mTextGravity
+        }
+    }
+
     /**
      * ⦁ 获取上一个 或 下一个 View
      *
@@ -992,7 +1013,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private fun getTextLists(originText: String, onComplete: (MutableList<Pair<String, Float>>) -> Unit) {
         mTaskHandler.sendMessage(object : Runnable {
             override fun run() {
-                val viewMeasureWidth = measuredWidth - (mTextFrameConfig?.run { ceil(mLineWidth / 2).toInt() } ?: 0)
+                val viewMeasureWidth = measuredWidth - (mTextFrameConfig?.run { ceil(mLineWidth / 2).toInt() shl 1 } ?: 0)
                 var textStringWidth = 0f
                 val textStringBuilder = StringBuilder()
                 val textList: MutableList<Pair<String, Float>> = mutableListOf()

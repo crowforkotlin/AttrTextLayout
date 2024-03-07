@@ -5,6 +5,7 @@ package com.crow.attrtextlayout
 import android.graphics.Color
 import android.os.Bundle
 import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
                     mRight = true,
                     mBottom = true, mLineWidth = (20..50).random().toFloat())
             }*/
+            createAttrTextLayout(128, FrameLayout.LayoutParams.WRAP_CONTENT, AttrTextLayout.ANIMATION_ERASE_X)
         }
     }
 
@@ -83,7 +85,7 @@ class MainActivity : AppCompatActivity() {
     private fun createAttrTextLayout(width: Int, height: Int, animationStrategy: Short): AttrTextLayout {
         val layout = AttrTextLayout(this)
         val layoutParams = LinearLayout.LayoutParams(width, height)
-//        mBinding.linear.addView(layout)
+        mBinding.linear.addView(layout)
         layout.layoutParams = layoutParams
         layout.mTextSize = 14f
         layout.mTextGravity = AttrTextLayout.GRAVITY_CENTER
