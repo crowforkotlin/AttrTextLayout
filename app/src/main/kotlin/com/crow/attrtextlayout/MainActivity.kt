@@ -60,7 +60,6 @@ class MainActivity : AppCompatActivity() {
                     mBottom = true, mLineWidth = (20..50).random().toFloat())
             }*/
         }
-        AttrTextLayout.mAwaitAnimationCount = 4
     }
 
     private fun onCreate() {
@@ -84,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     private fun createAttrTextLayout(width: Int, height: Int, animationStrategy: Short): AttrTextLayout {
         val layout = AttrTextLayout(this)
         val layoutParams = LinearLayout.LayoutParams(width, height)
-        mBinding.linear.addView(layout)
+//        mBinding.linear.addView(layout)
         layout.layoutParams = layoutParams
         layout.mTextSize = 14f
         layout.mTextGravity = AttrTextLayout.GRAVITY_CENTER

@@ -21,7 +21,6 @@ import android.graphics.LinearGradient
 import android.graphics.Path
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
-import android.graphics.Rect
 import android.graphics.Region
 import android.graphics.Shader
 import android.graphics.Typeface
@@ -59,7 +58,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
         override fun onAnimationEnd(animation: Animator) {
             mAnimationUpdateListener?.onAnimationEnd(animation)
-            tryReduceAniamtionTaskCount()
         }
         override fun onAnimationCancel(animation: Animator) {
             if (mTextAnimationStrategy == STRATEGY_ANIMATION_UPDATE_CONTINUA) {
@@ -250,34 +248,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
          */
         private var mTaskHandlerThread: HandlerThread? = null
         private lateinit var mTaskHandler: Handler
-
-        /**
-         * ⦁ 动画任务个数
-         *
-         * ⦁ 2024-01-29 16:52:10 周一 下午
-         * @author crowforkotlin
-         */
-        private var mAnimationTaskCount: Int = 0
-
-        /**
-         * ⦁ 等待动画个数 0 跳过
-         *
-         * ⦁ 2024-01-29 16:49:10 周一 下午
-         * @author crowforkotlin
-         */
-        var mAwaitAnimationCount = 0
-
-        /**
-         * ⦁ 等待动画时检查时间
-         *
-         * ⦁ 2024-01-29 16:51:46 周一 下午
-         * @author crowforkotlin
-         */
-        var mAwaitCheckAnimationDuration = 1000L
-
-        private fun tryReduceAniamtionTaskCount() {
-            if (mAnimationTaskCount > 0) mAnimationTaskCount --
-        }
     }
 
     /**
@@ -706,6 +676,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
            thread.start()
             mTaskHandler = thread.looper.asHandler(true)
         }
+        mCacheViews.add(creatAttrTextView())
+        mCacheViews.add(creatAttrTextView())
     }
 
     /**
@@ -717,8 +689,10 @@ class AttrTextLayout : FrameLayout, IAttrText {
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
         // 检查宽度和高度是否被设置为wrap_content
-        val widthIsWrapContent = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST
-        val heightIsWrapContent = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST
+        var mode = MeasureSpec.getMode(widthMeasureSpec)
+        val widthIsWrapContent = MeasureSpec.getMode(widthMeasureSpec) == MeasureSpec.AT_MOST || mode == MeasureSpec.UNSPECIFIED
+        mode = MeasureSpec.getMode(heightMeasureSpec)
+        val heightIsWrapContent = mode == MeasureSpec.AT_MOST || mode == MeasureSpec.UNSPECIFIED
         val width: Int
         val height: Int
         onInitTextPaint()
@@ -733,6 +707,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         } else {
             height = measuredHeight
         }
+        setMeasuredDimension(width, height)
         updateTextAndSpec(width, height)
     }
 
@@ -794,16 +769,15 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun updateTextAndSpec(width: Int, height: Int) {
-        setMeasuredDimension(width, height)
         if (mCacheViews.size != REQUIRED_CACHE_SIZE) return
+        val widhtSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
+        val heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+        mCacheViews[0].measure(widhtSpec, heightSpec)
+        mCacheViews[1].measure(widhtSpec, heightSpec)
         getTextLists(mText) {
             mList = it
             onNotifyLayoutUpdate()
             onNotifyViewUpdate()
-            val widhtSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY)
-            val heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
-            mCacheViews[0].measure(widhtSpec, heightSpec)
-            mCacheViews[1].measure(widhtSpec, heightSpec)
         }
     }
 
@@ -841,15 +815,16 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         override fun run() {
                             if (!isAttachedToWindow) return
                             mList = it
-                            var firstInit = false
+                            /* var firstInit = false
                             val currentCacheViewSize = mCacheViews.size
                             if (currentCacheViewSize < REQUIRED_CACHE_SIZE) {
                                 val viewsToAdd = REQUIRED_CACHE_SIZE - currentCacheViewSize
                                 for (index in 0 until  viewsToAdd) { mCacheViews.add(creatAttrTextView()) }
                                 firstInit = true
                                 debug { mCacheViews.forEachIndexed { index, baseAttrTextView -> baseAttrTextView.tag = index } }
-                            }
-                            if (mList.isEmpty() && firstInit) return
+                            }*/
+                            // if (mList.isEmpty() && firstInit) return
+                            if (mList.isEmpty()) return
                             onUpdatePosOrView()
                             onNotifyLayoutUpdate()
                             mTaskListRunnable.remove(this)
@@ -1253,36 +1228,31 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchHighBrushDrawAnimation(animationMode: Short, delay: Boolean, isX: Boolean) {
-        tryAwaitAnimationTask {
-            mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
-            mHandler?.postDelayed(Runnable {
-                val viewA = mCacheViews[mCurrentViewPos]
-                val viewB = getNextView(mCurrentViewPos)
-                viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
-                mAnimationStartTime = System.currentTimeMillis()
-//                mCurrentDuration = mAnimationDuration
-                viewA.mAnimationStartTime = mAnimationStartTime
-                viewB.mAnimationStartTime = mAnimationStartTime
-                viewA.mIsCurrentView = false
-                viewB.mIsCurrentView = true
-                updateViewPosition()
-                updateTextListPosition()
-                val duration: Long = with(MAX_SCROLL_SPEED - mTextAnimationSpeed) { if (this == 8) 0L else if (this == 1) 1L else toLong() shl 1 }
-                var count = 0
-                viewA.launchHighBrushDrawAnimation(isX, duration)
-                viewB.launchHighBrushDrawAnimation(isX, duration)
-                viewA.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB) }
-                viewB.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB) }
+        mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
+        mHandler?.postDelayed(Runnable {
+            val viewA = mCacheViews[mCurrentViewPos]
+            val viewB = getNextView(mCurrentViewPos)
+            viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
+            viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
+            mAnimationStartTime = System.currentTimeMillis()
+            viewA.mAnimationStartTime = mAnimationStartTime
+            viewB.mAnimationStartTime = mAnimationStartTime
+            viewA.mIsCurrentView = false
+            viewB.mIsCurrentView = true
+            updateViewPosition()
+            updateTextListPosition()
+            val duration: Long = with(MAX_SCROLL_SPEED - mTextAnimationSpeed) { if (this == 8) 0L else if (this == 1) 1L else toLong() shl 1 }
+            var count = 0
+            viewA.launchHighBrushDrawAnimation(isX, duration)
+            viewB.launchHighBrushDrawAnimation(isX, duration)
+            viewA.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB) }
+            viewB.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB) }
 
-            }.also { mViewAnimationRunnable = it },  mTextResidenceTime)
-        }
+        }.also { mViewAnimationRunnable = it },  mTextResidenceTime)
     }
     private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
         if (count == 2) {
-            tryReduceAniamtionTaskCount()
             mViewAnimationRunnable?.let { removeCallbacks(it) }
-            "onHighBrushAnimationEnd".debugLog()
             mHandler?.post(Runnable {
                 viewA.setLayerType(LAYER_TYPE_NONE, null)
                 viewB.setLayerType(LAYER_TYPE_NONE, null)
@@ -1635,82 +1605,49 @@ class AttrTextLayout : FrameLayout, IAttrText {
             mHandler?.postDelayed(mViewAnimationRunnable!!, mTextResidenceTime)
             return
         }
-        tryAwaitAnimationTask {
-            mViewAnimatorSet?.cancel()
-            mViewAnimatorSet = AnimatorSet()
-            val viewA = mCacheViews[mCurrentViewPos]
-            val viewB = getNextView(mCurrentViewPos)
-            val valueAnimator = ValueAnimator.ofFloat(0f, 1f)
-            valueAnimator.addUpdateListener {
-                mAnimationTimeFraction = it.animatedFraction
-                viewA.mAnimationTimeFraction = mAnimationTimeFraction
-                viewB.mAnimationTimeFraction = mAnimationTimeFraction
-                viewA.invalidate()
-                viewB.invalidate()
-            }
-            valueAnimator.duration = mCurrentDuration
-            mViewAnimatorSet?.let { animatorSet ->
-                mCurrentDuration.debugLog()
-                animatorSet.duration = mCurrentDuration
-                animatorSet.interpolator = LinearInterpolator()
-                animatorSet.play(valueAnimator)
-                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
-                    override fun onAnimationStart(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        mAnimationStartTime = System.currentTimeMillis()
-                        mCurrentDuration = mAnimationDuration
-                        viewA.mAnimationStartTime = mAnimationStartTime
-                        viewB.mAnimationStartTime = mAnimationStartTime
-                        viewA.mIsCurrentView = false
-                        viewB.mIsCurrentView = true
-                        super.onAnimationStart(animation)
-                    }
-                    override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
-                        onLayoutAnimation(animationMode, true, viewA, viewB)
-                        super.onAnimationEnd(animation)
-                    }
-                    override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
-                        super.onAnimationCancel(animation)
-                    }
-                })
-                animatorSet.start()
-            }
+        mViewAnimatorSet?.cancel()
+        mViewAnimatorSet = AnimatorSet()
+        val viewA = mCacheViews[mCurrentViewPos]
+        val viewB = getNextView(mCurrentViewPos)
+        val valueAnimator = ValueAnimator.ofFloat(0f, 1f)
+        valueAnimator.addUpdateListener {
+            mAnimationTimeFraction = it.animatedFraction
+            viewA.mAnimationTimeFraction = mAnimationTimeFraction
+            viewB.mAnimationTimeFraction = mAnimationTimeFraction
+            viewA.invalidate()
+            viewB.invalidate()
         }
-    }
-
-    /**
-     * ⦁ 设置动画等待个数时 尝试等待阻塞动画执行
-     *
-     * ⦁ 2024-02-02 14:57:46 周五 下午
-     * @author crowforkotlin
-     */
-    private fun tryAwaitAnimationTask(onComplete: Runnable) {
-        if (mAwaitAnimationCount > 0) {
-            val runnable = object : Runnable {
-                override fun run() {
-                    mTaskListRunnable.remove(this)
-                    if (mAnimationTaskCount >= mAwaitAnimationCount) {
-                        mTaskListRunnable.add(this)
-                        mTaskHandler.postDelayed(this, 1000L)
-                    } else {
-                        mAnimationTaskCount++
-                        mHandler?.post(object : Runnable {
-                            override fun run() {
-                                onComplete.run()
-                                mHandlerTaskList.remove(this)
-                            }
-                        }.also { mHandlerTaskList.add(it) })
-                    }
+        valueAnimator.duration = mCurrentDuration
+        mViewAnimatorSet?.let { animatorSet ->
+            animatorSet.duration = mCurrentDuration
+            animatorSet.interpolator = LinearInterpolator()
+            animatorSet.play(valueAnimator)
+            animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
+                override fun onAnimationStart(animation: Animator) {
+                    viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
+                    viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
+                    mAnimationStartTime = System.currentTimeMillis()
+                    mCurrentDuration = mAnimationDuration
+                    viewA.mAnimationStartTime = mAnimationStartTime
+                    viewB.mAnimationStartTime = mAnimationStartTime
+                    viewA.mIsCurrentView = false
+                    viewB.mIsCurrentView = true
+                    super.onAnimationStart(animation)
                 }
-            }
-            mTaskListRunnable.add(runnable)
-            mTaskHandler.post(runnable)
-        } else { onComplete.run() }
+                override fun onAnimationEnd(animation: Animator) {
+                    viewA.setLayerType(LAYER_TYPE_NONE, null)
+                    viewB.setLayerType(LAYER_TYPE_NONE, null)
+                    onLayoutAnimation(animationMode, true, viewA, viewB)
+                    super.onAnimationEnd(animation)
+                }
+                override fun onAnimationCancel(animation: Animator) {
+                    viewA.setLayerType(LAYER_TYPE_NONE, null)
+                    viewB.setLayerType(LAYER_TYPE_NONE, null)
+                    super.onAnimationCancel(animation)
+                }
+            })
+            animatorSet.start()
+        }
     }
 
     /**
