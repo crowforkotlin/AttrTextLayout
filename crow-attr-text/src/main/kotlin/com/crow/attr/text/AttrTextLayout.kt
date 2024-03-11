@@ -93,8 +93,13 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 mTop = getBoolean(R.styleable.AttrTextLayout_textFrameTop, false),
                 mRight = getBoolean(R.styleable.AttrTextLayout_textFrameRight, false),
                 mBottom = getBoolean(R.styleable.AttrTextLayout_textFrameBottom, false),
-                mLineWidth = getDimensionPixelOffset(R.styleable.AttrTextLayout_textFrameLineWdith, 1).toFloat(),
-                mColor = getColor(R.styleable.AttrTextLayout_textFrameColor, mTextColor)
+                mLineWidth = getDimensionPixelOffset(R.styleable.AttrTextLayout_textFrameLineWidth, 1).toFloat(),
+                mColor = getColor(R.styleable.AttrTextLayout_textFrameColor, mTextColor),
+                mGradient = when(val value = getInt(R.styleable.AttrTextLayout_textGradientDirection, defaultValue)) {
+                    0 -> null
+                    in GRADIENT_BEVEL..GRADIENT_VERTICAL-> value.toByte()
+                    else -> error("AttrTextLayout Get Unknow GradientDirection Value $value!")
+                }
             )
             mTextAnimationSpeed = getInt(R.styleable.AttrTextLayout_textAnimationSpeed, defaultValue).toShort()
             mTextRowMargin = getDimensionPixelOffset(R.styleable.AttrTextLayout_textRowMargin, defaultValue).toFloat()
@@ -721,8 +726,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
         drawAnimation(canvas)
         super.dispatchDraw(canvas)
         mTextFrameConfig?.let { frame ->
-            val widthFloat = width - 1f
-            val heightFloat = height - 1f
+            val widthFloat = measuredWidth - 1f
+            val heightFloat = measuredHeight - 1f
             val zero = 0f
             if (frame.mLeft) canvas.drawLine(zero, zero, zero, heightFloat, frame.mPaint)
             if (frame.mTop) canvas.drawLine(zero, zero, widthFloat, zero, frame.mPaint)
@@ -1772,6 +1777,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 GRADIENT_VERTICAL -> LinearGradient(halfWidth, 0f, halfWidth, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
                 GRADIENT_HORIZONTAL -> LinearGradient(0f, halfHeight, widthFloat, halfHeight, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
                 else -> { null }
+            }
+            mTextFrameConfig?.let { config ->
+                config.mPaint.shader = when(config.mGradient) {
+                    GRADIENT_BEVEL -> LinearGradient(0f, 0f, widthFloat, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
+                    GRADIENT_VERTICAL -> LinearGradient(halfWidth, 0f, halfWidth, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
+                    GRADIENT_HORIZONTAL -> LinearGradient(0f, halfHeight, widthFloat, halfHeight, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
+                    else -> { null }
+                }
             }
             color = mTextColor
             isAntiAlias = mTextAntiAliasEnable

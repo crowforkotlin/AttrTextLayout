@@ -15,7 +15,7 @@
         <attr name="textFrameRight" format="boolean" />
         <attr name="textFrameBottom" format="boolean" />
         <attr name="textFrameColor" format="color" />
-        <attr name="textFrameLineWdith" format="dimension" />
+        <attr name="textFrameLineWidth" format="dimension" />
         <attr name="textSize" format="dimension" />
         <attr name="textRowMargin" format="dimension" />
         <attr name="textCharSpacing" format="dimension" />
@@ -53,6 +53,11 @@
             <enum name="bottom_start" value="7" />
             <enum name="bottom_center" value="8" />
             <enum name="bottom_end" value="9" />
+        </attr>
+        <attr name="textFrameGradient" format="enum">
+            <enum name="bevel" value="10" />
+            <enum name="horizontal" value="11" />
+            <enum name="vertical" value="12" />
         </attr>
         <attr name="textGradientDirection" format="enum">
             <enum name="bevel" value="10" />

@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                     mRight = true,
                     mBottom = true, mLineWidth = (20..50).random().toFloat())
             }*/
-            createAttrTextLayout(128, FrameLayout.LayoutParams.WRAP_CONTENT, AttrTextLayout.ANIMATION_ERASE_X)
+            createAttrTextLayout(128, FrameLayout.LayoutParams.WRAP_CONTENT, AttrTextLayout.ANIMATION_CONTINUATION_ERASE_X)
         }
     }
 
@@ -111,7 +111,7 @@ class MainActivity : AppCompatActivity() {
         layout.mTextRowMargin = 4f
         layout.mTextCharSpacing = 1f
         layout.mTextAnimationSpeed = 15
-        layout.mTextFrameConfig = AttrTextFrameConfig(mLeft = true, mTop = true, mRight = true, mBottom = true)
+        layout.mTextFrameConfig = AttrTextFrameConfig(mLeft = true, mTop = true, mRight = true, mBottom = true, mGradient = AttrTextLayout.GRADIENT_BEVEL)
         layout.mText = mContent
         return layout
     }

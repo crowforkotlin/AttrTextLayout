@@ -1,9 +1,11 @@
 package com.crow.attr.text
 
 import android.graphics.Color
+import android.graphics.LinearGradient
 import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
+import android.graphics.Shader
 
 data class AttrTextFrameConfig(
     val mLeft: Boolean,
@@ -15,7 +17,8 @@ data class AttrTextFrameConfig(
     val mAnimationEnable: Boolean = false,
     val mAnimationSpeed: Int = 0,
     val mColor: Int = Color.RED,
-    val mAntiAliasEnable: Boolean = false
+    val mAntiAliasEnable: Boolean = false,
+    val mGradient: Byte? = null
 ) {
 
     val mPaint = Paint().apply {
