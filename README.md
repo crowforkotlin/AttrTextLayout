@@ -20,6 +20,7 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.7")
 - [x] 增加渐变色
 - [x] 增加高刷新率动画(仅支持左右移动、上下移动、可控制速度、Speed为8时效果最佳)
 - [x] 配置字体类型
+- [x] 配置边框
 - [ ] 启用（单列、多列）垂直文字
 - [ ] 启用文字描边、阴影
 - [ ] 配置渐变色RGB
