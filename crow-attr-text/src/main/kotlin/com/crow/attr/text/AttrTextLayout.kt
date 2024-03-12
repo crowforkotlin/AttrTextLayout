@@ -409,7 +409,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private var mMultipleLinePos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged( FLAG_CHILD_REFRESH) }
 
     /**
-     * ⦁ 文本行数 需要先开启多行
+     * ⦁ 文本行数 需要先开启多行，并且高度设置成Wrap时才有效果
      *
      * ⦁ 2024-02-20 13:55:30 周二 下午
      * @author crowforkotlin
@@ -607,7 +607,36 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     var mTextGradientDirection: Byte? = null
 
+    /**
+     * ⦁ 边框配置
+     *
+     * ⦁ 2024-03-12 16:10:21 周二 下午
+     * @author crowforkotlin
+     */
     var mTextFrameConfig: AttrTextFrameConfig? = null
+        set(value) {
+            if (value == null) { field = null }
+            else {
+                post {
+                    val widthFloat = measuredWidth.toFloat()
+                    val heightFloat = measuredHeight.toFloat()
+                    value.mPaint.shader = when(value.mGradient) {
+                        GRADIENT_BEVEL -> LinearGradient(0f, 0f, widthFloat, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
+                        GRADIENT_VERTICAL -> {
+                            val halfWidth = measuredWidth / 2f
+                            LinearGradient(halfWidth, 0f, halfWidth, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
+                        }
+                        GRADIENT_HORIZONTAL -> {
+                            val halfHeight = measuredHeight / 2f
+                            LinearGradient(0f, halfHeight, widthFloat, halfHeight, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
+                        }
+                        else -> { null }
+                    }
+                    field = value
+                    invalidate()
+                }
+            }
+        }
 
     /**
      * ⦁ 动画模式（一般是默认）
@@ -708,12 +737,13 @@ class AttrTextLayout : FrameLayout, IAttrText {
             width = measuredWidth
         }
         if (heightIsWrapContent) {
-            height = with(context.getExactlyTextHeight(mTextPaint.fontMetrics)) { ceil(if (mTextMultipleLineEnable) this * mTextLines else this).toInt() }
+            val lineWidth = if (mTextFrameConfig == null) { 0 } else { mTextFrameConfig!!.mLineWidth.toInt() }
+            height = with(context.getExactlyTextHeight(mTextPaint.fontMetrics)) { ceil(if (mTextMultipleLineEnable) this * mTextLines else this).toInt() + lineWidth }
         } else {
             height = measuredHeight
         }
         setMeasuredDimension(width, height)
-        updateTextAndSpec(width, height)
+        updateTextAndSpec(width, height, heightIsWrapContent)
     }
 
     /**
@@ -773,22 +803,16 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ⦁ 2024-02-21 09:41:50 周三 上午
      * @author crowforkotlin
      */
-    private fun updateTextAndSpec(width: Int, height: Int) {
+    private fun updateTextAndSpec(width: Int, height: Int, heightIsWrapContent: Boolean) {
         if (mCacheViews.size != REQUIRED_CACHE_SIZE) return
         val startXY = getChildStartXY()
         val xy = startXY.toInt() * 2
-        val widhtSpec = MeasureSpec.makeMeasureSpec(width - xy , MeasureSpec.EXACTLY)
-        val heightSpec = MeasureSpec.makeMeasureSpec(height - xy, MeasureSpec.EXACTLY)
+        val widhtSpec = MeasureSpec.makeMeasureSpec(width - xy, MeasureSpec.EXACTLY)
+        val heightSpec = MeasureSpec.makeMeasureSpec(if(heightIsWrapContent) height else height - xy, MeasureSpec.EXACTLY)
         syncChildViewParms {
             measure(widhtSpec, heightSpec)
             x = startXY
             y = startXY
-        }
-
-        getTextLists(if (mText.length > MAX_STRING_LENGTH) { mText.substring(0, MAX_STRING_LENGTH) } else mText) {
-            mList = it
-            onNotifyLayoutUpdate()
-            onNotifyViewUpdate()
         }
     }
 
@@ -825,29 +849,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
             FLAG_LAYOUT_REFRESH -> { onNotifyLayoutUpdate() }
             FLAG_CHILD_REFRESH -> { onNotifyViewUpdate() }
             FLAG_TEXT -> {
-                requestLayout()
-                return
-                getTextLists(if (mText.length > MAX_STRING_LENGTH) { mText.substring(0, MAX_STRING_LENGTH) } else mText) {it ->
-                    mHandler?.post(object : Runnable {
-                        override fun run() {
-                            if (!isAttachedToWindow) return
-                            mList = it
-                            /* var firstInit = false
-                            val currentCacheViewSize = mCacheViews.size
-                            if (currentCacheViewSize < REQUIRED_CACHE_SIZE) {
-                                val viewsToAdd = REQUIRED_CACHE_SIZE - currentCacheViewSize
-                                for (index in 0 until  viewsToAdd) { mCacheViews.add(creatAttrTextView()) }
-                                firstInit = true
-                                debug { mCacheViews.forEachIndexed { index, baseAttrTextView -> baseAttrTextView.tag = index } }
-                            }*/
-                            // if (mList.isEmpty() && firstInit) return
-                            if (mList.isEmpty()) return
-
-                            onUpdatePosOrView()
-                            onNotifyLayoutUpdate()
-                            mTaskListRunnable.remove(this)
-                        }
-                    }.also { runnable -> mTaskListRunnable.add(runnable) })
+                post {
+                    getTextLists(if (mText.length > MAX_STRING_LENGTH) { mText.substring(0, MAX_STRING_LENGTH) } else mText) {
+                        if (!isAttachedToWindow) return@getTextLists
+                        mList = it
+                        if (mList.isEmpty()) return@getTextLists
+                        onUpdatePosOrView()
+                        onNotifyLayoutUpdate()
+                    }
                 }
             }
             FLAG_SCROLL_SPEED -> {
@@ -1139,13 +1148,11 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     private fun updateTextListPosition() {
         if (mList.isEmpty()) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
-        }
+        mCacheViews::forEach { onInitAttrTextViewValue(it) }
         when(mTextMultipleLineEnable) {
             true -> {
                 val textHeightWithMargin = context.getExactlyTextHeight(mTextPaint.fontMetrics)
-                val height = height - (mTextFrameConfig?.run { ceil(mLineWidth / 2).toInt() } ?: 0)
+                val height = measuredHeight - (mTextFrameConfig?.run { ceil(mLineWidth / 2).toInt() } ?: 0)
                 val textMaxLine = if(textHeightWithMargin > height) 1 else  (height / textHeightWithMargin).toInt()
                 if (textMaxLine <= 0) return
                 val textListSize = mList.size
@@ -1181,25 +1188,26 @@ class AttrTextLayout : FrameLayout, IAttrText {
 
         cancelAnimator()
         removeAnimationRunnable()
-        val viewA = mCacheViews[mCurrentViewPos]
-        val viewB = getNextView(mCurrentViewPos)
-
-        // 哪怕if逻辑即使再多也不要直接赋值 避免造成重绘影响性能
-        if (viewA.alpha != 1f) viewA.alpha = 1f
-        if (viewA.scaleX != 1f) viewA.scaleX = 1f
-        if (viewA.scaleY != 1f) viewA.scaleY = 1f
-        if (viewA.translationX != 0f) viewA.translationX = 0f
-        if (viewA.translationY != 0f) viewA.translationY = 0f
-        if (viewB.alpha != 1f) viewB.alpha = 1f
-        if (viewB.scaleX != 1f) viewB.scaleX = 1f
-        if (viewB.scaleY != 1f) viewB.scaleY = 1f
-        if (viewB.translationX != 0f) viewB.translationX = 0f
-        if (viewB.translationY != 0f) viewB.translationY = 0f
-        viewA.mTextAnimationMode = mTextAnimationMode
-        viewB.mTextAnimationMode = mTextAnimationMode
-        viewA.mTextLines = mTextLines
-        viewB.mTextLines = mTextLines
-        onLayoutAnimation(animationMode, isDelay, viewA, viewB)
+        post {
+            val viewA = mCacheViews[mCurrentViewPos]
+            val viewB = getNextView(mCurrentViewPos)
+            // 哪怕if逻辑即使再多也不要直接赋值 避免造成重绘影响性能
+            if (viewA.alpha != 1f) viewA.alpha = 1f
+            if (viewA.scaleX != 1f) viewA.scaleX = 1f
+            if (viewA.scaleY != 1f) viewA.scaleY = 1f
+            if (viewA.translationX != 0f) viewA.translationX = 0f
+            if (viewA.translationY != 0f) viewA.translationY = 0f
+            if (viewB.alpha != 1f) viewB.alpha = 1f
+            if (viewB.scaleX != 1f) viewB.scaleX = 1f
+            if (viewB.scaleY != 1f) viewB.scaleY = 1f
+            if (viewB.translationX != 0f) viewB.translationX = 0f
+            if (viewB.translationY != 0f) viewB.translationY = 0f
+            viewA.mTextAnimationMode = mTextAnimationMode
+            viewB.mTextAnimationMode = mTextAnimationMode
+            viewA.mTextLines = mTextLines
+            viewB.mTextLines = mTextLines
+            onLayoutAnimation(animationMode, isDelay, viewA, viewB)
+        }
     }
 
     /**
@@ -1457,8 +1465,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
             mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
             mViewAnimationRunnable = Runnable { launchMoveYAnimation(animationMode, false) }
             mHandler?.postDelayed(mViewAnimationRunnable!!, mTextResidenceTime)
-        }
-        else {
+        } else {
             mViewAnimatorSet?.cancel()
             mViewAnimatorSet = AnimatorSet()
             val viewA = mCacheViews[mCurrentViewPos]
@@ -1748,14 +1755,13 @@ class AttrTextLayout : FrameLayout, IAttrText {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             mTextPaint.letterSpacing = mTextCharSpacing / mTextPaint.textSize
         }
+        if (mTextAnimationMode !in ANIMATION_ERASE_X..ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW) { view.mAnimationStartTime = 0 }
         view.mTextSizeUnitStrategy = mTextSizeUnitStrategy
         view.mTextAnimationTopEnable = mTextAnimationTopEnable
         view.mTextAnimationLeftEnable = mTextAnimationLeftEnable
         view.mTextAnimationMode = mTextAnimationMode
-        if (mTextAnimationMode !in ANIMATION_ERASE_X..ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW) {
-            view.mAnimationStartTime = 0
-        }
         view.mTextRowMargin = withSizeUnit(this::mTextRowMargin, dpOrSp = { context.px2dp(mTextRowMargin) })
+        view.mTextLines = mTextLines
         view.mTextPaint = mTextPaint
     }
 
@@ -1777,14 +1783,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 GRADIENT_VERTICAL -> LinearGradient(halfWidth, 0f, halfWidth, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
                 GRADIENT_HORIZONTAL -> LinearGradient(0f, halfHeight, widthFloat, halfHeight, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
                 else -> { null }
-            }
-            mTextFrameConfig?.let { config ->
-                config.mPaint.shader = when(config.mGradient) {
-                    GRADIENT_BEVEL -> LinearGradient(0f, 0f, widthFloat, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
-                    GRADIENT_VERTICAL -> LinearGradient(halfWidth, 0f, halfWidth, heightFloat, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
-                    GRADIENT_HORIZONTAL -> LinearGradient(0f, halfHeight, widthFloat, halfHeight, intArrayOf(Color.RED, Color.GREEN, Color.BLUE), null, Shader.TileMode.CLAMP)
-                    else -> { null }
-                }
             }
             color = mTextColor
             isAntiAlias = mTextAntiAliasEnable

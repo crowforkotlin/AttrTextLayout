@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -60,7 +61,7 @@ class MainActivity : AppCompatActivity() {
                     mRight = true,
                     mBottom = true, mLineWidth = (20..50).random().toFloat())
             }*/
-            createAttrTextLayout(128, FrameLayout.LayoutParams.WRAP_CONTENT, AttrTextLayout.ANIMATION_CONTINUATION_ERASE_X)
+            createAttrTextLayout(128, FrameLayout.LayoutParams.WRAP_CONTENT, AttrTextLayout.ANIMATION_MOVE_Y)
         }
     }
 
@@ -88,10 +89,10 @@ class MainActivity : AppCompatActivity() {
         mBinding.linear.addView(layout)
         layout.layoutParams = layoutParams
         layout.mTextSize = 14f
-        layout.mTextGravity = AttrTextLayout.GRAVITY_CENTER
+        layout.mTextGravity = AttrTextLayout.GRAVITY_BOTTOM_END
         layout.mTextGradientDirection = AttrTextLayout.GRADIENT_VERTICAL
         layout.mTextSizeUnitStrategy = AttrTextLayout.STRATEGY_DIMENSION_PX_OR_DEFAULT
-        layout.mSingleTextAnimationEnable = true
+        layout.mSingleTextAnimationEnable = false
         layout.mTextMultipleLineEnable = true
         layout.mTextResidenceTime = 1000
         layout.mTextAnimationMode = animationStrategy
@@ -108,11 +109,17 @@ class MainActivity : AppCompatActivity() {
         layout.mTextGradientDirection = AttrTextLayout.GRADIENT_BEVEL
         layout.mTextUpdateStrategy = AttrTextLayout.STRATEGY_TEXT_UPDATE_ALL
         layout.mTextAnimationStrategy = AttrTextLayout.STRATEGY_ANIMATION_UPDATE_CONTINUA
-        layout.mTextRowMargin = 4f
+        layout.mTextRowMargin = 0f
         layout.mTextCharSpacing = 1f
         layout.mTextAnimationSpeed = 15
         layout.mTextFrameConfig = AttrTextFrameConfig(mLeft = true, mTop = true, mRight = true, mBottom = true, mGradient = AttrTextLayout.GRADIENT_BEVEL)
         layout.mText = mContent
+        lifecycleScope.launch {
+            repeat(10000) {
+                delay(1000)
+                layout.applyOption()
+            }
+        }
         return layout
     }
 }
