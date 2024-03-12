@@ -10,7 +10,7 @@
 repository { mavenCentral() }
 
 // 引入远程依赖
-implementation("com.kotlincrow.android.component:AttrTextLayout:1.7")
+implementation("com.kotlincrow.android.component:AttrTextLayout:1.8")
 ```
 
 - ## 功能
@@ -152,8 +152,9 @@ layout.mTextCharSpacing = 1f
 layout.mTextAnimationSpeed = 13
 
 /* 
-1. 当高度为 `wrap` 只显示三行。
-2. 当高度为 `match或固定高度` 并且文本刚好满足两行时，只显示两行。
+1. 开启多行时生效
+2. 当高度为 `wrap` 只显示三行。
+3. 当高度为 `match或固定高度` 并且文本刚好满足两行时，只显示两行。
 */
 layout.mTextLines = 3
 
@@ -162,6 +163,9 @@ layout.mTextFontAssetsPath = "comic.ttf"
 
 // 存储中字体文件的绝对路径
 layout.mTextFontAbsolutePath = "/data/data/com.crow.attrtextlayout/files/font/calibri.ttf"
+
+// 设置边框
+layout.mTextFrameConfig = AttrTextFrameConfig(mLeft = true, mTop = true, mRight = true, mBottom = true, mGradient = AttrTextLayout.GRADIENT_BEVEL)
 
 // 设置文本内容（设置后会自动更新，前提你得吧这个layout添加到您的视图里面，直到您添加完成mText也会自动生效，除非不设置）
 layout.mText = "Hello World!"
@@ -225,6 +229,13 @@ const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
     app:textColor="@color/white"
     app:textGradientDirection="vertical"
     app:textGravity="center"
+    app:textFrameBottom="true"
+    app:textFrameLeft="true"
+    app:textFrameLineWdith="1sp"
+    app:textFrameRight="true"
+    app:textFrameTop="true"
+    app:textFrameGradient="bevel"
+    app:textFrameColor="@android:color/holo_red_light"
     app:textMonoSpaceEnable="true"
     app:textMultipleLineEnable="true"
     app:textResidenceTime="3000"
