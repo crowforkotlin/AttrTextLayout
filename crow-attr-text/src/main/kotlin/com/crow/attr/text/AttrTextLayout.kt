@@ -939,7 +939,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     private fun isListSizeFitPage(): Boolean {
         return if (mTextMultipleLineEnable) {
-            val textMaxLine = (measuredHeight / context.getExactlyTextHeight(mTextPaint.fontMetrics)).toInt()
+            val textMaxLine = getTextMaxLine()
             if (textMaxLine <= 0) return false
             val textListSize = mList.size
             var totalCount: Int = textListSize / textMaxLine
@@ -948,6 +948,18 @@ class AttrTextLayout : FrameLayout, IAttrText {
         } else {
             mList.size == 1
         }
+    }
+
+    /**
+     * ⦁ 获取文本最大可容纳的行数
+     *
+     * ⦁ 2024-03-16 09:37:03 周六 上午
+     * @author crowforkotlin
+     */
+    private fun getTextMaxLine():Int {
+        val textHeightWithMargin = context.getExactlyTextHeight(mTextPaint.fontMetrics)
+        val height = measuredHeight - (mTextFrameConfig?.run { ceil(mLineWidth / 2).toInt() } ?: 0)
+        return if(textHeightWithMargin > height) 1 else  (height / textHeightWithMargin).toInt()
     }
 
     /**
@@ -1151,9 +1163,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         mCacheViews::forEach { onInitAttrTextViewValue(it) }
         when(mTextMultipleLineEnable) {
             true -> {
-                val textHeightWithMargin = context.getExactlyTextHeight(mTextPaint.fontMetrics)
-                val height = measuredHeight - (mTextFrameConfig?.run { ceil(mLineWidth / 2).toInt() } ?: 0)
-                val textMaxLine = if(textHeightWithMargin > height) 1 else  (height / textHeightWithMargin).toInt()
+                val textMaxLine = getTextMaxLine()
                 if (textMaxLine <= 0) return
                 val textListSize = mList.size
                 var textTotalCount: Int = textListSize / textMaxLine
@@ -1697,7 +1707,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
         if (mTextMultipleLineEnable) {
             if (mMultipleLinePos == 0) {
-                val textMaxLine = (measuredHeight / context.getExactlyTextHeight(mTextPaint.fontMetrics)).toInt()
+                val textMaxLine = getTextMaxLine()
                 val textListSize = mList.size
                 var textTotalCount: Int = textListSize / textMaxLine
                 if (textListSize  % textMaxLine != 0) { textTotalCount ++ }
