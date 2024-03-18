@@ -4,10 +4,8 @@ package com.crow.attrtextlayout
 
 import android.graphics.Color
 import android.os.Bundle
-import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +14,6 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.crow.attr.text.AttrTextFrameConfig
-import com.crow.attr.text.AttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 import com.crow.base.tools.extensions.copyFolder
 import kotlinx.coroutines.Dispatchers

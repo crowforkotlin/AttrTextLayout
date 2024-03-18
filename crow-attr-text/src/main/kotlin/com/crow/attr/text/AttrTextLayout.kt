@@ -1239,28 +1239,31 @@ class AttrTextLayout : FrameLayout, IAttrText {
         viewB.mTextAnimationLeftEnable = mTextAnimationLeftEnable
         viewA.mTextAnimationTopEnable = mTextAnimationTopEnable
         viewB.mTextAnimationTopEnable = mTextAnimationTopEnable
-        when(animationMode) {
-            ANIMATION_DEFAULT -> launchDefaultAnimation(animationMode, isDelay = delay, viewA, viewB)
-            ANIMATION_MOVE_X -> launchMoveXAnimation(animationMode, isDelay = delay)
-            ANIMATION_MOVE_Y -> launchMoveYAnimation(animationMode, isDelay = delay)
-            ANIMATION_FADE -> launchFadeAnimation(animationMode, isDelay = delay, isSync = false)
-            ANIMATION_FADE_SYNC -> launchFadeAnimation(animationMode, isDelay = delay, isSync = true)
-            ANIMATION_CENTER -> launchCenterAnimation(animationMode, isDelay = delay)
-            ANIMATION_ERASE_Y -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
-            ANIMATION_ERASE_X -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
-            ANIMATION_OVAL -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
-            ANIMATION_CROSS_EXTENSION -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
-            ANIMATION_RHOMBUS -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
-            ANIMATION_CONTINUATION_OVAL -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
-            ANIMATION_CONTINUATION_CROSS_EXTENSION -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
-            ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
-            ANIMATION_CONTINUATION_ERASE_X -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
-            ANIMATION_CONTINUATION_RHOMBUS -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
-            ANIMATION_MOVE_X_DRAW -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
-            ANIMATION_MOVE_Y_DRAW -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
-            ANIMATION_MOVE_X_HIGH_BRUSH_DRAW -> launchHighBrushDrawAnimation(animationMode, delay, isX = true)
-            ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW -> launchHighBrushDrawAnimation(animationMode, delay,isX = false)
+        runCatching {
+            when(animationMode) {
+                ANIMATION_DEFAULT -> launchDefaultAnimation(animationMode, isDelay = delay, viewA, viewB)
+                ANIMATION_MOVE_X -> launchMoveXAnimation(animationMode, isDelay = delay)
+                ANIMATION_MOVE_Y -> launchMoveYAnimation(animationMode, isDelay = delay)
+                ANIMATION_FADE -> launchFadeAnimation(animationMode, isDelay = delay, isSync = false)
+                ANIMATION_FADE_SYNC -> launchFadeAnimation(animationMode, isDelay = delay, isSync = true)
+                ANIMATION_CENTER -> launchCenterAnimation(animationMode, isDelay = delay)
+                ANIMATION_ERASE_Y -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
+                ANIMATION_ERASE_X -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
+                ANIMATION_OVAL -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
+                ANIMATION_CROSS_EXTENSION -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
+                ANIMATION_RHOMBUS -> launchDrawAnimation(animationMode, isDelay = delay, viewA, viewB)
+                ANIMATION_CONTINUATION_OVAL -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
+                ANIMATION_CONTINUATION_CROSS_EXTENSION -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
+                ANIMATION_CONTINUATION_ERASE_Y -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
+                ANIMATION_CONTINUATION_ERASE_X -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
+                ANIMATION_CONTINUATION_RHOMBUS -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
+                ANIMATION_MOVE_X_DRAW -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
+                ANIMATION_MOVE_Y_DRAW -> launchContinuousDrawAnimation(animationMode, isDelay = delay)
+                ANIMATION_MOVE_X_HIGH_BRUSH_DRAW -> launchHighBrushDrawAnimation(animationMode, delay, isX = true)
+                ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW -> launchHighBrushDrawAnimation(animationMode, delay,isX = false)
+            }
         }
+            .onFailure { catach -> catach.stackTraceToString().debugLog(level = Log.ERROR)  }
     }
 
     /**
@@ -1270,6 +1273,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchHighBrushDrawAnimation(animationMode: Short, delay: Boolean, isX: Boolean) {
+        if (mCacheViews.isEmpty()) return
         mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
         mHandler?.postDelayed(Runnable {
             val viewA = mCacheViews[mCurrentViewPos]
@@ -1306,10 +1310,12 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchDefaultAnimation(animationMode: Short, isDelay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
+        if (mCacheViews.isEmpty()) return
         onNotifyViewVisibility(mCurrentViewPos)
         if (isDelay) {
             mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
             mViewAnimationRunnable = Runnable {
+                if (mCacheViews.isEmpty()) return@Runnable
                 updateViewPosition()
                 updateTextListPosition()
                 onLayoutAnimation(animationMode, true, viewA, viewB)
@@ -1329,6 +1335,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchCenterAnimation(animationMode: Short, isDelay: Boolean) {
+        if (mCacheViews.isEmpty()) return
         if (isDelay) {
             mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
             mViewAnimationRunnable = Runnable { launchCenterAnimation(animationMode, false) }
@@ -1381,6 +1388,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchMoveXAnimation(animationMode: Short, isDelay: Boolean) {
+        if (mCacheViews.isEmpty()) return
         if (isDelay) {
             mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
             mViewAnimationRunnable = Runnable { launchMoveXAnimation(animationMode, false) }
@@ -1450,6 +1458,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchMoveYAnimation(animationMode: Short, isDelay: Boolean) {
+        if (mCacheViews.isEmpty()) return
         if(isDelay) {
             mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
             mViewAnimationRunnable = Runnable { launchMoveYAnimation(animationMode, false) }
@@ -1511,6 +1520,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchFadeAnimation(animationMode: Short, isDelay: Boolean, isSync: Boolean) {
+        if (mCacheViews.isEmpty()) return
         if (isDelay) {
             mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
             mViewAnimationRunnable = Runnable { launchFadeAnimation(animationMode, false, isSync) }
@@ -1554,6 +1564,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchDrawAnimation(animationMode: Short, isDelay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
+        if (mCacheViews.isEmpty()) return
         if (isDelay) {
             mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
             mViewAnimationRunnable = Runnable { launchDrawAnimation(animationMode, false, viewA, viewB) }
@@ -1596,6 +1607,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchContinuousDrawAnimation(animationMode: Short, isDelay: Boolean) {
+        if (mCacheViews.isEmpty()) return
         if (isDelay) {
             mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
             mViewAnimationRunnable = Runnable { launchContinuousDrawAnimation(animationMode, false) }
