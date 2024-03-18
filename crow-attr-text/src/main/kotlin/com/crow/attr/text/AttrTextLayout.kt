@@ -1202,10 +1202,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
             if (viewB.scaleY != 1f) viewB.scaleY = 1f
             if (viewB.translationX != 0f) viewB.translationX = 0f
             if (viewB.translationY != 0f) viewB.translationY = 0f
-            viewA.mTextAnimationMode = mTextAnimationMode
-            viewB.mTextAnimationMode = mTextAnimationMode
-            viewA.mTextLines = mTextLines
-            viewB.mTextLines = mTextLines
+            onInitAttrTextViewValue(viewA)
+            onInitAttrTextViewValue(viewB)
             onLayoutAnimation(animationMode, isDelay, viewA, viewB)
         }
     }
@@ -1266,8 +1264,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
         mHandler?.postDelayed(Runnable {
             val viewA = mCacheViews[mCurrentViewPos]
             val viewB = getNextView(mCurrentViewPos)
-            viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
-            viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
             mAnimationStartTime = System.currentTimeMillis()
             viewA.mAnimationStartTime = mAnimationStartTime
             viewB.mAnimationStartTime = mAnimationStartTime
@@ -1288,8 +1284,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
         if (count == 2) {
             mViewAnimationRunnable?.let { removeCallbacks(it) }
             mHandler?.post(Runnable {
-                viewA.setLayerType(LAYER_TYPE_NONE, null)
-                viewB.setLayerType(LAYER_TYPE_NONE, null)
                 onLayoutAnimation(animationMode, delay, viewA, viewB)
             }.also { mViewAnimationRunnable = it })
         }
@@ -1302,21 +1296,18 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchDefaultAnimation(animationMode: Short, isDelay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
-        setLayerType(LAYER_TYPE_HARDWARE, null)
         onNotifyViewVisibility(mCurrentViewPos)
         if (isDelay) {
             mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
             mViewAnimationRunnable = Runnable {
                 updateViewPosition()
                 updateTextListPosition()
-                setLayerType(LAYER_TYPE_NONE, null)
                 onLayoutAnimation(animationMode, true, viewA, viewB)
             }
             mHandler?.postDelayed(mViewAnimationRunnable!!, if (mTextResidenceTime < 500) 500 else mTextResidenceTime)
         } else {
             updateViewPosition()
             updateTextListPosition()
-            setLayerType(LAYER_TYPE_NONE, null)
             onLayoutAnimation(animationMode, true, viewA, viewB)
         }
     }
@@ -1353,8 +1344,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.playSequentially(viewAnimationA, viewAnimationB)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
                         if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
                         if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
                         viewB.scaleX = 0f
@@ -1363,14 +1352,10 @@ class AttrTextLayout : FrameLayout, IAttrText {
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1430,22 +1415,16 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
                         if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
                         if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
                     }
                     override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         super.onAnimationCancel(animation)
                     }
                 })
@@ -1499,23 +1478,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
                         if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
-                    }
-                    override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
-                        super.onAnimationCancel(animation)
                     }
                 })
                 animatorSet.start()
@@ -1552,23 +1522,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 }
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                        viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
                         if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
                         if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
                         viewB.alpha = 0f
                         super.onAnimationStart(animation)
                     }
                     override fun onAnimationEnd(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
-                    }
-                    override fun onAnimationCancel(animation: Animator) {
-                        viewA.setLayerType(LAYER_TYPE_NONE, null)
-                        viewB.setLayerType(LAYER_TYPE_NONE, null)
-                        super.onAnimationCancel(animation)
                     }
                 })
                 animatorSet.start()
@@ -1602,7 +1563,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.play(valueAnimator)
                 animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                     override fun onAnimationStart(animation: Animator) {
-                        setLayerType(LAYER_TYPE_HARDWARE, null)
                         mAnimationStartTime = System.currentTimeMillis()
                         mCurrentDuration = mAnimationDuration
                         super.onAnimationStart(animation)
@@ -1610,14 +1570,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     }
 
                     override fun onAnimationEnd(animation: Animator) {
-                        setLayerType(LAYER_TYPE_NONE, null)
                         onLayoutAnimation(animationMode, true, viewA, viewB)
                         super.onAnimationEnd(animation)
-                    }
-
-                    override fun onAnimationCancel(animation: Animator) {
-                        setLayerType(LAYER_TYPE_NONE, null)
-                        super.onAnimationCancel(animation)
                     }
                 })
                 animatorSet.start()
@@ -1657,8 +1611,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
             animatorSet.play(valueAnimator)
             animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
                 override fun onAnimationStart(animation: Animator) {
-                    viewA.setLayerType(LAYER_TYPE_HARDWARE, null)
-                    viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
                     mAnimationStartTime = System.currentTimeMillis()
                     mCurrentDuration = mAnimationDuration
                     viewA.mAnimationStartTime = mAnimationStartTime
@@ -1668,14 +1620,10 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     super.onAnimationStart(animation)
                 }
                 override fun onAnimationEnd(animation: Animator) {
-                    viewA.setLayerType(LAYER_TYPE_NONE, null)
-                    viewB.setLayerType(LAYER_TYPE_NONE, null)
                     onLayoutAnimation(animationMode, true, viewA, viewB)
                     super.onAnimationEnd(animation)
                 }
                 override fun onAnimationCancel(animation: Animator) {
-                    viewA.setLayerType(LAYER_TYPE_NONE, null)
-                    viewB.setLayerType(LAYER_TYPE_NONE, null)
                     super.onAnimationCancel(animation)
                 }
             })

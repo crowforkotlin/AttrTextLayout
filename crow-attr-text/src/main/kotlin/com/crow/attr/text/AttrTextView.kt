@@ -274,6 +274,10 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      */
     override var mTextSizeUnitStrategy: Short = STRATEGY_DIMENSION_PX_OR_DEFAULT
 
+    init {
+        setLayerType(LAYER_TYPE_HARDWARE, null)
+    }
+
     /**
      * ⦁ 绘制文本
      *
@@ -580,7 +584,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             val textMarginRow = if (mTextRowMargin >= heightHalf) heightHalf.toFloat() else mTextRowMargin
             val textYIncremenet = textHeight + textMarginRow
             val textHeightWithMargin = textHeight + textMarginRow
-            val textMaxLine = min(if (measuredHeight < textHeightWithMargin) 1 else (measuredHeight / textHeightWithMargin).toInt(), mTextLines)
+            val textMaxLine = min(if (measuredHeight < textHeightWithMargin) 1 else (measuredHeight / textHeightWithMargin).toInt(), textListSize)
             var textStartPos = mListPosition * textMaxLine
             mTextY = onInitializaTextY(abs(fontMetrics.ascent))
             repeat(textMaxLine) {
