@@ -79,9 +79,6 @@ implementation("com.kotlincrow.android.component:AttrTextLayout:1.8")
 
 - ## 代码示例 动态创建
 ```kotlin
-// 设置和AttrTextLayout有关的类执行动画个数 限制5个 设置0或者不设置默认不限制（防止过多视图同时执行特效卡顿）
-AttrTextLayout.mAwaitAnimationCount = 5
-
 // 创建AttrTextLayout对象
 val layout = AttrTextLayout(this)
 
