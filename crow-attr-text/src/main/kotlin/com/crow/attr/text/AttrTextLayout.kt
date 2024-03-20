@@ -696,7 +696,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         * 否则使用Canvas绘制的动画例如子View实现的 就会导致clipRect的时候文字出现边角出现缺失
         * */
         mHandler = Looper.getMainLooper().asHandler(true)
-        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
+        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.OVERLAY)
         mTextPaint.color = mTextColor
         mTextPaint.textSize = mTextSize
         mTextPaint.typeface = if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT
