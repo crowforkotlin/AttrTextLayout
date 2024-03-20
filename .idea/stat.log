@@ -3502,3 +3502,10 @@
 {"ts":1710926368925,"action":"FILE_CLOSED","file":"/crow-attr-text/.gitignore","tags":{"FILE_LINE_OF_CODE":"2"}}
 {"ts":1710926368925,"action":"FILE_OPENED","file":"/.gitignore","tags":{"FILE_LINE_OF_CODE":"16"}}
 {"ts":1710926395165,"action":"IDE_DEACTIVATED"}
+{"ts":1710926445117,"action":"IDE_ACTIVATED"}
+{"ts":1710926447639,"action":"FILE_CLOSED","file":"/.gitignore","tags":{"FILE_LINE_OF_CODE":"17"}}
+{"ts":1710926447639,"action":"FILE_OPENED","file":"/crow-attr-text/src/main/kotlin/com/crow/attr/text/AttrTextLayout.kt","tags":{"FILE_LINE_OF_CODE":"1878"}}
+{"ts":1710926449903,"action":"FILE_CLOSED","file":"/crow-attr-text/src/main/kotlin/com/crow/attr/text/AttrTextLayout.kt","tags":{"FILE_LINE_OF_CODE":"1878"}}
+{"ts":1710926449903,"action":"FILE_OPENED","file":"/crow-attr-text/src/main/kotlin/com/crow/attr/text/IAttrText.kt","tags":{"FILE_LINE_OF_CODE":"276"}}
+{"ts":1710926469339,"action":"IDE_DEACTIVATED"}
+{"ts":1710926498551,"action":"IDE_ACTIVATED"}
