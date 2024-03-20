@@ -50,19 +50,22 @@ import kotlin.properties.Delegates
  */
 class AttrTextLayout : FrameLayout, IAttrText {
 
-    internal open inner class AttrAnimatorListener(val mAnimatorSet: AnimatorSet) : Animator.AnimatorListener {
+    internal open inner class AttrAnimatorListener(val mAnimatorSet: AnimatorSet, val viewA: AttrTextView?, val viewB: AttrTextView?) : Animator.AnimatorListener {
         override fun onAnimationStart(animation: Animator) {
-            setLayerType(LAYER_TYPE_HARDWARE, null)
+            viewA?.setLayerType(LAYER_TYPE_HARDWARE, null)
+            viewB?.setLayerType(LAYER_TYPE_HARDWARE, null)
             updateViewPosition()
             updateTextListPosition()
             mAnimationUpdateListener?.onAnimationStart(animation)
         }
         override fun onAnimationEnd(animation: Animator) {
-            setLayerType(LAYER_TYPE_NONE, null)
+            viewA?.setLayerType(LAYER_TYPE_NONE, null)
+            viewB?.setLayerType(LAYER_TYPE_NONE, null)
             mAnimationUpdateListener?.onAnimationEnd(animation)
         }
         override fun onAnimationCancel(animation: Animator) {
-            setLayerType(LAYER_TYPE_NONE, null)
+            viewA?.setLayerType(LAYER_TYPE_NONE, null)
+            viewB?.setLayerType(LAYER_TYPE_NONE, null)
             if (mTextAnimationStrategy == STRATEGY_ANIMATION_UPDATE_CONTINUA) {
                 mCurrentDuration = mAnimatorSet.duration - mAnimatorSet.currentPlayTime
             }
@@ -1291,7 +1294,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
             viewB.mAnimationStartTime = mAnimationStartTime
             viewA.mIsCurrentView = false
             viewB.mIsCurrentView = true
-            setLayerType(LAYER_TYPE_HARDWARE, null  )
+            viewA.setLayerType(LAYER_TYPE_HARDWARE, null  )
+            viewB.setLayerType(LAYER_TYPE_HARDWARE, null)
             updateViewPosition()
             updateTextListPosition()
             val duration: Long = with(MAX_SCROLL_SPEED - mTextAnimationSpeed) { if (this == 8) 0L else if (this == 1) 1L else toLong() shl 1 }
@@ -1305,7 +1309,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
 
     private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
         if (count == 2) {
-            setLayerType(LAYER_TYPE_NONE, null)
+            viewA.setLayerType(LAYER_TYPE_NONE, null  )
+            viewB.setLayerType(LAYER_TYPE_NONE, null)
             mViewAnimationRunnable?.let { removeCallbacks(it) }
             mHandler?.post(Runnable {
                 onLayoutAnimation(animationMode, delay, viewA, viewB)
@@ -1369,7 +1374,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.playSequentially(viewAnimationA, viewAnimationB)
-                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet, viewA, viewB) {
                     override fun onAnimationStart(animation: Animator) {
                         if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
                         if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
@@ -1441,7 +1446,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
-                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet, viewA, viewB) {
                     override fun onAnimationStart(animation: Animator) {
                         if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
                         if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
@@ -1505,7 +1510,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.playTogether(viewAnimationA, viewAnimationB)
-                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet, viewA, viewB) {
                     override fun onAnimationStart(animation: Animator) {
                         if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
                         if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
@@ -1550,7 +1555,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 } else {
                     animatorSet.playTogether(viewAnimationA, viewAnimationB)
                 }
-                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet, viewA, viewB) {
                     override fun onAnimationStart(animation: Animator) {
                         if (viewA.visibility == INVISIBLE) viewA.visibility = VISIBLE
                         if (viewB.visibility == INVISIBLE) viewB.visibility = VISIBLE
@@ -1592,7 +1597,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 animatorSet.duration = mCurrentDuration
                 animatorSet.interpolator = LinearInterpolator()
                 animatorSet.play(valueAnimator)
-                animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
+                animatorSet.addListener(object : AttrAnimatorListener(animatorSet, viewA, viewB) {
                     override fun onAnimationStart(animation: Animator) {
                         mAnimationStartTime = System.currentTimeMillis()
                         mCurrentDuration = mAnimationDuration
@@ -1641,7 +1646,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
             animatorSet.duration = mCurrentDuration
             animatorSet.interpolator = LinearInterpolator()
             animatorSet.play(valueAnimator)
-            animatorSet.addListener(object : AttrAnimatorListener(animatorSet) {
+            animatorSet.addListener(object : AttrAnimatorListener(animatorSet, viewA, viewB) {
                 override fun onAnimationStart(animation: Animator) {
                     mAnimationStartTime = System.currentTimeMillis()
                     mCurrentDuration = mAnimationDuration

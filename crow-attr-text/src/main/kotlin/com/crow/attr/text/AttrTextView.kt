@@ -273,10 +273,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      */
     override var mTextSizeUnitStrategy: Short = STRATEGY_DIMENSION_PX_OR_DEFAULT
 
-    init {
-//        setLayerType(LAYER_TYPE_HARDWARE, null)
-    }
-
     /**
      * ⦁ 绘制文本
      *
@@ -507,7 +503,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ⦁ 2024-02-01 11:17:55 周四 上午
      * @author crowforkotlin
      */
-    private fun launchHighBrushSuspendAnimation(count: Int, isTopOrLeft: Boolean, duration: Long) {
+    private fun launchHighBrushAnimation(count: Int, isTopOrLeft: Boolean, duration: Long) {
         mHighBrushPixelCount = count
         mHighBrushTopOrLeft = isTopOrLeft
         mHighBrushDuration = duration
@@ -527,8 +523,9 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                 if (duration == 0L) invalidate() else {
                     mHandler.post(object : Runnable {
                         override fun run() {
-                            if (mTextAxisValue > -mHighBrushPixelCount) invalidate()
-                            else {
+                            if (mTextAxisValue > -mHighBrushPixelCount) {
+                                invalidate()
+                            } else {
                                 mHandler.removeCallbacks(this)
                                 mHighBrushJobRunning = false
                                 mHighBrushSuccessListener?.run()
@@ -774,9 +771,9 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         mTextAxisValue = 0f
         mHighBrushJobRunning = true
         if (isX) {
-            launchHighBrushSuspendAnimation(measuredWidth, mTextAnimationLeftEnable, duration)
+            launchHighBrushAnimation(measuredWidth, mTextAnimationLeftEnable, duration)
         } else {
-            launchHighBrushSuspendAnimation(measuredHeight, mTextAnimationTopEnable, duration)
+            launchHighBrushAnimation(measuredHeight, mTextAnimationTopEnable, duration)
         }
     }
     internal fun setHighBrushSuccessListener(listener: Runnable) { mHighBrushSuccessListener = listener }

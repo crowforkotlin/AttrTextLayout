@@ -21,8 +21,8 @@ data class AttrTextFrameConfig(
     val mGradient: Byte? = null
 ) {
 
-    val mPaint = Paint().apply {
-        xfermode = PorterDuffXfermode(PorterDuff.Mode.OVERLAY)
+    internal val mPaint = Paint().apply {
+        xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
         isAntiAlias = mAntiAliasEnable
         color = mColor
         strokeWidth = mLineWidth
