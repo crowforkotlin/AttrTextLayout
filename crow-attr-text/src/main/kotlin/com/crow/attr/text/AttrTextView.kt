@@ -5,6 +5,25 @@
 package com.crow.attr.text
 
 import android.content.Context
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_X
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_Y
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_OVAL
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_RHOMBUS
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_DRAW
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_X_HIGH_BRUSH_DRAW
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_DRAW
+import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_MOVE_Y_HIGH_BRUSH_DRAW
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_CENTER
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_END
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_BOTTOM_START
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_CENTER
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_CENTER_END
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_CENTER_START
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_CENTER
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_END
+import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
+import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX_OR_DEFAULT
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
@@ -255,7 +274,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     override var mTextSizeUnitStrategy: Short = STRATEGY_DIMENSION_PX_OR_DEFAULT
 
     init {
-        setLayerType(LAYER_TYPE_HARDWARE, null)
+//        setLayerType(LAYER_TYPE_HARDWARE, null)
     }
 
     /**

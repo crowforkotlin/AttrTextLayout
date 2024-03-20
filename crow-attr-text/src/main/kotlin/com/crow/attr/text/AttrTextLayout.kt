@@ -15,6 +15,7 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.BlendMode
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -52,14 +53,17 @@ class AttrTextLayout : FrameLayout, IAttrText {
 
     internal open inner class AttrAnimatorListener(val mAnimatorSet: AnimatorSet) : Animator.AnimatorListener {
         override fun onAnimationStart(animation: Animator) {
+            setLayerType(LAYER_TYPE_HARDWARE, null)
             updateViewPosition()
             updateTextListPosition()
             mAnimationUpdateListener?.onAnimationStart(animation)
         }
         override fun onAnimationEnd(animation: Animator) {
+            setLayerType(LAYER_TYPE_NONE, null)
             mAnimationUpdateListener?.onAnimationEnd(animation)
         }
         override fun onAnimationCancel(animation: Animator) {
+            setLayerType(LAYER_TYPE_NONE, null)
             if (mTextAnimationStrategy == STRATEGY_ANIMATION_UPDATE_CONTINUA) {
                 mCurrentDuration = mAnimatorSet.duration - mAnimatorSet.currentPlayTime
             }
@@ -432,7 +436,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private var mHandler: Handler? = null
-    private var mHandlerTaskList: MutableList<Runnable> = mutableListOf()
+    // private var mHandlerTaskList: MutableList<Runnable> = mutableListOf() // 预留
 
     /**
      * ⦁ 字体类型路径
@@ -690,7 +694,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
         * 否则使用Canvas绘制的动画例如子View实现的 就会导致clipRect的时候文字出现边角出现缺失
         * */
         mHandler = Looper.getMainLooper().asHandler(true)
-        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.OVERLAY)
+        mTextPaint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC)
         mTextPaint.color = mTextColor
         mTextPaint.textSize = mTextSize
         mTextPaint.typeface = if (mTextMonoSpaceEnable) Typeface.MONOSPACE else Typeface.DEFAULT
@@ -712,6 +716,16 @@ class AttrTextLayout : FrameLayout, IAttrText {
         }
         mCacheViews.add(creatAttrTextView())
         mCacheViews.add(creatAttrTextView())
+        debug {
+
+            mCacheViews.first().apply {
+                tag = 1
+            }
+            mCacheViews.last().apply {
+
+                tag = 2
+            }
+        }
     }
 
     /**
@@ -773,14 +787,11 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     override fun onDetachedFromWindow() {
-        super.onDetachedFromWindow()
-        "onDetachedFromWindow".debugLog()
         runCatching {
             val hashCode = this@AttrTextLayout.hashCode()
             mHandler?.apply {
                 removeCallbacksAndMessages(this)
                 removeAnimationRunnable()
-                mHandlerTaskList.forEach(::removeCallbacks)
                 mHandler = null
             }
             mTaskListRunnable.forEach(mTaskHandler::removeCallbacks)
@@ -788,13 +799,14 @@ class AttrTextLayout : FrameLayout, IAttrText {
             mTaskHandler.removeMessages(hashCode)
             mTaskHandler.removeMessages(hashCode + FLAG_TEXT)
             cancelAnimator()
-            removeCallbacks(mViewAnimationRunnable)
             mCacheViews.clear()
             mList.clear()
             mTask?.clear()
             mLayoutComplete = false
             mLastAnimation = -1
         }
+        super.onDetachedFromWindow()
+        "onDetachedFromWindow".debugLog()
     }
 
     /**
@@ -1273,9 +1285,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun launchHighBrushDrawAnimation(animationMode: Short, delay: Boolean, isX: Boolean) {
-        if (mCacheViews.isEmpty()) return
         mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
         mHandler?.postDelayed(Runnable {
+            if (mCacheViews.isEmpty()) return@Runnable
             val viewA = mCacheViews[mCurrentViewPos]
             val viewB = getNextView(mCurrentViewPos)
             mAnimationStartTime = System.currentTimeMillis()
@@ -1283,6 +1295,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
             viewB.mAnimationStartTime = mAnimationStartTime
             viewA.mIsCurrentView = false
             viewB.mIsCurrentView = true
+            setLayerType(LAYER_TYPE_HARDWARE, null  )
             updateViewPosition()
             updateTextListPosition()
             val duration: Long = with(MAX_SCROLL_SPEED - mTextAnimationSpeed) { if (this == 8) 0L else if (this == 1) 1L else toLong() shl 1 }
@@ -1291,11 +1304,12 @@ class AttrTextLayout : FrameLayout, IAttrText {
             viewB.launchHighBrushDrawAnimation(isX, duration)
             viewA.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB) }
             viewB.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB) }
-
         }.also { mViewAnimationRunnable = it },  mTextResidenceTime)
     }
+
     private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
         if (count == 2) {
+            setLayerType(LAYER_TYPE_NONE, null)
             mViewAnimationRunnable?.let { removeCallbacks(it) }
             mHandler?.post(Runnable {
                 onLayoutAnimation(animationMode, delay, viewA, viewB)
@@ -1691,7 +1705,8 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun removeAnimationRunnable() {
-        removeCallbacks(mViewAnimationRunnable)
+        mHandler?.removeCallbacks(mViewAnimationRunnable ?: return)
+        mViewAnimationRunnable = null
     }
 
     /**

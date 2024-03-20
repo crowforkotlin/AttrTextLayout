@@ -14,6 +14,7 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import com.crow.attr.text.AttrTextFrameConfig
+import com.crow.attr.text.AttrTextLayout
 import com.crow.attrtextlayout.databinding.ActivityMainBinding
 import com.crow.base.tools.extensions.copyFolder
 import kotlinx.coroutines.Dispatchers
@@ -83,7 +84,7 @@ class MainActivity : AppCompatActivity() {
     private fun createAttrTextLayout(width: Int, height: Int, animationStrategy: Short): AttrTextLayout {
         val layout = AttrTextLayout(this)
         val layoutParams = LinearLayout.LayoutParams(width, height)
-        mBinding.linear.addView(layout)
+//        mBinding.linear.addView(layout)
         layout.layoutParams = layoutParams
         layout.mTextSize = 14f
         layout.mTextGravity = AttrTextLayout.GRAVITY_BOTTOM_END

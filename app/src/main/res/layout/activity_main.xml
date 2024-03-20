@@ -7,8 +7,39 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     tools:ignore="PxUsage">
+    <com.crow.attr.text.AttrTextLayout
+        android:layout_width="128px"
+        android:layout_height="64px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:singleTextAnimationEnable="true"
+        app:text="12345678910 11 12 13 14 15 16 17 18 19 20"
+        app:textAnimationMode="move_y_high_brush_draw"
+        app:textAnimationSpeed="15"
+        app:textAnimationStrategy="continua"
+        app:textAnimationX="left"
+        app:textAnimationY="top"
+        app:textAntiAliasEnable="true"
+        app:textBoldEnable="false"
+        app:textCharSpacing="1sp"
+        app:textColor="@color/white"
+        app:textFakeBoldEnable="false"
+        app:textFontAbsolutePath="/data/data/com.crow.attrtextlayout/files/font/calibri.ttf"
+        app:textFontAssetsPath="comic.ttf"
+        app:textGravity="center"
+        app:textItalicEnable="false"
+        app:textLines="2"
+        app:textMonoSpaceEnable="true"
+        app:textMultipleLineEnable="true"
+        app:textResidenceTime="1000"
+        app:textRowMargin="1sp"
+        app:textSize="16sp"
+        app:textSizeUnitStrategy="defaultOrSp"
+        app:textUpdateStrategy="lazy" />
 
-    <androidx.core.widget.NestedScrollView
+    <!--<androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="100dp">
 
@@ -18,7 +49,7 @@
             android:layout_height="500dp"
             android:orientation="vertical">
 
-<!--            <com.crow.attr.text.AttrTextLayout
+            <com.crow.attr.text.AttrTextLayout
                 android:id="@+id/attrTextLayout"
                 android:layout_width="128px"
                 android:layout_height="wrap_content"
@@ -44,7 +75,7 @@
                 app:textFontAssetsPath="comic.ttf"
                 app:textFrameBottom="true"
                 app:textFrameLeft="true"
-                app:textFrameLineWdith="1sp"
+                app:textFrameLineWidth="1sp"
                 app:textFrameRight="true"
                 app:textFrameTop="true"
                 app:textGravity="center"
@@ -82,7 +113,7 @@
                 app:textFontAssetsPath="comic.ttf"
                 app:textFrameBottom="true"
                 app:textFrameLeft="true"
-                app:textFrameLineWdith="5sp"
+                app:textFrameLineWidth="5sp"
                 app:textFrameRight="true"
                 app:textFrameTop="true"
                 app:textGravity="center"
@@ -119,7 +150,7 @@
                 app:textFontAssetsPath="comic.ttf"
                 app:textFrameBottom="true"
                 app:textFrameLeft="true"
-                app:textFrameLineWdith="5sp"
+                app:textFrameLineWidth="5sp"
                 app:textFrameRight="true"
                 app:textFrameTop="true"
                 app:textGravity="center"
@@ -156,7 +187,7 @@
                 app:textFontAssetsPath="comic.ttf"
                 app:textFrameBottom="true"
                 app:textFrameLeft="true"
-                app:textFrameLineWdith="5sp"
+                app:textFrameLineWidth="5sp"
                 app:textFrameRight="true"
                 app:textFrameTop="true"
                 app:textGravity="center"
@@ -168,8 +199,8 @@
                 app:textRowMargin="1sp"
                 app:textSize="16sp"
                 app:textSizeUnitStrategy="defaultOrSp"
-                app:textUpdateStrategy="lazy" />-->
+                app:textUpdateStrategy="lazy" />
         </LinearLayout>
 
-    </androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>-->
 </FrameLayout>
