@@ -15,7 +15,6 @@ import android.animation.ObjectAnimator
 import android.animation.PropertyValuesHolder
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.BlendMode
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -690,7 +689,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      */
     init {
         /*
-        * 这里一定要设置xfermode（在源图像中显示目标图像，目标图像仅在源图像上显示）
+        * 这里一定要设置xfermode（源像素取代目标像素）
         * 否则使用Canvas绘制的动画例如子View实现的 就会导致clipRect的时候文字出现边角出现缺失
         * */
         mHandler = Looper.getMainLooper().asHandler(true)
@@ -710,21 +709,18 @@ class AttrTextLayout : FrameLayout, IAttrText {
             }
         })
         if (mTaskHandlerThread == null) {
+            // 单独利用一个全局的任务线程Handler
             val thread = HandlerThread("TASK").also { mTaskHandlerThread = it }
            thread.start()
             mTaskHandler = thread.looper.asHandler(true)
         }
-        mCacheViews.add(creatAttrTextView())
-        mCacheViews.add(creatAttrTextView())
+        val viewA = creatAttrTextView()
+        val viewB = creatAttrTextView()
+        mCacheViews.add(viewA)
+        mCacheViews.add(viewB)
         debug {
-
-            mCacheViews.first().apply {
-                tag = 1
-            }
-            mCacheViews.last().apply {
-
-                tag = 2
-            }
+            viewA.apply { tag = 1 }
+            viewB.apply { tag = 2 }
         }
     }
 
