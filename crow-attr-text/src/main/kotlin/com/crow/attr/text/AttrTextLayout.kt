@@ -158,8 +158,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
     companion object {
 
         private const val NEWLINE_CHAR_FLAG = '\n'
-        private const val NEWLINE_CHAR_FLAG_SLASH = '/'
-        private const val NEWLINE_CHAR_FLAG_N = 'n'
         private const val MAX_SCROLL_SPEED: Short = 16
         private const val MIN_ANIMATION_DURATION = 1000L
         private const val ANIMATION_DURATION_FIXED_INCREMEN = 500
@@ -1084,85 +1082,27 @@ class AttrTextLayout : FrameLayout, IAttrText {
                     textStringWidth += textWidth
                     // 字符串宽度 < 测量宽度 假设宽度是 128  那么范围在 0 - 127 故用小于号而不是小于等于
                     if (textStringWidth < viewMeasureWidth) {
-                        when (char) {
-                            NEWLINE_CHAR_FLAG -> {
-                                textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                textStringBuilder.clear()
+                        if (char == NEWLINE_CHAR_FLAG) {
+                            textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
+                            textStringBuilder.clear()
+                            textStringWidth = 0f
+                        } else {
+                            if (index == textMaxIndex) {
+                                textStringBuilder.append(char)
+                                textList.add(textStringBuilder.toString() to textStringWidth)
                                 textStringWidth = 0f
-                            }
-
-                            NEWLINE_CHAR_FLAG_SLASH -> {
-                                if (originText.getOrNull(index + 1) == NEWLINE_CHAR_FLAG_N) {
-                                    textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                    textStringBuilder.clear()
-                                    textStringWidth = 0f
-                                }
-                            }
-
-                            NEWLINE_CHAR_FLAG_N -> {
-                                if (index == textMaxIndex) {
-                                    textStringWidth =
-                                        if (originText.getOrNull(index - 1) != NEWLINE_CHAR_FLAG_SLASH) {
-                                            textStringBuilder.append(char)
-                                            textList.add(textStringBuilder.toString() to textStringWidth)
-                                            0f
-                                        } else {
-                                            0f
-                                        }
-                                } else {
-                                    if (originText.getOrNull(index - 1) != NEWLINE_CHAR_FLAG_SLASH) {
-                                        textStringBuilder.append(char)
-                                    } else {
-                                        textStringWidth = 0f
-                                    }
-                                }
-                            }
-
-                            else -> {
-                                if (index == textMaxIndex) {
-                                    textStringBuilder.append(char)
-                                    textList.add(textStringBuilder.toString() to textStringWidth)
-                                    textStringWidth = 0f
-                                } else {
-                                    textStringBuilder.append(char)
-                                }
+                            } else {
+                                textStringBuilder.append(char)
                             }
                         }
                     } else {
-                        when (char) {
-                            NEWLINE_CHAR_FLAG_SLASH -> {
-                                if (originText.getOrNull(index + 1) == NEWLINE_CHAR_FLAG_N) {
-                                    textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                    textStringBuilder.clear()
-                                    textStringWidth = 0f
-                                }
-                            }
-
-                            NEWLINE_CHAR_FLAG_N -> {
-                                if (originText.getOrNull(index - 1) != NEWLINE_CHAR_FLAG_SLASH) {
-                                    textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                    textStringBuilder.clear()
-                                    textStringBuilder.append(char)
-                                    if (index == textMaxIndex) {
-                                        textList.add(textStringBuilder.toString() to textWidth)
-                                    } else {
-                                        textStringWidth = textWidth
-                                    }
-                                } else {
-                                    textStringWidth = 0f
-                                }
-                            }
-
-                            else -> {
-                                textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
-                                textStringBuilder.clear()
-                                textStringBuilder.append(char)
-                                if (index == textMaxIndex) {
-                                    textList.add(textStringBuilder.toString() to textWidth)
-                                } else {
-                                    textStringWidth = textWidth
-                                }
-                            }
+                        textList.add(textStringBuilder.toString() to textStringWidth - textWidth)
+                        textStringBuilder.clear()
+                        textStringBuilder.append(char)
+                        if (index == textMaxIndex) {
+                            textList.add(textStringBuilder.toString() to textWidth)
+                        } else {
+                            textStringWidth = textWidth
                         }
                     }
                 }
