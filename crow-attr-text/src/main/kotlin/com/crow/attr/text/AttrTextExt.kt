@@ -77,6 +77,12 @@ internal fun Handler.sendMessage(runnable: Runnable, config: Message.() -> Unit)
     sendMessage(Message.obtain(this, runnable).also { it.config() })
 }
 
+/**
+ * ⦁ AttrTextLayout高刷、异步核心API
+ *
+ * ⦁ 2024-03-20 15:54:02 周三 下午
+ * @author crowforkotlin
+ */
 @SuppressLint("ObsoleteSdkInt")
 internal fun Looper.asHandler(async: Boolean): Handler {
     // Async support was added in API 16.

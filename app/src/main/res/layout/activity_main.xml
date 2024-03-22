@@ -8,7 +8,46 @@
     tools:context=".MainActivity"
     tools:ignore="PxUsage">
 
-    <androidx.core.widget.NestedScrollView
+    <com.crow.attr.text.AttrTextLayout
+        android:layout_width="128px"
+        android:layout_height="64px"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:textForceHardwareRenderEnable="false"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:singleTextAnimationEnable="true"
+        app:text="1234567\n20"
+        app:textAnimationMode="move_x_high_brush_draw"
+        app:textAnimationSpeed="8"
+        app:textFrameLineWidth="5px"
+        app:textFrameLeft="true"
+        app:textFrameRight="true"
+        app:textFrameBottom="true"
+        app:textFrameTop="true"
+        app:textFrameColor="@android:color/holo_red_light"
+        app:textAnimationStrategy="continua"
+        app:textAnimationX="left"
+        app:textAnimationY="top"
+        app:textAntiAliasEnable="true"
+        app:textBoldEnable="false"
+        app:textCharSpacing="1sp"
+        app:textColor="@color/white"
+        app:textFakeBoldEnable="false"
+        app:textFontAbsolutePath="/data/data/com.crow.attrtextlayout/files/font/calibri.ttf"
+        app:textFontAssetsPath="comic.ttf"
+        app:textGravity="center"
+        app:textItalicEnable="false"
+        app:textLines="2"
+        app:textMonoSpaceEnable="true"
+        app:textMultipleLineEnable="true"
+        app:textResidenceTime="1000"
+        app:textRowMargin="1sp"
+        app:textSize="16sp"
+        app:textSizeUnitStrategy="defaultOrSp"
+        app:textUpdateStrategy="lazy" />
+
+    <!--<androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="100dp">
 
@@ -18,7 +57,7 @@
             android:layout_height="500dp"
             android:orientation="vertical">
 
-<!--            <com.crow.attr.text.AttrTextLayout
+            <com.crow.attr.text.AttrTextLayout
                 android:id="@+id/attrTextLayout"
                 android:layout_width="128px"
                 android:layout_height="wrap_content"
@@ -44,7 +83,7 @@
                 app:textFontAssetsPath="comic.ttf"
                 app:textFrameBottom="true"
                 app:textFrameLeft="true"
-                app:textFrameLineWdith="1sp"
+                app:textFrameLineWidth="1sp"
                 app:textFrameRight="true"
                 app:textFrameTop="true"
                 app:textGravity="center"
@@ -82,7 +121,7 @@
                 app:textFontAssetsPath="comic.ttf"
                 app:textFrameBottom="true"
                 app:textFrameLeft="true"
-                app:textFrameLineWdith="5sp"
+                app:textFrameLineWidth="5sp"
                 app:textFrameRight="true"
                 app:textFrameTop="true"
                 app:textGravity="center"
@@ -119,7 +158,7 @@
                 app:textFontAssetsPath="comic.ttf"
                 app:textFrameBottom="true"
                 app:textFrameLeft="true"
-                app:textFrameLineWdith="5sp"
+                app:textFrameLineWidth="5sp"
                 app:textFrameRight="true"
                 app:textFrameTop="true"
                 app:textGravity="center"
@@ -156,7 +195,7 @@
                 app:textFontAssetsPath="comic.ttf"
                 app:textFrameBottom="true"
                 app:textFrameLeft="true"
-                app:textFrameLineWdith="5sp"
+                app:textFrameLineWidth="5sp"
                 app:textFrameRight="true"
                 app:textFrameTop="true"
                 app:textGravity="center"
@@ -168,8 +207,8 @@
                 app:textRowMargin="1sp"
                 app:textSize="16sp"
                 app:textSizeUnitStrategy="defaultOrSp"
-                app:textUpdateStrategy="lazy" />-->
+                app:textUpdateStrategy="lazy" />
         </LinearLayout>
 
-    </androidx.core.widget.NestedScrollView>
+    </androidx.core.widget.NestedScrollView>-->
 </FrameLayout>
