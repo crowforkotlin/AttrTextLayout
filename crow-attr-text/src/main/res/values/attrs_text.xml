@@ -2,6 +2,7 @@
 <resources>
     <declare-styleable name="AttrTextLayout">
         <attr name="text" format="string" />
+        <attr name="textForceHardwareRenderEnable" format="boolean" />
         <attr name="textBoldEnable" format="boolean" />
         <attr name="textFakeBoldEnable" format="boolean" />
         <attr name="textAntiAliasEnable" format="boolean" />

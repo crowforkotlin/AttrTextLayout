@@ -289,7 +289,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         if (textListSize == 0) return
 
         // 获取文本 -> 如果超出列表位置取最后一个
-        val text = if (mListPosition !in 0..< textListSize) { mList.last() } else mList[mListPosition]
+        val text = if (mListPosition !in 0 until textListSize) { mList.last() } else mList[mListPosition]
 
         // 执行动画
         val isDrawBrushAnimation = drawAnimation(canvas)

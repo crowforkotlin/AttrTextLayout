@@ -7,12 +7,13 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     tools:ignore="PxUsage">
+
     <com.crow.attr.text.AttrTextLayout
         android:layout_width="128px"
         android:layout_height="64px"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:textForceHardwareRenderEnable="false"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layoutBackGroundColor="@android:color/holo_blue_dark"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:singleTextAnimationEnable="true"

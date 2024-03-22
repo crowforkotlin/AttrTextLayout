@@ -161,6 +161,9 @@ layout.mTextFontAssetsPath = "comic.ttf"
 // 存储中字体文件的绝对路径
 layout.mTextFontAbsolutePath = "/data/data/com.crow.attrtextlayout/files/font/calibri.ttf"
 
+// 关闭 强制启用硬件渲染, 详细说明可查看源码
+layout.mTextForceHardwareRenderEnable = false
+
 // 设置边框
 layout.mTextFrameConfig = AttrTextFrameConfig(mLeft = true, mTop = true, mRight = true, mBottom = true, mGradient = AttrTextLayout.GRADIENT_BEVEL)
 
@@ -211,6 +214,7 @@ const val STRATEGY_TEXT_UPDATE_CURRENT: Short = 902
     android:layout_height="320dp"
     android:layout_gravity="center"
     app:singleTextAnimationEnable="true"
+    app:textForceHardwareRenderEnable="false"
     app:textAnimationMode="move_x"
     app:textAnimationStrategy="continua"
     app:textAnimationX="left"
