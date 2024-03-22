@@ -10,7 +10,7 @@
 repository { mavenCentral() }
 
 // 引入远程依赖
-implementation("com.kotlincrow.android.component:AttrTextLayout:1.8")
+implementation("com.kotlincrow.android.component:AttrTextLayout:1.9")
 ```
 
 - ## 功能
