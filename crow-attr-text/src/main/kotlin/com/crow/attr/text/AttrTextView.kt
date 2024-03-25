@@ -5,6 +5,8 @@
 package com.crow.attr.text
 
 import android.content.Context
+import android.graphics.Canvas
+import android.graphics.Color
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_CROSS_EXTENSION
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_X
 import com.crow.attr.text.AttrTextLayout.Companion.ANIMATION_CONTINUATION_ERASE_Y
@@ -24,8 +26,6 @@ import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_CENTER
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_END
 import com.crow.attr.text.AttrTextLayout.Companion.GRAVITY_TOP_START
 import com.crow.attr.text.AttrTextLayout.Companion.STRATEGY_DIMENSION_PX_OR_DEFAULT
-import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Paint.FontMetrics
 import android.graphics.Path
