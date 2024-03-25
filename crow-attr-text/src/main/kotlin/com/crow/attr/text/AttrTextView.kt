@@ -503,8 +503,8 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ⦁ 2024-02-01 11:17:55 周四 上午
      * @author crowforkotlin
      */
-    private fun launchHighBrushAnimation(count: Int, isTopOrLeft: Boolean, duration: Long) {
-        mHighBrushPixelCount = count
+    private fun launchHighBrushAnimation(pixelCount: Int, isTopOrLeft: Boolean, duration: Long) {
+        mHighBrushPixelCount = pixelCount
         mHighBrushTopOrLeft = isTopOrLeft
         mHighBrushDuration = duration
         invalidateHighBrushAnimation(duration = duration)
@@ -566,7 +566,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     }
 
     /**
-     * ⦁ 绘制顶部文本
+     * ⦁ 绘制顶部文本 （参数详情和drawCenter函数定义一致）
      *
      * ⦁ 2023-11-04 17:53:43 周六 下午
      * @author crowforkotlin
@@ -603,6 +603,10 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ⦁ 绘制中心文本
      *
      * ⦁ 2023-11-04 17:54:09 周六 下午
+     * @param text <文本内容，文本像素宽>
+     * @param textListSize 文本列表大小
+     * @param onInitializaTextY 初始化文本Y轴坐标，这个过程只会执行一次
+     * @param onInitializaTextX 初始化文本X轴坐标，执行次数取决于是否多行以及需要绘制多少行
      * @author crowforkotlin
      */
     private inline fun drawCenterText(canvas: Canvas, text: Pair<String, Float>, textListSize: Int, onInitializaTextY: (Float) -> Float, onInitializaTextX: (Float) -> Unit) {
@@ -643,7 +647,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
     }
 
     /**
-     * ⦁ 绘制底部文本
+     * ⦁ 绘制底部文本（参数详情和drawCenter函数定义一致）
      *
      * ⦁ 2023-11-04 17:54:00 周六 下午
      * @author crowforkotlin
