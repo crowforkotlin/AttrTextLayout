@@ -43,7 +43,7 @@
         app:textMultipleLineEnable="true"
         app:textResidenceTime="1000"
         app:textRowMargin="1sp"
-        app:textSize="16sp"
+        app:textSize="12sp"
         app:textSizeUnitStrategy="defaultOrSp"
         app:textUpdateStrategy="lazy" />
 
