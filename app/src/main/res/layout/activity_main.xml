@@ -41,7 +41,7 @@
         app:textLines="2"
         app:textMonoSpaceEnable="true"
         app:textMultipleLineEnable="true"
-        app:textResidenceTime="1000"
+        app:textResidenceTime="0"
         app:textRowMargin="1sp"
         app:textSize="12sp"
         app:textSizeUnitStrategy="defaultOrSp"

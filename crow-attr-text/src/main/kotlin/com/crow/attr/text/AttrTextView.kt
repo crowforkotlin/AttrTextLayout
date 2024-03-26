@@ -128,7 +128,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ⦁ 2024-01-30 15:40:31 周二 下午
      * @author crowforkotlin
      */
-    private var mHighBrushJobRunning: Boolean= false
+    var mHighBrushJobRunning: Boolean= false
 
     /**
      * ⦁ 文本X坐标
@@ -144,7 +144,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ⦁ 2024-01-29 17:03:09 周一 下午
      * @author crowforkotlin
      */
-    private var mTextAxisValue: Float = 0f
+    var mTextAxisValue: Float = 0f
 
     /**
      * ⦁ 文本Y坐标
@@ -529,7 +529,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                                 invalidate()
                             } else {
                                 mHandler.removeCallbacks(this)
-                                mHighBrushJobRunning = false
                                 mHighBrushSuccessListener?.invoke(this@AttrTextView)
                                 return
                             }
@@ -539,12 +538,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                     })
                 }
             } else {
-                if (duration == 0L) {
-                    mTextAxisValue = 0f
-                    mHighBrushSuccessListener?.invoke(this@AttrTextView)
-                    return
-                }
-                mHighBrushJobRunning = false
                 mHighBrushSuccessListener?.invoke(this@AttrTextView)
             }
         } else {
@@ -556,7 +549,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                             if (mTextAxisValue < mHighBrushPixelCount) invalidate()
                             else {
                                 mHandler.removeCallbacks(this)
-                                mHighBrushJobRunning = false
                                 mHighBrushSuccessListener?.invoke(this@AttrTextView)
                                 return
                             }
@@ -566,7 +558,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                     })
                 }
             } else {
-                mHighBrushJobRunning = false
                 mHighBrushSuccessListener?.invoke(this@AttrTextView)
             }
         }
@@ -741,7 +732,6 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         if (oldValue == newValue && !skipSameCheck) return
         when(flag) {
             FLAG_REFRESH -> {
-                "tag is $tag \t mSkipUpdate : $mSkipUpdate".debugLog()
                 if (mSkipUpdate) {
                     mSkipUpdate = false
                     return

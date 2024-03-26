@@ -1036,7 +1036,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun onNotifyViewUpdate(updateAll: Boolean = mUpdateAll) {
-        "Update".debugLog()
         if (mList.isEmpty() || mCacheViews.isEmpty() || mCurrentViewPos > mCacheViews.size - 1) return
         val viewA = mCacheViews[mCurrentViewPos]
         val list : MutableList<Pair<String, Float>> = mList.toMutableList()
@@ -1148,7 +1147,6 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 } else {
                     mMultipleLinePos = 0
                 }
-                mMultipleLinePos.debugLog()
             }
             false ->{
                 if (mListPosition < mList.size - 1) {
@@ -1251,6 +1249,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
     private fun launchHighBrushDrawAnimation(animationMode: Short, isX: Boolean) {
         mViewAnimationRunnable?.let { mHandler?.removeCallbacks(it) }
         mHandler?.postDelayed(Runnable {
+            "$mTextResidenceTime".debugLog()
             if (mCacheViews.isEmpty()) return@Runnable
             val viewA = mCacheViews[mCurrentViewPos]
             val viewB = getNextView(mCurrentViewPos)
@@ -1287,10 +1286,15 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewA: AttrTextView, viewB: AttrTextView, duration: Long, isX: Boolean) {
-        if (count == 0) {
+        if (count == 2) {
             if (mCacheViews.isEmpty()) return
-            if (duration == 0L) {
+            mTextResidenceTime.debugLog()
+            if (mTextResidenceTime == 0L) {
+                viewA.mHighBrushJobRunning = true
+                viewB.mHighBrushJobRunning = true
                 mAnimationStartTime = System.currentTimeMillis()
+                viewA.mTextAxisValue = 0f
+                viewB.mTextAxisValue = 0f
                 viewA.mAnimationStartTime = mAnimationStartTime
                 viewB.mAnimationStartTime = mAnimationStartTime
                 viewA.mIsCurrentView = !viewA.mIsCurrentView
@@ -1302,6 +1306,9 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 viewA.invalidate()
                 viewB.invalidate()
                 return
+            } else {
+                viewA.mHighBrushJobRunning = false
+                viewB.mHighBrushJobRunning = false
             }
             if (!mTextForceHardwareRenderEnable) {
                 viewA.setLayerType(LAYER_TYPE_NONE, null  )
