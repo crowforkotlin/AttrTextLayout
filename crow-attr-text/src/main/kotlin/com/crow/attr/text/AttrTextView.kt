@@ -80,6 +80,8 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         private const val ROW_DEVIATION: Float = 0.5f
     }
 
+    var mSkipUpdate: Boolean = false
+
     /**
      * ⦁ ChildView 文本画笔
      *
@@ -183,7 +185,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ⦁ 2023-10-31 14:06:16 周二 下午
      * @author crowforkotlin
      */
-    var mListPosition : Int by Delegates.observable(0) { _, oldPosition, newPosition -> onVariableChanged(FLAG_REFRESH, oldPosition, newPosition, skipSameCheck = true) }
+    var mListPosition : Int by Delegates.observable(-1) { _, oldPosition, newPosition -> onVariableChanged(FLAG_REFRESH, oldPosition, newPosition, skipSameCheck = true) }
 
     /**
      * ⦁ 视图对齐方式 -- 上中下
@@ -231,7 +233,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ⦁ 2024-02-18 14:57:38 周日 下午
      * @author crowforkotlin
      */
-    var mHighBrushSuccessListener: Runnable? = null
+    var mHighBrushSuccessListener: ((AttrTextView) -> Unit)? = null
 
     /**
      * ⦁ 动画模式
@@ -356,7 +358,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         }
 
         // 如果执行的是高刷新绘制动画并且任务正在阻塞中
-        if (isDrawBrushAnimation && mHighBrushJobRunning && mHighBrushDuration == 0L) invalidateHighBrushAnimation(mHighBrushDuration )
+        if (isDrawBrushAnimation && mHighBrushJobRunning && mHighBrushDuration == 0L) invalidateHighBrushAnimation(mHighBrushDuration)
     }
 
     /**
@@ -516,11 +518,11 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
      * ⦁ 2024-02-01 14:15:20 周四 下午
      * @author crowforkotlin
      */
-    private fun invalidateHighBrushAnimation(duration: Long) {
+    fun invalidateHighBrushAnimation(duration: Long) {
         if (mHighBrushTopOrLeft) {
             mTextAxisValue --
             if (mTextAxisValue > -mHighBrushPixelCount) {
-                if (duration == 0L) invalidate() else {
+                if (duration == 0L) { invalidate() } else {
                     mHandler.post(object : Runnable {
                         override fun run() {
                             if (mTextAxisValue > -mHighBrushPixelCount) {
@@ -528,7 +530,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                             } else {
                                 mHandler.removeCallbacks(this)
                                 mHighBrushJobRunning = false
-                                mHighBrushSuccessListener?.run()
+                                mHighBrushSuccessListener?.invoke(this@AttrTextView)
                                 return
                             }
                             mTextAxisValue--
@@ -537,8 +539,13 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                     })
                 }
             } else {
+                if (duration == 0L) {
+                    mTextAxisValue = 0f
+                    mHighBrushSuccessListener?.invoke(this@AttrTextView)
+                    return
+                }
                 mHighBrushJobRunning = false
-                mHighBrushSuccessListener?.run()
+                mHighBrushSuccessListener?.invoke(this@AttrTextView)
             }
         } else {
             mTextAxisValue ++
@@ -550,7 +557,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                             else {
                                 mHandler.removeCallbacks(this)
                                 mHighBrushJobRunning = false
-                                mHighBrushSuccessListener?.run()
+                                mHighBrushSuccessListener?.invoke(this@AttrTextView)
                                 return
                             }
                             mTextAxisValue ++
@@ -560,7 +567,7 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
                 }
             } else {
                 mHighBrushJobRunning = false
-                mHighBrushSuccessListener?.run()
+                mHighBrushSuccessListener?.invoke(this@AttrTextView)
             }
         }
     }
@@ -734,6 +741,11 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
         if (oldValue == newValue && !skipSameCheck) return
         when(flag) {
             FLAG_REFRESH -> {
+                "tag is $tag \t mSkipUpdate : $mSkipUpdate".debugLog()
+                if (mSkipUpdate) {
+                    mSkipUpdate = false
+                    return
+                }
                 if (mList.isNotEmpty()) mHandler.post { invalidate() }
             }
         }
@@ -780,5 +792,5 @@ internal class AttrTextView internal constructor(context: Context) : View(contex
             launchHighBrushAnimation(measuredHeight, mTextAnimationTopEnable, duration)
         }
     }
-    internal fun setHighBrushSuccessListener(listener: Runnable) { mHighBrushSuccessListener = listener }
+    internal fun setHighBrushSuccessListener(listener: (AttrTextView) -> Unit) { mHighBrushSuccessListener = listener }
 }

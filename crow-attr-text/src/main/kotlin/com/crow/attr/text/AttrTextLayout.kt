@@ -410,7 +410,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ⦁ 2023-10-31 14:06:16 周二 下午
      * @author crowforkotlin
      */
-    private var mListPosition : Int by Delegates.observable(0) { _, _, _ -> onVariableChanged( FLAG_CHILD_REFRESH) }
+    private var mListPosition : Int by Delegates.observable(0) { _, _, _ -> onVariableChanged(FLAG_CHILD_REFRESH) }
 
     /**
      * ⦁ 多行文本（换行）位置
@@ -418,7 +418,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * ⦁ 2023-11-03 18:19:24 周五 下午
      * @author crowforkotlin
      */
-    private var mMultipleLinePos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged( FLAG_CHILD_REFRESH) }
+    private var mMultipleLinePos: Int by Delegates.observable(0) { _, _, _ -> onVariableChanged(FLAG_CHILD_REFRESH) }
 
     /**
      * ⦁ 是否强制硬件渲染？
@@ -1036,6 +1036,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
      * @author crowforkotlin
      */
     private fun onNotifyViewUpdate(updateAll: Boolean = mUpdateAll) {
+        "Update".debugLog()
         if (mList.isEmpty() || mCacheViews.isEmpty() || mCurrentViewPos > mCacheViews.size - 1) return
         val viewA = mCacheViews[mCurrentViewPos]
         val list : MutableList<Pair<String, Float>> = mList.toMutableList()
@@ -1147,6 +1148,7 @@ class AttrTextLayout : FrameLayout, IAttrText {
                 } else {
                     mMultipleLinePos = 0
                 }
+                mMultipleLinePos.debugLog()
             }
             false ->{
                 if (mListPosition < mList.size - 1) {
@@ -1265,23 +1267,48 @@ class AttrTextLayout : FrameLayout, IAttrText {
             updateTextListPosition()
             val duration: Long = with(MAX_SCROLL_SPEED - mTextAnimationSpeed) { if (this == 8) 0L else if (this == 1) 1L else toLong() shl 1 }
             var count = 0
+            viewA.setHighBrushSuccessListener {
+                onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB, duration, isX)
+                if (count == 2) count = 0
+            }
+            viewB.setHighBrushSuccessListener {
+                onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB, duration, isX)
+                if (count == 2) count = 0
+            }
             viewA.launchHighBrushDrawAnimation(isX, duration)
             viewB.launchHighBrushDrawAnimation(isX, duration)
-            viewA.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB) }
-            viewB.setHighBrushSuccessListener { onHighBrushAnimationEnd(++count, animationMode, true, viewA, viewB) }
         }.also { mViewAnimationRunnable = it },  mTextResidenceTime)
     }
 
-    private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewA: AttrTextView, viewB: AttrTextView) {
-        if (count == 2) {
+    /**
+     * ⦁ 高刷动画结束时、有两种情况 无停留时间、有停留时间
+     *
+     * ⦁ 2024-03-26 15:06:42 周二 下午
+     * @author crowforkotlin
+     */
+    private fun onHighBrushAnimationEnd(count: Int, animationMode: Short, delay: Boolean, viewA: AttrTextView, viewB: AttrTextView, duration: Long, isX: Boolean) {
+        if (count == 0) {
+            if (mCacheViews.isEmpty()) return
+            if (duration == 0L) {
+                mAnimationStartTime = System.currentTimeMillis()
+                viewA.mAnimationStartTime = mAnimationStartTime
+                viewB.mAnimationStartTime = mAnimationStartTime
+                viewA.mIsCurrentView = !viewA.mIsCurrentView
+                viewB.mIsCurrentView = !viewB.mIsCurrentView
+                viewA.mSkipUpdate = true
+                viewB.mSkipUpdate = true
+                updateViewPosition()
+                updateTextListPosition()
+                viewA.invalidate()
+                viewB.invalidate()
+                return
+            }
             if (!mTextForceHardwareRenderEnable) {
                 viewA.setLayerType(LAYER_TYPE_NONE, null  )
                 viewB.setLayerType(LAYER_TYPE_NONE, null)
             }
             mViewAnimationRunnable?.let { removeCallbacks(it) }
-            mHandler?.post(Runnable {
-                onLayoutAnimation(animationMode, delay, viewA, viewB)
-            }.also { mViewAnimationRunnable = it })
+            mHandler?.post(Runnable { onLayoutAnimation(animationMode, delay, viewA, viewB) }.also { mViewAnimationRunnable = it })
         }
     }
 
